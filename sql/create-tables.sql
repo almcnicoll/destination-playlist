@@ -13,7 +13,8 @@ CREATE TABLE authmethods
 (
 id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 method_name VARCHAR(200) NOT NULL,
-oauth_endpoint VARCHAR(400) NULL,
+handler VARCHAR(200) NOT NULL,
+image VARCHAR(200) NULL,
 created datetime,
 modified DATETIME
 )
