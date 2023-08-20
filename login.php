@@ -6,7 +6,7 @@
     <script src="js/bootstrap.min.js" cdn-src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 </head>
 <?php
-    require_once('inc/db.php');
+    require_once('class/authmethod.php');
 ?>
 <html lang="en">
     <div class="row">
@@ -15,6 +15,11 @@
         </div>
     </div>
     <?php
-    //foreach auth method here
+    $auth_methods = AuthMethod::getAll();
+    foreach ($auth_methods as $auth_method) {
+        echo "<div class='row'>\n";
+        echo "<div class='span12'><img src='{$auth_method->image}' /></div>\n";
+        echo "</div>\n";
+    }
     ?>
 </html>
