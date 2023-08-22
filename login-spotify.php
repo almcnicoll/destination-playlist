@@ -52,7 +52,13 @@ if (isset($_REQUEST['code'])) {
     $users = User::find([['authmethod_id','=',$methods[0]->id],['identifier','=',$userid]]);
     if (count($users)==0) {
         // Need to create user
-        
+        $user = new User();
+        $user->set_authmethod_id($methods[0]->id);
+        $user->identifier = $userid;
+        $user->email = $email;
+        $user->save();
+    } else {
+        $user = $users[0];
     }
     
     die();

@@ -11,4 +11,8 @@ class User extends Model {
 
     static string $tableName = "users";
     static $fields = ['id','authmethod_id','identifier','email','created','modified'];
+
+    public function set_authmethod_id($id) {
+        $this->authmethod_id = $id;
+    }
 }

@@ -91,22 +91,30 @@ class Model {
         return $results;
     }
 
-    public function save() {
+    public function save() : ?int {
         $pdo = db::getPDO();
-        
+
         // If id is set and record exists then update; otherwise, create new
         $criteria_strings = [];
         $criteria_values = [];
         $insert_placeholders = [];
 
+        $is_insert = ( (empty($this->id) || !static::checkForId($this->id)) );
+
         // Loop through all properties
         foreach (static::$fields as $field) {
             $criteria_strings[] = "`{$field}` = ?";
-            $criteria_values[] = $this->{$field};
+            if ($field == 'created' && $is_insert) {
+                $criteria_values[] = date('Y-m-d H:i:s');
+            } elseif ($field == 'modified') {
+                $criteria_values[] = date('Y-m-d H:i:s');
+            } else {
+                $criteria_values[] = $this->{$field};
+            }
             $insert_placeholders[] = '?';
         }
 
-        if(empty($this->id) || !static::checkForId($this->id)) {
+        if ($is_insert) {
             // Create record
             $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).")";
         } else {
@@ -116,5 +124,8 @@ class Model {
         }
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
+
+        $this->id = $pdo->lastInsertId();
+        return $this->id;
     }
 }
