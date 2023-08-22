@@ -10,4 +10,5 @@ class User extends Model {
     public ?string $email;
 
     static string $tableName = "users";
+    static $fields = ['id','authmethod_id','identifier','email','created','modified'];
 }

@@ -1,12 +1,13 @@
 <?php
 class Model {
-    public int $id;
+    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE'];
+
+    public ?int $id = null;
     private ?string $created;
     private ?string $modified;
     
     static string $tableName;
-
-    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE'];
+    static $fields = ['id','created','modified'];
 
     public function getCreated():?DateTime {
         return $this->created;
@@ -18,17 +19,32 @@ class Model {
     public static function getAll() : array {
         $pdo = db::getPDO();
         
-        $sql = "SELECT * FROM `".AuthMethod::$tableName."`";
+        $sql = "SELECT * FROM `".static::$tableName."`";
         $query = $pdo->query($sql);
 
         $results = $query->fetchAll(PDO::FETCH_CLASS, static::class);
         return $results;
     }
 
-    public static function getById(int $id) : AuthMethod {
+    public static function checkForId(int $id) : bool {
         $pdo = db::getPDO();
 
-        $sql = "SELECT * FROM `".AuthMethod::$tableName."` WHERE id=:id";
+        $sql = "SELECT COUNT(id) as c FROM `".static::$tableName."` WHERE id=:id";
+        $params = [
+            "id" => $id,
+        ];
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result === false) { return null; }
+        return ($result['c']>0);
+    }
+
+    public static function getById(int $id) {
+        $pdo = db::getPDO();
+
+        $sql = "SELECT * FROM `".static::$tableName."` WHERE id=:id";
         $params = [
             "id" => $id,
         ];
@@ -67,11 +83,38 @@ class Model {
             $criteria_values[] = $value;
         }
 
-        $sql = "SELECT * FROM `".AuthMethod::$tableName."` WHERE ".implode(" AND ", $criteria_strings);
+        $sql = "SELECT * FROM `".static::$tableName."` WHERE ".implode(" AND ", $criteria_strings);
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
 
         $results = $stmt->fetchAll(PDO::FETCH_CLASS, static::class);
         return $results;
+    }
+
+    public function save() {
+        $pdo = db::getPDO();
+        
+        // If id is set and record exists then update; otherwise, create new
+        $criteria_strings = [];
+        $criteria_values = [];
+        $insert_placeholders = [];
+
+        // Loop through all properties
+        foreach (static::$fields as $field) {
+            $criteria_strings[] = "`{$field}` = ?";
+            $criteria_values[] = $this->{$field};
+            $insert_placeholders[] = '?';
+        }
+
+        if(empty($this->id) || !static::checkForId($this->id)) {
+            // Create record
+            $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).")";
+        } else {
+            // Update record
+            $sql = "UPDATE `".static::$tableName."` SET ".implode(',',$criteria_strings)."` WHERE id=?";
+            $criteria_values[] = $this->id;
+        }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($criteria_values);
     }
 }
