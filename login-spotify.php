@@ -4,8 +4,9 @@
 require_once('inc/db.php');
 
 if (isset($_REQUEST['code'])) {
-    // Callback with auth code
+    // This branch is callback with auth code
     //$_SESSION['SPOTIFY_AUTHCODE'] = $_REQUEST['code'];
+    
     // Now request token
     $endpoint = "https://accounts.spotify.com/api/token";
     $options = http_build_query([
@@ -21,39 +22,30 @@ if (isset($_REQUEST['code'])) {
     ) );
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, SPOTIFY_CLIENTID.':'.SPOTIFY_CLIENTSECRET);
-
-    /* Start cUrl debug code */
-/*
-    curl_setopt($ch, CURLOPT_VERBOSE, true);
-
-    $streamVerboseHandle = fopen('php://temp', 'w+');
-    curl_setopt($ch, CURLOPT_STDERR, $streamVerboseHandle);
-*/
-    /* end debug code */
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
     $result = curl_exec($ch);
+    $authresponse = json_decode($result, true);
+    curl_close($ch);
+    echo "<pre>".print_r($authresponse,true)."</pre>\n";
+    
+    // Now request user data
+    $endpoint = "https://api.spotify.com/v1/me";
+    $ch = curl_init($endpoint);
+    curl_setopt_array ( $ch, array (
+        CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$authresponse['access_token']],
+    ) );
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-    /* More debugging code */
-/*
-    if ($result === FALSE) {
-        printf("cUrl error (#%d): %s<br>\n",
-            curl_errno($ch),
-            htmlspecialchars(curl_error($ch)))
-            ;
-    }
-
-    rewind($streamVerboseHandle);
-    $verboseLog = stream_get_contents($streamVerboseHandle);
-
-    echo "cUrl verbose information:\n", 
-        "<pre>", htmlspecialchars($verboseLog), "</pre>\n";
-/*
-    /* End debugging code */
-
-    echo "<pre>Output from cUrl:\n-----------------\n\n";
-    $curlresponse = json_decode($result, true);
-    var_dump($curlresponse);
-    echo "</pre>";
+    $result = curl_exec($ch);
+    $userresponse = json_decode($result, true);
+    $displayname = $userresponse['display_name'];
+    $email = $userresponse['email'];
+    $userid = $userresponse['id'];
+    curl_close($ch);
+    
+    
+    
     die();
 } elseif (isset($_REQUEST['error'])) {
     die('Error: '.$_REQUEST['error']);
