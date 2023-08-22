@@ -1,5 +1,0 @@
-[22-Aug-2023 09:43:08 UTC] PHP Fatal error:  Uncaught TypeError: curl_setopt_array(): The CURLOPT_HTTPHEADER option must have an array value in C:\Bitnami\wampstack-8.0.9-0\apache2\htdocs\destination-playlist\login-spotify.php:20
-Stack trace:
-#0 C:\Bitnami\wampstack-8.0.9-0\apache2\htdocs\destination-playlist\login-spotify.php(20): curl_setopt_array()
-#1 {main}
-  thrown in C:\Bitnami\wampstack-8.0.9-0\apache2\htdocs\destination-playlist\login-spotify.php on line 20
