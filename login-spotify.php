@@ -1,7 +1,7 @@
 <?php
 // TODO - switch to the PKCE auth method https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 // TODO - build redirect_uri from a server variable or constant so all instances update when hosting changes
-require_once('inc/db.php');
+require_once('class/user.php');
 
 if (isset($_REQUEST['code'])) {
     // This branch is callback with auth code
@@ -44,7 +44,16 @@ if (isset($_REQUEST['code'])) {
     $userid = $userresponse['id'];
     curl_close($ch);
     
-    
+    // Get correct auth method
+    $methods = AuthMethod::find([['methodName','=','spotify'],]);
+    if (count($methods)!=1) { throw new Exception("Couldn't find spotify auth method"); }
+
+    // Look up user
+    $users = User::find([['authmethod_id','=',$methods[0]->id],['identifier','=',$userid]]);
+    if (count($users)==0) {
+        // Need to create user
+        
+    }
     
     die();
 } elseif (isset($_REQUEST['error'])) {
