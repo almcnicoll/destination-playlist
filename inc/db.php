@@ -1,5 +1,11 @@
 <?php
 session_start();
+if (!is_writable(session_save_path())) {
+    die('Cannot write to session path "'.session_save_path().'"'); 
+} /*else {
+    echo "<pre>Session #".session_id()."\n".print_r(session_get_cookie_params(),true)."</pre>"; // TODO - remove this
+}*/
+
 if (!@include_once('inc/secret.php')) { require_once('../inc/secret.php'); }
 define('DB_HOST','localhost');
 define('DB_SCHEMA','destination-playlist');
@@ -8,12 +14,14 @@ define('DB_USER','dp');
 define('DB_CHARSET','utf8mb4');
 
 class db {
+    private static $pdo; 
+
     static function getDSN() {
         return "mysql:host=".DB_HOST.";dbname=".DB_SCHEMA.";charset=".DB_CHARSET;
     }
 
     public static function getPDO() {
-        if (isset($_SESSION['DB_PDO'])) { return $_SESSION['DB_PDO']; }
+        if (isset(static::$pdo) && !empty(static::$pdo)) { return static::$pdo; }
 
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -21,7 +29,7 @@ class db {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         $dsn = db::getDSN();
-        $_SESSION['DB_PDO'] = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
-        return $_SESSION['DB_PDO'];
+        static::$pdo = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
+        return static::$pdo;
     }
 }

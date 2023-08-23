@@ -15,6 +15,7 @@ CREATE TABLE `users` (
   `authmethod_id` int(10) unsigned NOT NULL,
   `identifier` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `display_name` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),

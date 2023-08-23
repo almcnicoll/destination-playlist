@@ -7,11 +7,16 @@ class User extends Model {
     public int $authmethod_id;
     public string $identifier;
     public ?string $email;
+    public ?string $display_name;
 
     static string $tableName = "users";
-    static $fields = ['id','authmethod_id','identifier','email','created','modified'];
+    static $fields = ['id','authmethod_id','identifier','email','display_name','created','modified'];
 
-    public function set_authmethod_id($id) {
+    public function setAuthmethod_id($id) {
         $this->authmethod_id = $id;
+    }
+
+    public function getAuthmethod() : ?AuthMethod {
+        return AuthMethod::getById($this->authmethod_id);
     }
 }

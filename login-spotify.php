@@ -3,7 +3,39 @@
 // TODO - build redirect_uri from a server variable or constant so all instances update when hosting changes
 require_once('class/user.php');
 
-if (isset($_REQUEST['code'])) {
+if (isset($_REQUEST['refresh_needed'])) {
+    // This branch is for refreshing the access token
+    $endpoint = "https://accounts.spotify.com/api/token";
+    $options = http_build_query([
+        'grant_type'        =>  'refresh_token',
+        'refresh_token'     =>  $_SESSION['USER_REFRESHTOKEN'],
+    ]);
+    $ch = curl_init($endpoint);
+    curl_setopt_array ( $ch, array (
+        CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        CURLOPT_POST => 1,
+        CURLOPT_POSTFIELDS => $options, 
+    ) );
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($ch, CURLOPT_USERPWD, SPOTIFY_CLIENTID.':'.SPOTIFY_CLIENTSECRET);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+    $result = curl_exec($ch);
+    $authresponse = json_decode($result, true);
+    $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
+    if (isset($authresponse['refresh_token'])) { $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token']; }
+    $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early
+    session_write_close();
+    curl_close($ch);
+
+    if (isset($_REQUEST['redirect_url'])) {
+        header("Location: {$_REQUEST['redirect_url']}");
+    } else {
+        header("Location: ./");
+    }
+    die();
+
+} elseif (isset($_REQUEST['code'])) {
     // This branch is callback with auth code
     //$_SESSION['SPOTIFY_AUTHCODE'] = $_REQUEST['code'];
     
@@ -27,7 +59,11 @@ if (isset($_REQUEST['code'])) {
     $result = curl_exec($ch);
     $authresponse = json_decode($result, true);
     curl_close($ch);
-    echo "<pre>".print_r($authresponse,true)."</pre>\n";
+    if (isset($authresponse['error'])) {
+        header("Location: ./login.php?error={$authresponse['error_description']}");
+        die();
+    }
+    //echo "<pre>".print_r($authresponse,true)."</pre>\n";
     
     // Now request user data
     $endpoint = "https://api.spotify.com/v1/me";
@@ -43,6 +79,7 @@ if (isset($_REQUEST['code'])) {
     $email = $userresponse['email'];
     $userid = $userresponse['id'];
     curl_close($ch);
+    //echo "<pre>".print_r($userresponse,true)."</pre>\n";
     
     // Get correct auth method
     $methods = AuthMethod::find([['methodName','=','spotify'],]);
@@ -53,19 +90,29 @@ if (isset($_REQUEST['code'])) {
     if (count($users)==0) {
         // Need to create user
         $user = new User();
-        $user->set_authmethod_id($methods[0]->id);
+        $user->setAuthmethod_id($methods[0]->id);
         $user->identifier = $userid;
         $user->email = $email;
+        $user->display_name = $displayname;
         $user->save();
     } else {
         $user = $users[0];
     }
     $_SESSION['USER_ID'] = $user->id;
-    
+    $_SESSION['USER'] = $user;
+    $_SESSION['USER_AUTHMETHOD_ID'] = $methods[0]->id;
+    $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
+    $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token'];
+    $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early
+    echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+    session_write_close();
+    //header('Location: ./');
     die();
 } elseif (isset($_REQUEST['error'])) {
+    // This branch is for if the authorization process throws an error
     die('Error: '.$_REQUEST['error']);
 } else {
+    // This branch is for starting the authorization process, sometimes with user interaction needed
     $endpoint = "https://accounts.spotify.com/authorize";
     $options = [
         'client_id'         => SPOTIFY_CLIENTID,
