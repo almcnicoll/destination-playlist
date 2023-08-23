@@ -60,6 +60,7 @@ if (isset($_REQUEST['code'])) {
     } else {
         $user = $users[0];
     }
+    $_SESSION['USER_ID'] = $user->id;
     
     die();
 } elseif (isset($_REQUEST['error'])) {

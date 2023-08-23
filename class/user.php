@@ -4,7 +4,6 @@ if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
 if(!@include_once('class/authmethod.php')) { require_once('../class/authmethod.php'); }
 
 class User extends Model {
-    public int $id;
     private int $authmethod_id;
     public string $identifier;
     public ?string $email;

@@ -3,8 +3,8 @@ class Model {
     static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE'];
 
     public ?int $id = null;
-    private ?string $created;
-    private ?string $modified;
+    public ?string $created = null;
+    public ?string $modified = null;
     
     static string $tableName;
     static $fields = ['id','created','modified'];
@@ -22,7 +22,8 @@ class Model {
         $sql = "SELECT * FROM `".static::$tableName."`";
         $query = $pdo->query($sql);
 
-        $results = $query->fetchAll(PDO::FETCH_CLASS, static::class);
+        $query->setFetchMode(PDO::FETCH_CLASS, static::class);
+        $results = $query->fetchAll();
         return $results;
     }
 
@@ -51,7 +52,8 @@ class Model {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
 
-        $result = $stmt->fetch(PDO::FETCH_CLASS,static::class);
+        $stmt->setFetchMode(PDO::FETCH_CLASS,static::class);
+        $result = $stmt->fetch();
         if ($result === false) { return null; }
         return $result;
     }
@@ -87,7 +89,8 @@ class Model {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
 
-        $results = $stmt->fetchAll(PDO::FETCH_CLASS, static::class);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, static::class);
+        $results = $stmt->fetchAll();
         return $results;
     }
 
@@ -104,6 +107,7 @@ class Model {
         // Loop through all properties
         foreach (static::$fields as $field) {
             $criteria_strings[] = "`{$field}` = ?";
+            echo "`{$field}` = ".$this->{$field}."\n";
             if ($field == 'created' && $is_insert) {
                 $criteria_values[] = date('Y-m-d H:i:s');
             } elseif ($field == 'modified') {
@@ -119,13 +123,57 @@ class Model {
             $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).")";
         } else {
             // Update record
-            $sql = "UPDATE `".static::$tableName."` SET ".implode(',',$criteria_strings)."` WHERE id=?";
+            $sql = "UPDATE `".static::$tableName."` SET ".implode(',',$criteria_strings)." WHERE id=?";
             $criteria_values[] = $this->id;
         }
+        //echo "{$sql}\n";
+        //print_r($criteria_values);
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
 
-        $this->id = $pdo->lastInsertId();
+        if ($is_insert) {
+            $this->id = $pdo->lastInsertId();
+        }
         return $this->id;
+    }
+
+    public function delete() : bool {
+        $pdo = db::getPDO();
+
+        $is_new = ( (empty($this->id) || !static::checkForId($this->id)) );
+
+        if ($is_new) {
+            throw new Exception("Could not delete: no matching record in database");
+        }
+
+        $sql = "DELETE FROM `".static::$tableName."` WHERE id=:id";
+        $params = [
+            "id" => $this->id,
+        ];
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        // TODO - pay attention to results
+        return true;
+    }
+
+    public static function deleteById($id) : bool {
+        $pdo = db::getPDO();
+
+        $unmatched = ( (empty($id) || !static::checkForId($id)) );
+
+        if ($unmatched) {
+            throw new Exception("Could not delete: no matching record in database");
+        }
+
+        $sql = "DELETE FROM `".static::$tableName."` WHERE id=:id";
+        $params = [
+            "id" => $id,
+        ];
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        // TODO - pay attention to results
+        return true;
     }
 }
