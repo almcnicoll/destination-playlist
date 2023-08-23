@@ -9,8 +9,8 @@ class Playlist extends Model {
     public ?string $spotify_playlist_id;
     public ?string $display_name;
 
-    static string $tableName = "users";
-    static $fields = ['id','authmethod_id','identifier','email','display_name','created','modified'];
+    static string $tableName = "playlists";
+    static $fields = ['id','user_id','destination','spotify_playlist_id','display_name','created','modified'];
 
     public function getUser() : ?User {
         return User::getById($this->user_id);
