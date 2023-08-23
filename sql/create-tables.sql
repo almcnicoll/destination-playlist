@@ -22,3 +22,17 @@ CREATE TABLE `users` (
   UNIQUE KEY `LoginLookup` (`authmethod_id`,`identifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ;
+
+CREATE TABLE `playlists` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `destination` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `spotify_playlist_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `display_name` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ListIndex` (`user_id`,`destination`,`id`,`display_name`),
+  CONSTRAINT `UserLookup` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;

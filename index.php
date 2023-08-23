@@ -1,6 +1,7 @@
 <?php
 require_once('inc/login_check.php');
 require_once('class/user.php');
+require_once('class/playlist.php');
 
 if (isset($_REQUEST['newname'])) {
     $user = $_SESSION['user'];
@@ -12,7 +13,7 @@ if (isset($_REQUEST['newname'])) {
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login to Destination Playlist</title>
+    <title>Destination Playlist</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet">
 </head>
@@ -46,6 +47,11 @@ if ($user->display_name) {
 </form>
 <?php
 }
+?>
+<?php
+// List all playlists
+$criteria = [['user_id','=',$_SESSION['USER_ID']]];
+$my_playlists = Playlist::find($criteria);
 ?>
 </body>
 </html>
