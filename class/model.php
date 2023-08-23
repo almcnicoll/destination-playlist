@@ -107,7 +107,7 @@ class Model {
         // Loop through all properties
         foreach (static::$fields as $field) {
             $criteria_strings[] = "`{$field}` = ?";
-            echo "`{$field}` = ".$this->{$field}."\n";
+            //echo "`{$field}` = ".$this->{$field}."\n";
             if ($field == 'created' && $is_insert) {
                 $criteria_values[] = date('Y-m-d H:i:s');
             } elseif ($field == 'modified') {
