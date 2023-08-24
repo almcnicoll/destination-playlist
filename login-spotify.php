@@ -104,9 +104,9 @@ if (isset($_REQUEST['refresh_needed'])) {
     $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
     $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token'];
     $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early
-    echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+    //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
     session_write_close();
-    //header('Location: ./');
+    header('Location: ./');
     die();
 } elseif (isset($_REQUEST['error'])) {
     // This branch is for if the authorization process throws an error

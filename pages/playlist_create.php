@@ -24,15 +24,17 @@
             ];
             $url = $endpoint;
             curl_setopt_array ( $ch, array (
-                CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$_SESSION['USER_ACCESSTOKEN'],'Content-Type: application/x-www-form-urlencoded'],
+                CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$_SESSION['USER_ACCESSTOKEN'],'Content-type: application/json'],
                 CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => http_build_query($options),
+                CURLOPT_POSTFIELDS => json_encode($options),
             ) );
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
             $result = curl_exec($ch);
             $listresponse = json_decode($result, true);
             curl_close($ch);
+
+            //echo "<pre>".print_r($listresponse,true)."</pre>\n";
 
             $playlist = new Playlist();
             $playlist->destination = $_REQUEST['destination'];
@@ -41,6 +43,8 @@
             $playlist->flags = $_REQUEST['flags'];
             $playlist->user_id = $_SESSION['USER_ID'];
             $playlist->save();
+
+            header("Location: {$get_back}playlist/manage/{$playlist->id}");
         }
     }
 

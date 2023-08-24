@@ -3,12 +3,12 @@ if(!@include_once('inc/db.php')) { require_once('../inc/db.php'); }
 if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
 if(!@include_once('class/user.php')) { require_once('../class/user.php'); }
 
-enum PlaylistFlags : int {
+/*enum PlaylistFlags : int {
     case Strict = 1; // Should DP prevent non-matching tracks from being added?
     case AllowTitle = 2; // Can track title be used for the relevant letter?
     case AllowArtist = 4; // Can artist be used for the relevant letter?
     case TheAgnostic = 8; // If yes, 'The' can be ignored or used
-}
+}*/
 
 class Playlist extends Model {
     public int $user_id;
