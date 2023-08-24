@@ -29,6 +29,7 @@ CREATE TABLE `playlists` (
   `destination` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `spotify_playlist_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `display_name` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `flags` bigint(20) unsigned NOT NULL DEFAULT 0,
   `created` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
