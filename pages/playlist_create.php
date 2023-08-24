@@ -1,4 +1,49 @@
 <?php
+    // Handle creation
+    if (isset($_REQUEST['action'])) {
+        if ($_REQUEST['action'] == 'formsubmitted') {
+            if (!@include_once('class/user.php')) {
+                if (!@include_once('../class/user.php')) {
+                    require_once('../../class/user.php');
+                }
+            }
+            if (!@include_once('class/playlist.php')) {
+                if (!@include_once('../class/playlist.php')) {
+                    require_once('../../class/playlist.php');
+                }
+            }
+            // Now request user data
+            $user = $_SESSION['USER'];
+            $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
+            $ch = curl_init($endpoint);
+            $options = [
+                'name'              => $_REQUEST['display_name'],
+                'public'            => false,
+                'collaborative'     => true,
+                'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),
+            ];
+            $url = $endpoint;
+            curl_setopt_array ( $ch, array (
+                CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$_SESSION['USER_ACCESSTOKEN'],'Content-Type: application/x-www-form-urlencoded'],
+                CURLOPT_POST => 1,
+                CURLOPT_POSTFIELDS => http_build_query($options),
+            ) );
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            $result = curl_exec($ch);
+            $listresponse = json_decode($result, true);
+            curl_close($ch);
+
+            $playlist = new Playlist();
+            $playlist->destination = $_REQUEST['destination'];
+            $playlist->spotify_playlist_id = $listresponse['id'];
+            $playlist->display_name = $_REQUEST['display_name'];
+            $playlist->flags = $_REQUEST['flags'];
+            $playlist->user_id = $_SESSION['USER_ID'];
+            $playlist->save();
+        }
+    }
+
     $destination_placeholders = [
         "Alexander Road London",
         "Kings Road Sheffield",
@@ -21,9 +66,21 @@
     $i = array_rand($destination_placeholders,1);
     $destination_placeholder = $destination_placeholders[$i];
 ?>
+<script type="text/javascript">
+    // Default to display name being destination
+    $(document).ready(
+        function() {
+            $('#destination').on('change',function() {
+                if ($('#display_name').val() == '') {
+                    $('#display_name').val('DP: '+$('#destination').val());
+                }
+            });
+        }
+    );
+</script>
 <h2>Create a playlist</h2>
 <div class="row">
-    <form>
+    <form method="POST">
         <div class="mb-3">
             <label for="destination" class="form-label">What's your destination?</label>
             <input type="text" class="form-control" name="destination" id="destination" placeholder="<?= $destination_placeholder ?>" aria-describedby="destination-help">
@@ -55,7 +112,7 @@
                         <label class="form-check-label" for="flags-allow-artist">Artist match</label>
                         <div class="form-text" id="flags-allow-artist-help">Can the artist name be used for the letter match?</div>
 
-                        <input class="form-check-input" type="checkbox" value="8" class="form-control" name="flags" id="flags-the-agnostic" aria-describedby="flags-the-agnostic-help">
+                        <input class="form-check-input" type="checkbox" value="8" class="form-control" name="flags" id="flags-the-agnostic" aria-describedby="flags-the-agnostic-help" checked>
                         <label class="form-check-label" for="flags-the-agnostic">"The"-agnostic</label>
                         <div class="form-text" id="flags-the-agnostic-help">Can users ignore the word "The" at the start of a track or artist?</div>
                     </fieldset>
@@ -63,8 +120,8 @@
             </div>
         </div>
         <div class="mb-3">
+            <input type="hidden" value="formsubmitted" name="action" id="action">
             <button type="submit" class="btn btn-primary">Create!</button>
         </div>
     </form>
 </div>
-<?php
