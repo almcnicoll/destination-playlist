@@ -1,5 +1,12 @@
 <?php
-    // Handle creation
+    // Include Playlist class
+    if (!@include_once('class/playlist.php')) {
+        if (!@include_once('../class/playlist.php')) {
+            require_once('../../class/playlist.php');
+        }
+    }
+
+    // If form submitted, handle creation
     if (isset($_REQUEST['action'])) {
         if ($_REQUEST['action'] == 'formsubmitted') {
             if (!@include_once('class/user.php')) {
@@ -7,12 +14,12 @@
                     require_once('../../class/user.php');
                 }
             }
-            if (!@include_once('class/playlist.php')) {
-                if (!@include_once('../class/playlist.php')) {
-                    require_once('../../class/playlist.php');
+            if (!@include_once('class/letter.php')) {
+                if (!@include_once('../class/letter.php')) {
+                    require_once('../../class/letter.php');
                 }
             }
-            // Now request user data
+            // Create playlist on spotify
             $user = $_SESSION['USER'];
             $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
             $ch = curl_init($endpoint);
@@ -34,8 +41,7 @@
             $listresponse = json_decode($result, true);
             curl_close($ch);
 
-            //echo "<pre>".print_r($listresponse,true)."</pre>\n";
-
+            // Create playlist in db
             $playlist = new Playlist();
             $playlist->destination = $_REQUEST['destination'];
             $playlist->spotify_playlist_id = $listresponse['id'];
@@ -44,7 +50,24 @@
             $playlist->user_id = $_SESSION['USER_ID'];
             $playlist->save();
 
-            header("Location: {$get_back}playlist/manage/{$playlist->id}");
+            // Populate list of letters
+            $letters = [];
+            if ($playlist->hasFlags(Playlist::FLAGS_INCLUDEDIGITS)) {
+                $letters = str_split( preg_replace('/[^\w\d]+/i','',$playlist->destination) , 1);
+            } else {
+                $letters = str_split( preg_replace('/[^\w]+/i','',$playlist->destination) , 1);
+            }
+
+            // Create letters in db
+            foreach ($letters as $letter) {
+                $l = new Letter ();
+                $l->playlist_id = $playlist->id;
+                $l->user_id = $_SESSION['USER_ID'];
+                $l->letter = $letter;
+                $l->save();
+            }
+
+            header("Location: {$get_back}playlist/share/{$playlist->id}");
         }
     }
 
@@ -104,21 +127,25 @@
                 </h2>
                 <div class="accordion-collapse collapse" data-bs-parent="#optionsAccordion" id="collapseOptions">
                     <fieldset>
-                        <input class="form-check-input" type="checkbox" value="1" class="form-control" name="flags" id="flags-strict" aria-describedby="flags-strict-help" checked>
+                        <input class="form-check-input" type="checkbox" value="<?= Playlist::FLAGS_STRICT ?>" class="form-control" name="flags" id="flags-strict" aria-describedby="flags-strict-help" checked>
                         <label class="form-check-label" for="flags-strict">Strict mode</label>
                         <div class="form-text" id="flags-strict-help">Should Destination Playlist enforce the rules? If not, users can choose to ignore them.</div>
 
-                        <input class="form-check-input" type="checkbox" value="2" class="form-control" name="flags" id="flags-allow-title" aria-describedby="flags-allow-title-help" checked>
+                        <input class="form-check-input" type="checkbox" value="<?= Playlist::FLAGS_ALLOWTITLE ?>" class="form-control" name="flags" id="flags-allow-title" aria-describedby="flags-allow-title-help" checked>
                         <label class="form-check-label" for="flags-allow-title">Track match</label>
                         <div class="form-text" id="flags-allow-title-help">Can the track title be used for the letter match?</div>
 
-                        <input class="form-check-input" type="checkbox" value="4" class="form-control" name="flags" id="flags-allow-artist" aria-describedby="flags-allow-artist-help" checked>
+                        <input class="form-check-input" type="checkbox" value="<?= Playlist::FLAGS_ALLOWARTIST ?>" class="form-control" name="flags" id="flags-allow-artist" aria-describedby="flags-allow-artist-help" checked>
                         <label class="form-check-label" for="flags-allow-artist">Artist match</label>
                         <div class="form-text" id="flags-allow-artist-help">Can the artist name be used for the letter match?</div>
 
-                        <input class="form-check-input" type="checkbox" value="8" class="form-control" name="flags" id="flags-the-agnostic" aria-describedby="flags-the-agnostic-help" checked>
+                        <input class="form-check-input" type="checkbox" value="<?= Playlist::FLAGS_THEAGNOSTIC ?>" class="form-control" name="flags" id="flags-the-agnostic" aria-describedby="flags-the-agnostic-help" checked>
                         <label class="form-check-label" for="flags-the-agnostic">"The"-agnostic</label>
                         <div class="form-text" id="flags-the-agnostic-help">Can users ignore the word "The" at the start of a track or artist?</div>
+
+                        <input class="form-check-input" type="checkbox" value="<?= Playlist::FLAGS_INCLUDEDIGITS ?>" class="form-control" name="flags" id="flags-include-digits" aria-describedby="flags-include-digits-help">
+                        <label class="form-check-label" for="flags-include-digits">Include digits</label>
+                        <div class="form-text" id="flags-include-digits-help">Include digits as well as letters?</div>
                     </fieldset>
                 </div>
             </div>
