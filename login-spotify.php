@@ -17,7 +17,7 @@ if (isset($_REQUEST['refresh_needed'])) {
         CURLOPT_POSTFIELDS => $options, 
     ) );
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, SPOTIFY_CLIENTID.':'.SPOTIFY_CLIENTSECRET);
+    curl_setopt($ch, CURLOPT_USERPWD, $config['SPOTIFY_CLIENTID'].':'.$config['SPOTIFY_CLIENTSECRET']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
     $result = curl_exec($ch);
@@ -53,7 +53,7 @@ if (isset($_REQUEST['refresh_needed'])) {
         CURLOPT_POSTFIELDS => $options, 
     ) );
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, SPOTIFY_CLIENTID.':'.SPOTIFY_CLIENTSECRET);
+    curl_setopt($ch, CURLOPT_USERPWD, $config['SPOTIFY_CLIENTID'].':'.$config['SPOTIFY_CLIENTSECRET']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
     $result = curl_exec($ch);
@@ -115,7 +115,7 @@ if (isset($_REQUEST['refresh_needed'])) {
     // This branch is for starting the authorization process, sometimes with user interaction needed
     $endpoint = "https://accounts.spotify.com/authorize";
     $options = [
-        'client_id'         => SPOTIFY_CLIENTID,
+        'client_id'         => $config['SPOTIFY_CLIENTID'],
         'response_type'      => 'code',
         'redirect_uri'      => 'http://localhost:8888/destination-playlist/login-spotify.php',
         /* 'state'             => '', */ // TODO - look this up and implement it sometime: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1

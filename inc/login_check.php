@@ -1,4 +1,5 @@
 <?php
+session_start();
 if (!include_once('class/authmethod.php')) {
     require_once('../class/authmethod.php');
 }
@@ -26,7 +27,8 @@ if(!(
         // Call refresh mechanism
         $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
         if(!isset($get_back)) { $get_back = ''; }
-        header("Location: {$get_back}{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
+        //header("Location: {$get_back}{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
+        header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
         die();
     }
     // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object

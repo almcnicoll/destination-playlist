@@ -6,6 +6,11 @@
         }
     }
 
+    $error_messages = [];
+    if (isset($_REQUEST['error_message'])) {
+        $error_messages[] = $_REQUEST['error_message'];
+    }
+
     // If form submitted, handle creation
     if (isset($_REQUEST['action'])) {
         if ($_REQUEST['action'] == 'formsubmitted') {
@@ -41,33 +46,38 @@
             $listresponse = json_decode($result, true);
             curl_close($ch);
 
-            // Create playlist in db
-            $playlist = new Playlist();
-            $playlist->destination = $_REQUEST['destination'];
-            $playlist->spotify_playlist_id = $listresponse['id'];
-            $playlist->display_name = $_REQUEST['display_name'];
-            $playlist->flags = $_REQUEST['flags'];
-            $playlist->user_id = $_SESSION['USER_ID'];
-            $playlist->save();
-
-            // Populate list of letters
-            $letters = [];
-            if ($playlist->hasFlags(Playlist::FLAGS_INCLUDEDIGITS)) {
-                $letters = str_split( preg_replace('/[^\w\d]+/i','',$playlist->destination) , 1);
+            if (isset($listresponse['error'])) {
+                // Show the error
+                $error_messages[] = $listresponse['error'];
             } else {
-                $letters = str_split( preg_replace('/[^\w]+/i','',$playlist->destination) , 1);
-            }
+                // Create playlist in db
+                $playlist = new Playlist();
+                $playlist->destination = $_REQUEST['destination'];
+                $playlist->spotify_playlist_id = $listresponse['id'];
+                $playlist->display_name = $_REQUEST['display_name'];
+                $playlist->flags = $_REQUEST['flags'];
+                $playlist->user_id = $_SESSION['USER_ID'];
+                $playlist->save();
 
-            // Create letters in db
-            foreach ($letters as $letter) {
-                $l = new Letter ();
-                $l->playlist_id = $playlist->id;
-                $l->user_id = $_SESSION['USER_ID'];
-                $l->letter = $letter;
-                $l->save();
-            }
+                // Populate list of letters
+                $letters = [];
+                if ($playlist->hasFlags(Playlist::FLAGS_INCLUDEDIGITS)) {
+                    $letters = str_split( strtoupper(preg_replace('/[^\w\d]+/i','',$playlist->destination)) , 1);
+                } else {
+                    $letters = str_split( strtoupper(preg_replace('/[^\w]+/i','',$playlist->destination)) , 1);
+                }
 
-            header("Location: {$get_back}playlist/share/{$playlist->id}");
+                // Create letters in db
+                foreach ($letters as $letter) {
+                    $l = new Letter ();
+                    $l->playlist_id = $playlist->id;
+                    $l->user_id = $_SESSION['USER_ID'];
+                    $l->letter = $letter;
+                    $l->save();
+                }
+
+                header("Location: {$get_back}playlist/share/{$playlist->id}");
+            }
         }
     }
 
@@ -106,6 +116,17 @@
     );
 </script>
 <h2>Create a playlist</h2>
+<?php
+if (count($error_messages)>0) {
+    foreach($error_messages as $error_message) {
+?>
+<div class="row">
+    <div class="span12 alert alert-danger"><?= $error_message ?></div>
+</div>
+<?php
+    }
+}
+?>
 <div class="row">
     <form method="POST">
         <div class="mb-3">

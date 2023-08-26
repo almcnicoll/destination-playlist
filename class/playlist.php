@@ -31,4 +31,17 @@ class Playlist extends Model {
         }
         return ($this->flags & $flagSum == $flagSum);
     }
+
+    public function getShareCode() : string {
+        $hash = hash('sha256', (string)$this->id);
+        $second_pos = $this->id % 64;
+        return $this->id . '-' . substr($hash, 0, 1) . substr($hash, $second_pos, 1);
+    }
+
+    /*
+    // At some point, implement this to have limited-duration easy-to-share codes
+    public function setShareCode() {
+        // Auto-sets the share-code for the playlist
+    }
+    */
 }

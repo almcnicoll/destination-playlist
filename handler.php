@@ -1,4 +1,5 @@
 <?php
+// NB - try to get rid of $get_back - it's unreliable. Use $config['root_path'] instead
 
 $page_parts = explode('/', $_GET['params']);
 $params = [];
@@ -13,9 +14,19 @@ if (count($page_parts)==0) {
     $get_back = '';
 } elseif (count($page_parts)>2) {
     // Move extraneous page parts to params 
+    /*echo "<pre>";
+    var_dump($page_parts);
+    var_dump($params);
+    echo "</pre>";*/
     while (count($page_parts)>2) {
-        array_unshift($params, (array_shift($page_parts)) );
+        array_unshift($params, (array_pop($page_parts)) );
+        $get_back .= '../';
     }
+    /*echo "<pre>";
+    echo print_r($page_parts,true);
+    echo print_r($params,true);
+    echo "</pre>";
+    die();*/
 }
 $page = "pages/{$page_parts[0]}_{$page_parts[1]}.php";
 

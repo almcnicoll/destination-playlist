@@ -3,4 +3,4 @@ Options +Indexes
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ handler.php?params=$1
+RewriteRule ^(.*)$ handler.php?params=$1 [L,QSA]
