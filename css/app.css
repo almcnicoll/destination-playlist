@@ -4,3 +4,15 @@ body {
     max-width: 960px;
     margin: auto;
 }
+
+div.initial-display {
+    background-color: #0099CC;
+    color: #fff;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    font-weight: bold;
+}

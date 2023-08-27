@@ -23,6 +23,10 @@ class Playlist extends Model {
     public function getUser() : ?User {
         return User::getById($this->user_id);
     }
+    
+    public function getLetters() {
+        return Letter::find(['playlist_id','=',$this->id]);
+    }
 
     public function hasFlags(...$testFlags) : bool {
         $flagSum = 0;
