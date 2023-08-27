@@ -12,7 +12,7 @@
 <body>    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <div class="row text-center">
-        <div class="span12">
+        <div class="col-12">
             <h1>Login page</h1>
         </div>
     </div>
@@ -20,7 +20,7 @@
 if(isset($_REQUEST['error'])):
     ?>
     <div class="row text-center">
-        <div class="span12">
+        <div class="col-12">
             <div class="alert alert-warning"><?php echo $_REQUEST['error']; ?></div>
         </div>
     </div>
@@ -29,7 +29,7 @@ endif;
     $auth_methods = AuthMethod::getAll();
     foreach ($auth_methods as $auth_method) {
         echo "<div class='row text-center'>\n";
-        echo "<div class='span12'><a class='btn btn-lg' href='{$auth_method->handler}'><img src='{$auth_method->image}' height='60' /></a></div>\n";
+        echo "<div class='col-12'><a class='btn btn-lg' href='{$auth_method->handler}'><img src='{$auth_method->image}' height='60' /></a></div>\n";
         echo "</div>\n";
     }
     ?>

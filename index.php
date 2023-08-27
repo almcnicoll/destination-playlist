@@ -26,7 +26,7 @@ $user = $_SESSION['USER'];
 if ($user->display_name) {
 ?>
 <div class="row">
-    <div class="span12">
+    <div class="col-12">
         <h1>Welcome, <?= $user->display_name ?></h1>
     </div>
 </div>
@@ -34,7 +34,7 @@ if ($user->display_name) {
 } else {
 ?>
 <div class="row">
-    <div class="span12">
+    <div class="col-12">
         <h1>Welcome!</h1>
     </div>
 </div>
@@ -59,7 +59,7 @@ if (count($my_playlists)==0) {
 ?>
 
 <div class="row">
-    <div class="span12">
+    <div class="col-12">
         <h2>You don't have any playlists. How sad!</h2>
         <h3>Click below to create one.</h3>
         <a class="btn btn-primary" href="playlist/create">Create</a>

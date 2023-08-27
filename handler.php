@@ -47,7 +47,7 @@ require_once('inc/login_check.php');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 
 <?php
-if (!include_once($page)) {
+if (!@include_once($page)) {
     http_response_code(404);
     echo "<h1>You’ve Lost That Lovin’ Feelin’...</h1>\n";
     echo "<h2>Or, more accurately, you've clicked a wrong link.</h2>\n";

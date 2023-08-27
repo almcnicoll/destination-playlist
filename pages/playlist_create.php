@@ -121,7 +121,7 @@ if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
 ?>
 <div class="row">
-    <div class="span12 alert alert-danger"><?= $error_message ?></div>
+    <div class="col-12 alert alert-danger"><?= $error_message ?></div>
 </div>
 <?php
     }
