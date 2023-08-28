@@ -25,7 +25,7 @@ class Playlist extends Model {
     }
     
     public function getLetters() {
-        return Letter::find(['playlist_id','=',$this->id]);
+        return Letter::find([['playlist_id','=',$this->id],]);
     }
 
     public function hasFlags(...$testFlags) : bool {

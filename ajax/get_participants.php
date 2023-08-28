@@ -15,11 +15,11 @@
         $error_messages[] = $_REQUEST['error_message'];
     }
 
-    if (count($params)==0) {
+    if (!isset($_REQUEST['playlist_id'])) {
         $error_messages[] = "No playlist specified";
         $fatal_error = true;
     }
-    $playlist_id = $params[0];
+    $playlist_id = $_REQUEST['playlist_id'];
 
     $playlist = Playlist::getById($playlist_id);
     if ($playlist == null) {
@@ -32,8 +32,23 @@
         $fatal_error = true;
     }
 
-if (count($error_messages)>0) {
-    $output = json_encode(['errors' => $error_messages]);
-    ob_end_clean();
-    die($output);
-}
+    if (count($error_messages)==0) {
+        $participants = Participation::find([['playlist_id','=',$playlist_id],]);
+        foreach ($participants as $participant) {
+            $participant->user = $participant->getUser();
+        }
+    }
+
+    if (empty($participants)) {
+        $participants = [];
+    }
+
+    if (count($error_messages)>0) {
+        $output = json_encode(['errors' => $error_messages]);
+        ob_end_clean();
+        die($output);
+    } else {
+        $output = json_encode($participants);
+        ob_end_clean();
+        die($output);
+    }

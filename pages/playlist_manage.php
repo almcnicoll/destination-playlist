@@ -32,6 +32,36 @@
 
 ?>
 
+<script type="text/javascript">
+    var timer;
+    var scriptUrl = "<?= $config['root_path'] ?>/ajax/get_participants.php?playlist_id=<?= $playlist->id ?>";
+    function updateList(data, textStatus, jqXHR) {
+        $('#people-table tbody tr:not(:first)').remove();
+        for(var i in data) {
+            var u = data[i].user;
+            $('#people tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
+        }
+    }
+    var ajaxOptions = {
+        async: false,
+        cache: false,
+        success: updateList,
+        dataType: 'json',
+        method: 'GET',
+        timeout: 4000
+    };
+    function getParticipants() {
+        $.ajax(scriptUrl, ajaxOptions);
+        timer = setTimeout('getParticipants()',5000);
+    }
+    $(document).ready(
+        function () {
+            //timer = setTimeout('getParticipants()',5000);
+            getParticipants();
+        }
+    );
+</script>
+
 <h2 class="text-center"><?= $playlist->display_name ?></h2>
 <?php
 if (count($error_messages)>0) {
@@ -63,7 +93,7 @@ if ($fatal_error) {
 </nav>
 <div class="tab-content">
     <div class="tab-pane fade show active" id="people">
-        <table class="table table-light table-striped">
+        <table class="table table-light table-striped" id="people-table">
             <thead>
                 <tr>
                     <th>&nbsp;</th>
