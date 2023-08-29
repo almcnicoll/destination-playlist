@@ -16,8 +16,8 @@ if(!(
  )) {
     // Need to log in
     echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
-    if(!isset($get_back)) { $get_back = ''; }
-    header("Location: {$get_back}./login.php");
+    //if(!isset($get_back)) { $get_back = ''; }
+    header("Location: {$config['root_path']}/login.php");
     die();
 } else {
     // Check if our token is still valid
@@ -26,7 +26,7 @@ if(!(
     if ($refresh_needed < time()) {
         // Call refresh mechanism
         $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
-        if(!isset($get_back)) { $get_back = ''; }
+        //if(!isset($get_back)) { $get_back = ''; }
         //header("Location: {$get_back}{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
         header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
         die();

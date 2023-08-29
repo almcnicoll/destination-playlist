@@ -131,6 +131,7 @@ if (isset($_REQUEST['refresh_needed'])) {
         'show_dialog'       => false,
     ];
     $url = $endpoint . '?' . http_build_query($options);
+    session_write_close();
     header("Location: {$url}");
     die();
 }
