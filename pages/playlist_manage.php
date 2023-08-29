@@ -39,7 +39,7 @@
         $('#people-table tbody tr:not(:first)').remove();
         for(var i in data) {
             var u = data[i].user;
-            $('#people tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
+            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
         }
     }
     var ajaxOptions = {
@@ -81,18 +81,17 @@ if ($fatal_error) {
 }
 ?>
 
-<nav>
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#" data-bs-toggle="tab">People</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-bd-toggle="tab">Tracks</a>
-        </li>
-    </ul>
-</nav>
-<div class="tab-content">
-    <div class="tab-pane fade show active" id="people">
+<ul class="nav nav-tabs" id="nav1" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" aria-current="page" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1" aria-selected="true">People</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="#nav1-content-2" data-bd-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2">Tracks</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="nav1-content">
+    <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-1" aria-labelledby="nav1-tab-1">
         <table class="table table-light table-striped" id="people-table">
             <thead>
                 <tr>
@@ -108,7 +107,7 @@ if ($fatal_error) {
             </tbody>
         </table>
     </div>
-    <div class="tab-pane fade" id="tracks">
+    <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
         <table class="table table-light table-striped">
             <thead>
                 <tr>

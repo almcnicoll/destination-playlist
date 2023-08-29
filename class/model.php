@@ -58,6 +58,13 @@ class Model {
         return $result;
     }
 
+    public static function findFirst($criteria) {
+        // TODO - would be better (more efficient in db) to run query with LIMIT 1 instead of this
+        $values = static::find($criteria);
+        if (count($values)==0) { return null; }
+        return $values[0];
+    }
+
     public static function find($criteria) : array {
         $pdo = db::getPDO();
 

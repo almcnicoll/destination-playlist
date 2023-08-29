@@ -10,6 +10,7 @@ class Playlist extends Model {
     const FLAGS_ALLOWARTIST     =   4;  // Can artist be used for the relevant letter?
     const FLAGS_THEAGNOSTIC     =   8;  // If yes, 'The' can be ignored or used
     const FLAGS_INCLUDEDIGITS   =  16;  // If yes, digits as well as letters are used as match targets
+    const FLAGS_PEOPLELOCKED    =  32;  // If yes, nobody new can join the playlist
 
     public int $user_id;
     public string $destination;

@@ -50,7 +50,7 @@ if ($fatal_error) {
     die();
 }
 
-$share_link = $config['root_path'].'/playlists/join/'.$playlist->getShareCode();
+$share_link = $config['root_path'].'/playlist/join/'.$playlist->getShareCode();
 ?>
 <!--
 <div class="row">
