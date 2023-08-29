@@ -32,6 +32,19 @@
 
 ?>
 
+<script type="text/javascript">
+    $(document).ready(
+        function() {
+            $('#copy-button').on('click',function(){
+                // Select text inside element
+                document.getElementById('share-link-input').select();
+                // Copy text to clipboard
+                document.execCommand('copy');
+            })
+        }
+    );
+</script>
+
 <h2 class="text-center">Great! Now share the love...</h2>
 <?php
 if (count($error_messages)>0) {
@@ -52,15 +65,6 @@ if ($fatal_error) {
 
 $share_link = $config['root_path'].'/playlist/join/'.$playlist->getShareCode();
 ?>
-<!--
-<div class="row">
-    <div class="span12 text-center">
-        <button type="button" class="btn btn-primary text-uppercase" data-bs-toggle="modal" data-bs-target="#myModal" id="shareBtn" data-bs-placement="top" title="Share your playlist">
-            Share 
-        </button>  
-    </div>
-</div>
--->
 <div class="row text-center">
     <div class="col-md-6">
         <h3>Share on</h3>
@@ -90,8 +94,8 @@ $share_link = $config['root_path'].'/playlist/join/'.$playlist->getShareCode();
         <div class="row fs-3 text-center">
             <div class="col-sm-12">
                 <div class="input-group mt-3">
-                    <input type="text" class="form-control" value="<?= $share_link ?>">
-                    <button class="btn btn-outline-secondary" type="button">Copy</button>
+                    <input type="text" class="form-control" id="share-link-input" value="<?= $share_link ?>">
+                    <button class="btn btn-outline-secondary" type="button" id="copy-button">Copy</button>
                 </div>
             </div>
         </div>

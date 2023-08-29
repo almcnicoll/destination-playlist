@@ -106,12 +106,20 @@ if (isset($_REQUEST['refresh_needed'])) {
     $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early
     //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
     session_write_close();
-    header('Location: ./');
+    if (isset($_SESSION['redirect_url_once'])) {
+        header('Location: '.$_SESSION['redirect_url_once']);
+        unset($_SESSION['redirect_url_once']);
+    } else {
+        header('Location: ./');
+    }
     die();
 } elseif (isset($_REQUEST['error'])) {
     // This branch is for if the authorization process throws an error
     die('Error: '.$_REQUEST['error']);
 } else {
+    if (isset($_REQUEST['redirect_url'])) {
+        $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
+    }
     // This branch is for starting the authorization process, sometimes with user interaction needed
     $endpoint = "https://accounts.spotify.com/authorize";
     $options = [

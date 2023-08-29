@@ -42,8 +42,7 @@ if ($user->display_name) {
     <div class="mb-3">
         <label for="newname" class="form-label">What's your name?</label>
         <input type="text" class="form-control" name="newname" id="newname" aria-describedby="newname-help">
-        <div class="form-text" id="newname-help">It's helpful to have your name!</div>
-        
+        <div class="form-text" id="newname-help">It's helpful to have your name!</div>        
         <button type="submit" class="btn btn-primary">Update!</button>
     </div>
 </form>
@@ -69,13 +68,23 @@ if (count($my_playlists)==0) {
 } else {
 ?>
 <table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Playlist</th>
+            <th>Destination</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
     <tbody>
 <?php
     foreach ($my_playlists as $playlist) {
-        echo "<tr>\n";
+        echo "<tr style='vertical-align: middle;'>\n";
         echo "<th scope='row'>{$playlist->display_name}</th>\n";
         echo "<td>{$playlist->destination}</td>\n";
-        echo "<td>Actions...</td>\n";
+        echo "<td>";
+        echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-success'>Share</a>";
+        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'>Manage</a>";
+        echo "</td>\n";
         echo "</tr>\n";
     }
 ?>
