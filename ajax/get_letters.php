@@ -7,6 +7,12 @@
             require_once('../../class/participation.php');
         }
     }
+    // Include Letter class
+    if (!@include_once('class/letter.php')) {
+        if (!@include_once('../class/letter.php')) {
+            require_once('../../class/letter.php');
+        }
+    }
 
     $fatal_error = false;
 
@@ -27,19 +33,23 @@
         $fatal_error = true;
     }
 
-    if ($playlist->user_id != $_SESSION['USER_ID']) {
-        $error_messages[] = "You do not own this playlist!";
-        $fatal_error = true;
-    }
-
+    $found_user = false;
     if (count($error_messages)==0) {
         $participants = Participation::find([['playlist_id','=',$playlist_id],]);
         foreach ($participants as $participant) {
             $participant->user = $participant->getUser();
+            if ($participant->user_id == $_SESSION['USER_ID']) { $found_user = true; }
         }
     }
 
-    if (empty($participants)) {
+    if (!$found_user) {
+        $error_messages[] = "You have not joined this playlist!";
+        $fatal_error = true;
+    }
+
+    $letters = Letter::find([['playlist_id','=',$playlist_id],]);
+
+    if (empty($letter)) {
         $participants = [];
     }
 
@@ -48,7 +58,7 @@
         ob_end_clean();
         die($output);
     } else {
-        $output = json_encode($participants);
+        $output = json_encode($letters);
         ob_end_clean();
         die($output);
     }

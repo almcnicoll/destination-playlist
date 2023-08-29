@@ -23,11 +23,18 @@
         $error_messages[] = "No playlist specified";
         $fatal_error = true;
     }
-    $playlist_id = (int)$params[0];
+    
+    list($playlist_id,$share_code) = explode('-',$params[0]);
+    $playlist_id = (int)$playlist_id;
 
     $playlist = Playlist::getById($playlist_id);
     if ($playlist == null) {
         $error_messages[] = "Playlist not found";
+        $fatal_error = true;
+    }
+
+    if (empty($share_code) || ($share_code != $playlist->getShareCode())) {
+        $error_messages[] = "Invalid share link";
         $fatal_error = true;
     }
 
@@ -82,5 +89,47 @@ if ($participation == null) {
             $('#title').text(currTitle.replace(/Joining/,'Joined'));
         }
     );
+
+    
+    var timer;
+    var script2Url = "<?= $config['root_path'] ?>/ajax/get_letters.php?playlist_id=<?= $playlist->id ?>";
+    function updateTrackList(data, textStatus, jqXHR) {
+        $('#tracks-table tbody tr').remove();
+        for(var i in data) {
+            var l = data[i];
+            var u = data[i].user;
+            $('#tracks-table tbody').append("<tr><td><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td></tr>");
+        }
+    }
+    var ajax2Options = {
+        async: false,
+        cache: false,
+        success: updateTrackList,
+        dataType: 'json',
+        method: 'GET',
+        timeout: 4000
+    };
+    function getLetters() {
+        $.ajax(script2Url, ajax2Options);
+        timer = setTimeout('getLetters()',5000);
+    }
+    $(document).ready(
+        function () {
+            //timer = setTimeout('getParticipants()',5000);
+            getLetters();
+        }
+    );
 </script>
+
+<table class="table table-light table-striped" id="tracks-table">
+    <!--<thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>-->
+    <tbody>
+    </tbody>
+</table>
 <?php

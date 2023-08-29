@@ -34,24 +34,24 @@
 
 <script type="text/javascript">
     var timer;
-    var scriptUrl = "<?= $config['root_path'] ?>/ajax/get_participants.php?playlist_id=<?= $playlist->id ?>";
-    function updateList(data, textStatus, jqXHR) {
+    var script1Url = "<?= $config['root_path'] ?>/ajax/get_participants.php?playlist_id=<?= $playlist->id ?>";
+    function updatePeopleList(data, textStatus, jqXHR) {
         $('#people-table tbody tr:not(:first)').remove();
         for(var i in data) {
             var u = data[i].user;
             $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
         }
     }
-    var ajaxOptions = {
+    var ajax1Options = {
         async: false,
         cache: false,
-        success: updateList,
+        success: updatePeopleList,
         dataType: 'json',
         method: 'GET',
         timeout: 4000
     };
     function getParticipants() {
-        $.ajax(scriptUrl, ajaxOptions);
+        $.ajax(script1Url, ajax1Options);
         timer = setTimeout('getParticipants()',5000);
     }
     $(document).ready(
@@ -108,7 +108,7 @@ if ($fatal_error) {
         </table>
     </div>
     <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
-        <table class="table table-light table-striped">
+        <table class="table table-light table-striped" id="tracks-table">
             <thead>
                 <tr>
                     <th>&nbsp;</th>
