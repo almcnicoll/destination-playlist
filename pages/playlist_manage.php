@@ -86,7 +86,7 @@ if ($fatal_error) {
         <a class="nav-link active" aria-current="page" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1" aria-selected="true">People</a>
     </li>
     <li class="nav-item" role="presentation">
-        <a class="nav-link" href="#nav1-content-2" data-bd-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2">Tracks</a>
+        <a class="nav-link" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2">Tracks</a>
     </li>
 </ul>
 
