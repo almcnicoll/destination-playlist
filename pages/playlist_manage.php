@@ -43,7 +43,7 @@
         }
     }
     var ajax1Options = {
-        async: false,
+        async: true,
         cache: false,
         success: updatePeopleList,
         dataType: 'json',

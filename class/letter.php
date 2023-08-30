@@ -5,7 +5,7 @@ if(!@include_once('class/user.php')) { require_once('../class/user.php'); }
 
 class Letter extends Model {
     public int $playlist_id;
-    public int $user_id;
+    public ?int $user_id;
     public string $letter;
     public ?string $spotify_track_id = null;
     public ?string $cached_artist = null;

@@ -71,7 +71,7 @@
                 foreach ($letters as $letter) {
                     $l = new Letter ();
                     $l->playlist_id = $playlist->id;
-                    $l->user_id = $_SESSION['USER_ID'];
+                    $l->user_id = null; // NOT current user - letter should be unassigned
                     $l->letter = $letter;
                     $l->save();
                 }

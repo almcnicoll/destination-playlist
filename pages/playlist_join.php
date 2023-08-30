@@ -24,7 +24,7 @@
         $fatal_error = true;
     }
     
-    list($playlist_id,$share_code) = explode('-',$params[0]);
+    list($playlist_id,$auth_suffix) = explode('-',$params[0]);
     $playlist_id = (int)$playlist_id;
 
     $playlist = Playlist::getById($playlist_id);
@@ -33,7 +33,10 @@
         $fatal_error = true;
     }
 
-    if (empty($share_code) || ($share_code != $playlist->getShareCode())) {
+    /*var_dump($params,$playlist_id,$auth_suffix,$playlist->getShareCode());
+    die();*/
+
+    if (empty($auth_suffix) || ($params[0] != $playlist->getShareCode())) {
         $error_messages[] = "Invalid share link";
         $fatal_error = true;
     }
@@ -97,12 +100,16 @@ if ($participation == null) {
         $('#tracks-table tbody tr').remove();
         for(var i in data) {
             var l = data[i];
-            var u = data[i].user;
-            $('#tracks-table tbody').append("<tr><td><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td></tr>");
+            var user_display = "";
+            if ((data[i].user_id != null) && (data[i].user_id != 'null')) {
+                var u = data[i].user;
+                user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
+            }
+            $('#tracks-table tbody').append("<tr><td><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+user_display+"</td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td></tr>");
         }
     }
     var ajax2Options = {
-        async: false,
+        async: true,
         cache: false,
         success: updateTrackList,
         dataType: 'json',
@@ -115,7 +122,6 @@ if ($participation == null) {
     }
     $(document).ready(
         function () {
-            //timer = setTimeout('getParticipants()',5000);
             getLetters();
         }
     );
@@ -132,4 +138,3 @@ if ($participation == null) {
     <tbody>
     </tbody>
 </table>
-<?php

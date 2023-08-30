@@ -33,13 +33,18 @@
         $fatal_error = true;
     }
 
-    $found_user = false;
+    
+    // If we're the playlist owner, we don't need a participation entry
+    $found_user = ($playlist->user_id == $_SESSION['USER_ID']);
+
     if (count($error_messages)==0) {
         $participants = Participation::find([['playlist_id','=',$playlist_id],]);
         foreach ($participants as $participant) {
-            $participant->user = $participant->getUser();
+            //$participant->user = $participant->getUser();
             if ($participant->user_id == $_SESSION['USER_ID']) { $found_user = true; }
         }
+        // Add in playlist owner too
+        $participants[] = $_SESSION['USER'];
     }
 
     if (!$found_user) {
@@ -49,8 +54,14 @@
 
     $letters = Letter::find([['playlist_id','=',$playlist_id],]);
 
-    if (empty($letter)) {
-        $participants = [];
+    if (empty($letters)) {
+        $letters = [];
+    } else {
+        foreach ($letters as $letter) {
+            if (!empty($letter->user_id)) {
+                $letter->user = $letter->getUser();
+            }
+        }
     }
 
     if (count($error_messages)>0) {
