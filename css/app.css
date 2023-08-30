@@ -22,3 +22,19 @@ div.initial-display {
     vertical-align: middle;
     font-weight: bold;
 }
+
+div.letter-display {
+    zfont-family: 'Courier New', Courier, monospace;
+    background-color: #003399;
+    color: #fff;
+    width: 2em;
+    height: 2em;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+td.initial-display, td.letter-display {
+    width: 3em;
+}
