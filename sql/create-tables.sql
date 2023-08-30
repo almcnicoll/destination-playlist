@@ -51,7 +51,7 @@ CREATE TABLE `letters` (
   PRIMARY KEY (`id`),
   KEY `ListIndex` (`playlist_id`,`letter`,`id`,`cached_artist`,`cached_title`),
   CONSTRAINT `FK_playlist_lookup` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ;
 
 CREATE TABLE `participations` (

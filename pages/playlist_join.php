@@ -94,7 +94,7 @@ if ($participation == null) {
     );
 
     
-    var timer;
+    var timer2;
     var script2Url = "<?= $config['root_path'] ?>/ajax/get_letters.php?playlist_id=<?= $playlist->id ?>";
     function updateTrackList(data, textStatus, jqXHR) {
         $('#tracks-table tbody tr').remove();
@@ -118,7 +118,7 @@ if ($participation == null) {
     };
     function getLetters() {
         $.ajax(script2Url, ajax2Options);
-        timer = setTimeout('getLetters()',5000);
+        timer2 = setTimeout('getLetters()',5000);
     }
     $(document).ready(
         function () {
