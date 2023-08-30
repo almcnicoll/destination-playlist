@@ -57,7 +57,7 @@
 
 ?>
 
-<h2 class="text-center" id="title">Joining <?= $playlist->display_name ?>...</h2>
+<h2 class="text-center" id="title">Joining playlist <?= $playlist->display_name ?>...</h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
