@@ -138,12 +138,12 @@ if ($fatal_error) {
     </div>
     <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
         <table class="table table-light table-striped" id="tracks-table">
-            <thead>
+            <!--<thead>
                 <tr>
                     <th>&nbsp;</th>
                     <th>Track</th>
                 </tr>
-            </thead>
+            </thead>-->
             <tbody></tbody>
         </table>
     </div>
