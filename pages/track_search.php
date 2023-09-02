@@ -77,16 +77,22 @@
         }
     };
     function search_request(query,resultType,userMarket,resultLimit) {
-        ajax3Options.data = /*JSON.stringify(*/{
+        ajax3Options.data = {
             q: query,
             type: resultType,
             market: userMarket,
-            limit: resultLimit
-        }/*)*/;
+            limit: resultLimit,
+            playlist_id: <?= $playlist->id ?>
+        };
         $.ajax('<?= $config['root_path'] ?>/ajax/proxy_search.php', ajax3Options);
     }
     function updateSearchBox(data, textStatus, jqXHR) {
-        $('#search-results-container').html("<pre>"+data+"</pre>");
+        output = '';
+        for(var i in data.tracks.items) {
+            var t = data.tracks.items[i];
+            output += "<li>"+t.name+"</li>";
+        }
+        $('#search-results-container').html("<ul>"+output+"</ul>");
     }
 
     $(document).ready(function() {

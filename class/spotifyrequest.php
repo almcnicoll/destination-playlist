@@ -42,6 +42,8 @@ class SpotifyRequest {
 
         // Initialise curl
         $this->ch = curl_init($this->endpoint);
+        curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($this->ch, CURLOPT_VERBOSE, true);
 
         // Set content-type header if appropriate
         if (!empty($this->contentType)) {
@@ -71,24 +73,36 @@ class SpotifyRequest {
         // Set action and data fields in curl
         if ($this->action == SpotifyRequest::ACTION_POST) {
             curl_setopt($this->ch,CURLOPT_POST,1);
+            if ($this->contentType == SpotifyRequest::CONTENT_TYPE_JSON) {
+                curl_setopt($this->ch,CURLOPT_POSTFIELDS,json_encode($data));
+            } else {
+                curl_setopt($this->ch,CURLOPT_POSTFIELDS,$data);
+            }
         } else {
             curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, 'GET' );
-        }
-        if ($this->contentType == SpotifyRequest::CONTENT_TYPE_JSON) {
-            curl_setopt($this->ch,CURLOPT_POSTFIELDS,json_encode($data));
-        } else {
-            curl_setopt($this->ch,CURLOPT_POSTFIELDS,$data);
+            // Add or extend querystring
+            $url_parts = parse_url($this->endpoint);
+            if (empty($url_parts['query'])) {
+                // Create a querystring
+                curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '?' . http_build_query($data));
+            } else {
+                curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '&' . http_build_query($data));
+            }
         }
         
         // Set return transfer
         if ($this->returnTransfer) { curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1); }
 
         // EXECUTE
+        // TODO - remove curl error logging
+        $fh = fopen('curl.err.log','w');
+        curl_setopt($this->ch,CURLOPT_STDERR,$fh);
         $this->result = curl_exec($this->ch);
         $this->info = curl_getinfo($this->ch);
         $this->error_message = curl_error($this->ch);
         $this->error_number = curl_errno($this->ch);
         curl_close($this->ch);
+        fclose($fh);
 
         return $this;
     }
