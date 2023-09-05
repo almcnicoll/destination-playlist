@@ -76,6 +76,25 @@
             'Content-type': 'application/json'
         }
     };
+    function build_search_request(txt) {
+        var querystring = '';
+        if (allow_title && allow_artist) {
+            querystring = encodeURIComponent(txt);
+        } else if (allow_title) {
+            querystring = encodeURIComponent("track:"+txt);
+        } else if (allow_artist) {
+            querystring = encodeURIComponent("artist:"+txt);
+        } else {
+            // Not sure what to do here!
+            querystring = encodeURIComponent(txt);
+        }
+        return {
+            query: querystring,
+            resultType: 'track',
+            market: 'GB', // replace with user value
+            limit: 20
+        };
+    }
     function search_request(query,resultType,userMarket,resultLimit) {
         ajax3Options.data = {
             q: query,
@@ -90,27 +109,40 @@
         output = '';
         for(var i in data.tracks.items) {
             var t = data.tracks.items[i];
-            output += "<li>"+t.name+"</li>";
+            output += "<li class='list-group-item'>"+t.name+"</li>";
         }
-        $('#search-results-container').html("<ul>"+output+"</ul>");
+        $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
+        search_request_running = false;
+        if (search_request_queue !== null) {
+            // There was another request waiting in the wings
+            // Stash variables
+            var _q  = search_request_queue.query;
+            var _rT = search_request_queue.resultType;
+            var _m  = search_request_queue.market;
+            var _l  = search_request_queue.limit;
+            // Clear queue
+            search_request_queue = null;
+            // Send queued request
+            search_request(_q,_rT,_m,_l);
+        }
     }
+
+    var search_request_queue = null;
+    var search_request_running = false;
 
     $(document).ready(function() {
         $('#track-search-box').on('keyup',function() {
+            // Don't run loads of simultaneous queries
             var txt=$(this).val();
-            if (txt.length > 3) {
-                var querystring = '';
-                if (allow_title && allow_artist) {
-                    querystring = encodeURIComponent(txt);
-                } else if (allow_title) {
-                    querystring = encodeURIComponent("track:"+txt);
-                } else if (allow_artist) {
-                    querystring = encodeURIComponent("artist:"+txt);
-                } else {
-                    // Not sure what to do here!
-                    querystring = encodeURIComponent(txt);
+            if (search_request_running) {
+                // Set or overwrite queued request, ready for completion of current one
+                search_request_queue = build_search_request(txt);
+            } else {
+                if (txt.length > 3) {
+                    search_request_running = true;
+                    var req = build_search_request(txt);
+                    search_request(req.query,req.resultType,req.market,req.limit);
                 }
-                search_request(querystring,'track','GB',20);
             }
         })
     });
@@ -122,13 +154,6 @@
             <input type="text" placeholder="Type here to search..." id="track-search-box">
         </div>
         <div class="col-12" style="min-height: 10em;" id='search-results-container'>
-            <ul class="list-group">
-                <li class="list-group-item">An item</li>
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-                <li class="list-group-item">A fourth item</li>
-                <li class="list-group-item">And a fifth one</li>
-            </ul>
         </div>
     </div>
 </div>
