@@ -63,7 +63,10 @@
     }
     echo "var t = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n\n";
     ?>
-    
+</script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
+<script type='text/javascript'>
+    // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
     var ajax3Options = {
         async: true,
         cache: false,
