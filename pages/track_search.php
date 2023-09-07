@@ -32,7 +32,7 @@
     $participation = Participation::findFirst([['playlist_id','=',$playlist->id],['user_id','=',$_SESSION['USER_ID']]]);
     if ($participation == null) {
         // They're not part of this playlist
-        $error_messages[] = "Sorry, you have nto joined this playlist. Please talk to the playlist owner to join.";
+        $error_messages[] = "Sorry, you have not joined this playlist. Please talk to the playlist owner to join.";
         $fatal_error = true;
     } else {
         if ($participation->removed == 1) {
@@ -41,114 +41,47 @@
             $fatal_error = true;
         }
     }
-
+    
     ?>
-
 <script type="text/javascript">
+    if (typeof trackSearch === 'undefined') { trackSearch = {}; }
     <?php
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
-        echo "var allow_title=false;\n";
+        echo "trackSearch.allow_title=false;\n";
     } else {
-        echo "var allow_title=true;\n";
+        echo "trackSearch.allow_title=true;\n";
     }
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWARTIST)) {
-        echo "var allow_artist=false;\n";
+        echo "trackSearch.allow_artist=false;\n";
     } else {
-        echo "var allow_artist=true;\n";
+        echo "trackSearch.allow_artist=true;\n";
     }
     if(isset($playlist_id) && $playlist->hasFlags(Playlist::FLAGS_STRICT)) {
-        echo "var strict_mode=true;\n";
+        echo "trackSearch.strict_mode=true;\n";
     } else {
-        echo "var strict_mode=false;\n";
+        echo "trackSearch.strict_mode=false;\n";
     }
-    echo "var t = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n\n";
+    echo "trackSearch.token = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n\n";
+    $user = $_SESSION['USER'];
+    echo "/*\n".print_r($user,true)."\n*/\n\n";
+    echo "trackSearch.market = \"{$user->market}\";\n\n";
+    echo "trackSearch.playlist_id = \"{$playlist->id}\";\n\n";
+    echo "root_path = \"{$config['root_path']}\";\n\n";
     ?>
 </script>
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
 <script type='text/javascript'>
     // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
-    var ajax3Options = {
-        async: true,
-        cache: false,
-        success: updateSearchBox,
-        dataType: 'json',
-        method: 'GET',
-        timeout: 10000,
-        headers: {
-            Authorization: 'Bearer '+t,
-            'Content-type': 'application/json'
-        }
-    };
-    function build_search_request(txt) {
-        var querystring = '';
-        if (allow_title && allow_artist) {
-            querystring = encodeURIComponent(txt);
-        } else if (allow_title) {
-            querystring = encodeURIComponent("track:"+txt);
-        } else if (allow_artist) {
-            querystring = encodeURIComponent("artist:"+txt);
-        } else {
-            // Not sure what to do here!
-            querystring = encodeURIComponent(txt);
-        }
-        return {
-            query: querystring,
-            resultType: 'track',
-            market: 'GB', // replace with user value
-            limit: 20
-        };
-    }
-    function search_request(query,resultType,userMarket,resultLimit) {
-        ajax3Options.data = {
-            q: query,
-            type: resultType,
-            market: userMarket,
-            limit: resultLimit,
-            playlist_id: <?= $playlist->id ?>
-        };
-        $.ajax('<?= $config['root_path'] ?>/ajax/proxy_search.php', ajax3Options);
-    }
-    function updateSearchBox(data, textStatus, jqXHR) {
+    trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
         output = '';
         for(var i in data.tracks.items) {
             var t = data.tracks.items[i];
             output += "<li class='list-group-item'>"+t.name+"</li>";
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
-        search_request_running = false;
-        if (search_request_queue !== null) {
-            // There was another request waiting in the wings
-            // Stash variables
-            var _q  = search_request_queue.query;
-            var _rT = search_request_queue.resultType;
-            var _m  = search_request_queue.market;
-            var _l  = search_request_queue.limit;
-            // Clear queue
-            search_request_queue = null;
-            // Send queued request
-            search_request(_q,_rT,_m,_l);
-        }
     }
 
-    var search_request_queue = null;
-    var search_request_running = false;
-
-    $(document).ready(function() {
-        $('#track-search-box').on('keyup',function() {
-            // Don't run loads of simultaneous queries
-            var txt=$(this).val();
-            if (search_request_running) {
-                // Set or overwrite queued request, ready for completion of current one
-                search_request_queue = build_search_request(txt);
-            } else {
-                if (txt.length > 3) {
-                    search_request_running = true;
-                    var req = build_search_request(txt);
-                    search_request(req.query,req.resultType,req.market,req.limit);
-                }
-            }
-        })
-    });
+    trackSearch.init('#track-search-box');
 </script>
 
 <div class="card" style="max-width: 16em;">

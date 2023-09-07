@@ -87,6 +87,10 @@
             //timer = setTimeout('getParticipants()',5000);
             getParticipants();
             getLetters();
+
+            $('#btn-assign-letters').on('click',function() {
+                // TODO - ajax call to assign letters
+            });
         }
     );
 </script>
@@ -138,12 +142,6 @@ if ($fatal_error) {
     </div>
     <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
         <table class="table table-light table-striped" id="tracks-table">
-            <!--<thead>
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>Track</th>
-                </tr>
-            </thead>-->
             <tbody></tbody>
         </table>
     </div>
@@ -151,7 +149,7 @@ if ($fatal_error) {
 
 <div class="row">
     <div class="col-4">
-        <a href="#" class="btn btn-md btn-success">Assign letters</a>
+        <a href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</a>
     </div>
     <div class="col-8"></div>
 </div>

@@ -16,11 +16,12 @@ CREATE TABLE `users` (
   `identifier` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `display_name` varchar(400) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `market` char(2) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `LoginLookup` (`authmethod_id`,`identifier`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ;
 
 CREATE TABLE `playlists` (
