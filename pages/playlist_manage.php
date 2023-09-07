@@ -82,6 +82,16 @@
         timer2 = setTimeout('getLetters()',5000);
     }
 
+    var script3Url = "<?= $config['root_path'] ?>/ajax/assign_letters.php?playlist_id=<?= $playlist->id ?>";
+    var ajax3Options = {
+        async: true,
+        cache: false,
+        /*success: someFunction,*/
+        dataType: 'json',
+        method: 'GET',
+        timeout: 4000
+    };
+
     $(document).ready(
         function () {
             //timer = setTimeout('getParticipants()',5000);
@@ -89,7 +99,7 @@
             getLetters();
 
             $('#btn-assign-letters').on('click',function() {
-                // TODO - ajax call to assign letters
+                $.ajax(script3Url, ajax3Options);
             });
         }
     );

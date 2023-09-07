@@ -1,6 +1,6 @@
 <?php
 class Model {
-    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE'];
+    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT'];
 
     public ?int $id = null;
     public ?string $created = null;
@@ -72,6 +72,23 @@ class Model {
         if (!is_array($criteria)) {
             throw new Exception("Find method requires an array of three-element arrays to operate");
         }
+        // Allow for people passing in a single criterion without the enclosing array
+        if (count($criteria) == 3) {
+            // To minimise potential for error, only do this where the intent is really clear:
+            //  to qualify, all three elements must be non-array
+            if(
+                !is_array($criteria[0]) &&
+                !is_array($criteria[1]) &&
+                !is_array($criteria[2])
+            ) {
+                // Yep - that's what they've done. Enclose it as 0th element of a container array
+                $tmp_criteria = serialize($criteria);
+                $criteria = [
+                    0 => unserialize($tmp_criteria),
+                ];
+            }
+        }
+        // Now process the criteria
         $criteria_strings = [];
         $criteria_values = [];
         foreach ($criteria as $criterion) {
@@ -84,12 +101,21 @@ class Model {
             if (strpos($field,'`')!==false) {
                 throw new Exception("Field names in criteria cannot contain backticks (`)");
             }
-            if (!in_array($operator,Model::$allowedOperators)) {
+            if (!in_array(strtoupper($operator),Model::$allowedOperators)) {
                 throw new Exception("Operator {$operator} is not allowed");
             }
 
-            $criteria_strings[] = "`{$field}` {$operator} ?";
-            $criteria_values[] = $value;
+            // Need special treatment for IS NULL / IS NOT NULL
+            if ((strtoupper($operator) == 'IS') || (strtoupper($operator) == 'IS NOT')) {
+                if (is_null($value) || trim(strtoupper($value))=='NULL') {
+                    $criteria_strings[] = "`{$field}` {$operator} NULL";
+                } else {
+                    throw new Exception("Operator {$operator} can only take NULL as its argument (supplied as literal null or 'NULL')");
+                }
+            } else {
+                $criteria_strings[] = "`{$field}` {$operator} ?";
+                $criteria_values[] = $value;
+            }
         }
 
         $sql = "SELECT * FROM `".static::$tableName."` WHERE ".implode(" AND ", $criteria_strings);

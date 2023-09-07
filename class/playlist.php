@@ -21,12 +21,18 @@ class Playlist extends Model {
     static string $tableName = "playlists";
     static $fields = ['id','user_id','destination','spotify_playlist_id','display_name','flags','created','modified'];
 
-    public function getUser() : ?User {
+    public function getOwner() : ?User {
         return User::getById($this->user_id);
+    }
+    public function getParticipants() {
+        return Participation::find(['playlist_id','=',$this->id]);
     }
     
     public function getLetters() {
         return Letter::find([['playlist_id','=',$this->id],]);
+    }
+    public function getUnassignedLetters() {
+        return Letter::find([['playlist_id','=',$this->id],['user_id','IS',null]]);
     }
 
     public function hasFlags(...$testFlags) : bool {
@@ -41,6 +47,16 @@ class Playlist extends Model {
         $hash = hash('sha256', (string)$this->id);
         $second_pos = $this->id % 64;
         return $this->id . '-' . substr($hash, 0, 1) . substr($hash, $second_pos, 1);
+    }
+
+    public function clearLetterOwners() : void {
+        $pdo = db::getPDO();
+        $sql = "UPDATE `".Letter::$tableName."` SET user_id = NULL WHERE playlist_id = :playlist_id";
+        $criteria_values = [
+            'playlist_id' => $this->id,
+        ];
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($criteria_values);
     }
 
     /*
