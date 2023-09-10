@@ -14,7 +14,7 @@ class db {
 
     static function getDSN() {
         global $config;
-        return "mysql:host=".$config['DB_HOST'].";dbname=".$config['DB_SCHEMA'].";charset=".$config['DB_CHARSET'];
+        return "mysql:host={$config['DB_HOST']};dbname={$config['DB_SCHEMA']};charset={$config['DB_CHARSET']};port={$config['DB_PORT']}";
     }
 
     public static function getPDO() {
