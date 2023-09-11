@@ -31,8 +31,48 @@
     }
 
 ?>
+
 <script type="text/javascript">
-    var root_path = "<?= $config['root_path'] ?>";
+    if (typeof trackSearch === 'undefined') { trackSearch = {}; }
+    <?php
+    if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
+        echo "trackSearch.allow_title=false;\n";
+    } else {
+        echo "trackSearch.allow_title=true;\n";
+    }
+    if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWARTIST)) {
+        echo "trackSearch.allow_artist=false;\n";
+    } else {
+        echo "trackSearch.allow_artist=true;\n";
+    }
+    if(isset($playlist_id) && $playlist->hasFlags(Playlist::FLAGS_STRICT)) {
+        echo "trackSearch.strict_mode=true;\n";
+    } else {
+        echo "trackSearch.strict_mode=false;\n";
+    }
+    echo "trackSearch.token = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n\n";
+    $user = $_SESSION['USER'];
+    echo "/*\n".print_r($user,true)."\n*/\n\n";
+    echo "trackSearch.market = \"{$user->market}\";\n\n";
+    echo "trackSearch.playlist_id = \"{$playlist->id}\";\n\n";
+    echo "var root_path = \"{$config['root_path']}\";\n\n";
+    ?>
+</script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
+<script type='text/javascript'>
+    // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
+    trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
+        output = '';
+        for(var i in data.tracks.items) {
+            var t = data.tracks.items[i];
+            output += "<li class='list-group-item'>"+t.name+"</li>";
+        }
+        $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
+    }
+
+    trackSearch.init('#track-search-box');
+</script>
+<script type="text/javascript">
     var playlist_id = "<?= $playlist->id ?>";
     var currentUser = <?= $_SESSION['USER_ID'] ?>;
 </script>
@@ -142,4 +182,27 @@ if ($fatal_error) {
         <a href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</a>
     </div>
     <div class="col-8"></div>
+</div>
+
+<div class="modal fade" id="trackSearchModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Track search</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <div class="row">
+        <div class="col-12">
+            <input type="text" placeholder="Type here to search..." id="track-search-box">
+        </div>
+        <div class="col-12" style="min-height: 10em;" id='search-results-container'>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
 </div>

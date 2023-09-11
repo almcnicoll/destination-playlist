@@ -66,7 +66,7 @@
     echo "/*\n".print_r($user,true)."\n*/\n\n";
     echo "trackSearch.market = \"{$user->market}\";\n\n";
     echo "trackSearch.playlist_id = \"{$playlist->id}\";\n\n";
-    echo "root_path = \"{$config['root_path']}\";\n\n";
+    echo "var root_path = \"{$config['root_path']}\";\n\n";
     ?>
 </script>
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
