@@ -31,7 +31,12 @@
     }
 
 ?>
-
+<script type="text/javascript">
+    var root_path = "<?= $config['root_path'] ?>";
+    var playlist_id = "<?= $playlist->id ?>";
+    var currentUser = <?= $_SESSION['USER_ID'] ?>;
+</script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
 <script type="text/javascript">
     var timer1;
     var script1Url = "<?= $config['root_path'] ?>/ajax/get_participants.php?playlist_id=<?= $playlist->id ?>";
@@ -48,39 +53,14 @@
         success: updatePeopleList,
         dataType: 'json',
         method: 'GET',
-        timeout: 4000
+        timeout: 8000
     };
     function getParticipants() {
         $.ajax(script1Url, ajax1Options);
-        timer1 = setTimeout('getParticipants()',5000);
+        timer1 = setTimeout('getParticipants()',10000);
     }
     
-    var timer2;
-    var script2Url = "<?= $config['root_path'] ?>/ajax/get_letters.php?playlist_id=<?= $playlist->id ?>";
-    function updateTrackList(data, textStatus, jqXHR) {
-        $('#tracks-table tbody tr').remove();
-        for(var i in data) {
-            var l = data[i];
-            var user_display = "";
-            if ((data[i].user_id != null) && (data[i].user_id != 'null')) {
-                var u = data[i].user;
-                user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
-            }
-            $('#tracks-table tbody').append("<tr><td><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+user_display+"</td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td></tr>");
-        }
-    }
-    var ajax2Options = {
-        async: true,
-        cache: false,
-        success: updateTrackList,
-        dataType: 'json',
-        method: 'GET',
-        timeout: 4000
-    };
-    function getLetters() {
-        $.ajax(script2Url, ajax2Options);
-        timer2 = setTimeout('getLetters()',5000);
-    }
+    
 
     var script3Url = "<?= $config['root_path'] ?>/ajax/assign_letters.php?playlist_id=<?= $playlist->id ?>";
     var ajax3Options = {
@@ -96,7 +76,7 @@
         function () {
             //timer = setTimeout('getParticipants()',5000);
             getParticipants();
-            getLetters();
+            var tmp_timer = setTimeout('getLetters();',1000); // Give it a little offset
 
             $('#btn-assign-letters').on('click',function() {
                 $.ajax(script3Url, ajax3Options);

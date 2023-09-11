@@ -86,45 +86,18 @@ if ($participation == null) {
 // Dynamic content
 ?>
 <script type="text/javascript">
+    var root_path = "<?= $config['root_path'] ?>";
+    var playlist_id = "<?= $playlist->id ?>";
     var currentUser = <?= $_SESSION['USER_ID'] ?>;
+</script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
+<script type="text/javascript">
     $(document).ready(
         function() {
             var currTitle = $('#title').text();
             $('#title').text(currTitle.replace(/Joining/,'Joined'));
         }
     );
-
-    
-    var timer2;
-    var script2Url = "<?= $config['root_path'] ?>/ajax/get_letters.php?playlist_id=<?= $playlist->id ?>";
-    function updateTrackList(data, textStatus, jqXHR) {
-        $('#tracks-table tbody tr').remove();
-        for(var i in data) {
-            var l = data[i];
-            var user_display = "";
-            var edit_own = "";
-            if ((data[i].user_id != null) && (data[i].user_id != 'null')) {
-                var u = data[i].user;
-                user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
-                if (u.id == currentUser) {
-                    edit_own = "<a href='#' id=''><span class='bi bi-pencil-square'></span></a>";
-                }
-            }
-            $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
-        }
-    }
-    var ajax2Options = {
-        async: true,
-        cache: false,
-        success: updateTrackList,
-        dataType: 'json',
-        method: 'GET',
-        timeout: 4000
-    };
-    function getLetters() {
-        $.ajax(script2Url, ajax2Options);
-        timer2 = setTimeout('getLetters()',5000);
-    }
     $(document).ready(
         function () {
             getLetters();

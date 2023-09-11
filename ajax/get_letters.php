@@ -2,6 +2,7 @@
     // TODO - also return a results hash so pages can refresh only if hash is different
 
     // Returns the current participant list for the playlist
+    $time_start = microtime(true);
     ob_start();
     // Include Participation class
     if (!@include_once('class/participation.php')) {
@@ -66,12 +67,16 @@
         }
     }
 
+    $time_end = microtime(true);
+
     if (count($error_messages)>0) {
         $output = json_encode(['errors' => $error_messages]);
+
         ob_end_clean();
         die($output);
     } else {
         $output = json_encode($letters);
         ob_end_clean();
+        //echo "Runtime: ".(($time_end - $time_start) / 1000000)." ms\n\n";
         die($output);
     }
