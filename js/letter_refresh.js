@@ -11,7 +11,7 @@
                 var u = data[i].user;
                 user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
                 if (u.id == currentUser) {
-                    edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal'><span class='bi bi-pencil-square'></span></a>";
+                    edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"search_letter = '"+l.letter.toUpperCase()+"';\"><span class='bi bi-pencil-square'></span></a>";
                 }
             }
             $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");

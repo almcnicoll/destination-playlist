@@ -63,9 +63,21 @@
     // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
         output = '';
+        title_valid = false;
+        artist_valid = false;
         for(var i in data.tracks.items) {
             var t = data.tracks.items[i];
-            output += "<li class='list-group-item'>"+t.name+"</li>";
+            var t_a = t.artists;
+            title_valid = (t.name.substr(0,1).toUpperCase() == search_letter); // check if title meets criteria (but need to handle "the")
+            t.artist_string = '';
+            for(var ii in t.artists) {
+                if (t.artist_string != '') { t.artist_string += ', '; }
+                t.artist_string += t.artists[ii].name;
+                artist_valid = artist_valid | (t.artists[ii].name.substr(0,1).toUpperCase() == search_letter); // check if artist meets criteria
+            }
+            // alter output if not allowed by playlist rules
+            // ... code here ...
+            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"+t.id+"' data-preview-url='"+t.preview_url+"'>"+t.name+" ("+t.artist_string+")</a></li>";
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
     }
