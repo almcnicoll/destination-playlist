@@ -67,10 +67,10 @@ trackSearch.ajaxOptions = {
     }
 };
 
-trackSearch.init = function(target, limit=20) {
+trackSearch.init = function(inputBox, outputBox, limit=20) {
     trackSearch.limit = limit;
     $(document).ready(function() {
-        $(target).on('keyup',function() {
+        $(inputBox).on('keyup',function() {
             // Don't run loads of simultaneous queries
             var txt=$(this).val();
             if (trackSearch.search_request_running) {
@@ -83,6 +83,24 @@ trackSearch.init = function(target, limit=20) {
                     trackSearch.search_request(req.query,req.resultType,req.market,req.limit);
                 }
             }
-        })
+        });
+
+        $(outputBox).on('click','a.search-result',function(){
+            var ele = $(this);
+            //alert("Track id: "+ele.data('track-id'));
+
+            // Pass the request to save the track to the playlist
+            requestData = {
+                'id':               letter_id,
+                'spotify_id':       ele.data('track-id'),
+                'cached_title':     '',
+                'cached_artist':    ''
+            };
+            
+
+            if ('handleSearchClickCustom' in trackSearch) {
+                trackSearch.handleSearchClickCustom(ele); // Runs any custom actions for the page on which we're embedding
+            }
+        });
     });
 }

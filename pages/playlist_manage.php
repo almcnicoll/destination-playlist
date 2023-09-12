@@ -81,8 +81,11 @@
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
     }
+    trackSearch.handleSearchClickCustom = function(clickedElement) {
 
-    trackSearch.init('#track-search-box');
+    }
+
+    trackSearch.init('#track-search-box','#search-results-container');
 </script>
 <script type="text/javascript">
     var playlist_id = "<?= $playlist->id ?>";

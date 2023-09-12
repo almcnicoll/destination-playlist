@@ -70,12 +70,21 @@
     $time_end = microtime(true);
 
     if (count($error_messages)>0) {
-        $output = json_encode(['errors' => $error_messages]);
-
+        $hash = sha1(serialize($error_messages));
+        $container = [
+            'errors'    => $errors,
+            'hash'      => $hash,
+        ];
+        $output = json_encode($container);
         ob_end_clean();
         die($output);
     } else {
-        $output = json_encode($letters);
+        $hash = sha1(serialize($letters));
+        $container = [
+            'result'    => $letters,
+            'hash'      => $hash,
+        ];
+        $output = json_encode($container);
         ob_end_clean();
         //echo "Runtime: ".(($time_end - $time_start) / 1000000)." ms\n\n";
         die($output);
