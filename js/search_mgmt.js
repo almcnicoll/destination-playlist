@@ -67,6 +67,33 @@ trackSearch.ajaxOptions = {
     }
 };
 
+trackSearch.handleTrackUpdate = function(jqXHR, textStatus) {
+    // "success", "notmodified", "nocontent", "error", "timeout", "abort", or "parsererror"
+    switch (textStatus) {
+        case 'success':
+            if ('handleTrackUpdateSuccessCustom' in trackSearch) {
+                trackSearch.handleTrackUpdateSuccessCustom(); // Runs any custom actions for the page on which we're embedding
+            }
+            break;
+        case 'error':
+            if ('handleTrackUpdateErrorCustom' in trackSearch) {
+                trackSearch.handleTrackUpdateErrorCustom(); // Runs any custom actions for the page on which we're embedding
+            } else {
+                alert("Error saving selection. Please try again.");
+            }
+            break;
+        case 'timeout':
+            if ('handleTrackUpdateTimeoutCustom' in trackSearch) {
+                trackSearch.handleTrackUpdateTimeoutCustom(); // Runs any custom actions for the page on which we're embedding
+            } else {
+                alert("The server did not respond in time. Please try again.");
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 trackSearch.init = function(inputBox, outputBox, limit=20) {
     trackSearch.limit = limit;
     $(document).ready(function() {
@@ -86,16 +113,25 @@ trackSearch.init = function(inputBox, outputBox, limit=20) {
         });
 
         $(outputBox).on('click','a.search-result',function(){
+            // TODO - some kind of "please wait" cursor?
             var ele = $(this);
-            //alert("Track id: "+ele.data('track-id'));
 
             // Pass the request to save the track to the playlist
-            requestData = {
-                'id':               letter_id,
+            requestData = new URLSearchParams({
+                'id':               letter_id,                
                 'spotify_id':       ele.data('track-id'),
-                'cached_title':     '',
-                'cached_artist':    ''
+                'cached_title':     decodeURIComponent(ele.data('track-title')),
+                'cached_artist':    decodeURIComponent(ele.data('track-artists'))
+            });
+            var ajaxUpdateOptions = {
+                async: true,
+                cache: false,
+                complete: trackSearch.handleTrackUpdate,
+                dataType: 'json',
+                method: 'GET',
+                timeout: 8000
             };
+            $.ajax(root_path+"/ajax/assign_track.php?"+requestData.toString(), ajaxUpdateOptions);
             
 
             if ('handleSearchClickCustom' in trackSearch) {

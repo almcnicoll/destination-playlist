@@ -71,18 +71,21 @@
             title_valid = (t.name.substr(0,1).toUpperCase() == search_letter); // check if title meets criteria (but need to handle "the")
             t.artist_string = '';
             for(var ii in t.artists) {
-                if (t.artist_string != '') { t.artist_string += ', '; }
+                if (t.artist_string != '') { t.artist_string += ' // '; }
                 t.artist_string += t.artists[ii].name;
                 artist_valid = artist_valid | (t.artists[ii].name.substr(0,1).toUpperCase() == search_letter); // check if artist meets criteria
             }
             // alter output if not allowed by playlist rules
             // ... code here ...
-            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"+t.id+"' data-preview-url='"+t.preview_url+"'>"+t.name+" ("+t.artist_string+")</a></li>";
+            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"+t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)+"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
     }
     trackSearch.handleSearchClickCustom = function(clickedElement) {
 
+    }
+    trackSearch.handleTrackUpdateSuccessCustom = function() {
+        $('#trackSearchModalCloseX').trigger('click');
     }
 
     trackSearch.init('#track-search-box','#search-results-container');
@@ -200,11 +203,11 @@ if ($fatal_error) {
 </div>
 
 <div class="modal fade" id="trackSearchModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog .modal-fullscreen-lg-down">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Track search</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="trackSearchModalCloseX"></button>
       </div>
       <div class="modal-body">
       <div class="row">
