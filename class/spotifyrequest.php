@@ -25,6 +25,7 @@ class SpotifyRequest {
     public $info = null;
     public string $error_message = '';
     public int $error_number = 0;
+    public ?int $http_code = null;
     protected $ch = null;
 
     public function __construct($type, $action, $endpoint) {
@@ -111,6 +112,7 @@ class SpotifyRequest {
         $this->info = curl_getinfo($this->ch);
         $this->error_message = curl_error($this->ch);
         $this->error_number = curl_errno($this->ch);
+        $this->http_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
         curl_close($this->ch);
         fclose($fh);
 

@@ -95,10 +95,14 @@ END_SQL;
             'range_length'  => 99,
         ];
         $srUpdatePlaylist->send($trackData);
-        if (($srUpdatePlaylist->result) && ($srUpdatePlaylist->error_number==0)) {
+        if (($srUpdatePlaylist->result) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
             // All good
         } else {
-            $error_messages[] = $srUpdatePlaylist->error_message;
+            if ($srUpdatePlaylist->http_code >= 400) {
+                $error_messages[] = "Request returned: ".$srUpdatePlaylist->http_code;
+            } else {
+                $error_messages[] = $srUpdatePlaylist->error_message;
+            }
         }
     }
 
