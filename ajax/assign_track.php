@@ -13,6 +13,12 @@
             require_once('../../class/participation.php');
         }
     }
+    // Include SpotifyRequest class
+    if (!@include_once('class/spotifyrequest.php')) {
+        if (!@include_once('../class/spotifyrequest.php')) {
+            require_once('../../class/spotifyrequest.php');
+        }
+    }
 
     $fatal_error = false;
 
@@ -62,6 +68,38 @@
         header("HTTP/1.1 400 Bad Request");
         ob_end_clean();
         die($output);
+    }
+
+    // Update the playlist
+    $sqlGetTracks = <<<END_SQL
+    SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY id SEPARATOR ',spotify:track:')) AS tracks FROM letters
+    WHERE spotify_track_id IS NOT NULL
+    AND playlist_id = :playlist_id
+    GROUP BY playlist_id
+    ;
+END_SQL;
+    $params = [
+        'playlist_id' => $playlist_id,
+    ];
+    $db = db::getPDO();
+    $stmt = $db->prepare($sqlGetTracks);
+    $stmt->execute($params);
+    $resGetTracks = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($resGetTracks !== false) { 
+        $trackList = $resGetTracks['tracks'];
+        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, 
+                                "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/tracks");
+        $trackData = [
+            'uris'          => $trackList,
+            'range_start'   => 0,
+            'range_length'  => 99,
+        ];
+        $srUpdatePlaylist->send($trackData);
+        if (($srUpdatePlaylist->result) && ($srUpdatePlaylist->error_number==0)) {
+            // All good
+        } else {
+            $error_messages[] = $srUpdatePlaylist->error_message;
+        }
     }
 
     // Do the assigning

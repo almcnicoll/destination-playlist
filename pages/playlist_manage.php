@@ -31,7 +31,7 @@
     }
 
 ?>
-
+<!-- Set vars -->
 <script type="text/javascript">
     if (typeof trackSearch === 'undefined') { trackSearch = {}; }
     <?php
@@ -50,17 +50,60 @@
     } else {
         echo "trackSearch.strict_mode=false;\n";
     }
-    echo "trackSearch.token = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n\n";
+    echo "trackSearch.token = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n";
     $user = $_SESSION['USER'];
-    echo "/*\n".print_r($user,true)."\n*/\n\n";
-    echo "trackSearch.market = \"{$user->market}\";\n\n";
+    //echo "/*\n".print_r($user,true)."\n*/\n\n";
+    echo "trackSearch.market = \"{$user->market}\";\n";
     echo "trackSearch.playlist_id = \"{$playlist->id}\";\n\n";
-    echo "var root_path = \"{$config['root_path']}\";\n\n";
+    echo "var root_path = \"{$config['root_path']}\";\n";
+    echo "var playlist_id = {$playlist->id};\n";
+    echo "var currentUser = {$_SESSION['USER_ID']};\n";
     ?>
 </script>
+<!-- Include search script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
+<!-- Include letter-refresh script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
+<!-- Include people-refresh script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/people_refresh.js'></script>
+<!-- Include letter-assign script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
+<!-- Custom callback functions -->
 <script type='text/javascript'>
-    // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
+    letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
+        $('#tracks-table tbody tr').remove();
+        // Manage errors or good data
+        if ('errors' in data) {            
+            $('#tracks-table tbody tr').remove();
+            for(var i in data.errors) {
+                $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>"+data.errors[i]+"</td></tr>");
+            }
+        } else {
+            var letterData = data.result;
+            for(var i in letterData) {
+                var l = letterData[i];
+                var user_display = "";
+                var edit_own = "";
+                if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
+                    var u = letterData[i].user;
+                    user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
+                    if (u.id == currentUser) {
+                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"search_letter = '"+l.letter.toUpperCase()+"'; letter_id = "+l.id+";\"><span class='bi bi-pencil-square'></span></a>";
+                    }
+                }
+                $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
+            }
+        }
+    }
+
+    peopleGetter.updatePeopleListCustom = function(data, textStatus, jqXHR) {
+        $('#people-table tbody tr:not(:first)').remove();
+        for(var i in data) {
+            var u = data[i].user;
+            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
+        }
+    }
+
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
         output = '';
         title_valid = false;
@@ -88,59 +131,12 @@
         $('#trackSearchModalCloseX').trigger('click');
     }
 
+    // Initialisations
     trackSearch.init('#track-search-box','#search-results-container');
-</script>
-<script type="text/javascript">
-    var playlist_id = "<?= $playlist->id ?>";
-    var currentUser = <?= $_SESSION['USER_ID'] ?>;
-</script>
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
-<script type="text/javascript">
-    var timer1;
-    var script1Url = "<?= $config['root_path'] ?>/ajax/get_participants.php?playlist_id=<?= $playlist->id ?>";
-    function updatePeopleList(data, textStatus, jqXHR) {
-        $('#people-table tbody tr:not(:first)').remove();
-        for(var i in data) {
-            var u = data[i].user;
-            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
-        }
-    }
-    var ajax1Options = {
-        async: true,
-        cache: false,
-        success: updatePeopleList,
-        dataType: 'json',
-        method: 'GET',
-        timeout: 8000
-    };
-    function getParticipants() {
-        $.ajax(script1Url, ajax1Options);
-        timer1 = setTimeout('getParticipants()',10000);
-    }
+    letterGetter.init(500,10000,8000);
+    peopleGetter.init(0,10000,8000);
+    letterAssigner.init('#btn-assign-letters');
     
-    
-
-    var script3Url = "<?= $config['root_path'] ?>/ajax/assign_letters.php?playlist_id=<?= $playlist->id ?>";
-    var ajax3Options = {
-        async: true,
-        cache: false,
-        /*success: someFunction,*/
-        dataType: 'json',
-        method: 'GET',
-        timeout: 4000
-    };
-
-    $(document).ready(
-        function () {
-            //timer = setTimeout('getParticipants()',5000);
-            getParticipants();
-            var tmp_timer = setTimeout('getLetters();',1000); // Give it a little offset
-
-            $('#btn-assign-letters').on('click',function() {
-                $.ajax(script3Url, ajax3Options);
-            });
-        }
-    );
 </script>
 
 <h2 class="text-center"><?= $playlist->display_name ?></h2>

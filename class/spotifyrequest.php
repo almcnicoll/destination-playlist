@@ -3,6 +3,7 @@
 class SpotifyRequest {
     const ACTION_GET    = "GET";
     const ACTION_POST   = "POST";
+    const ACTION_PUT    = "PUT";
 
     const TYPE_UNKNOWN              = 0;
     const TYPE_OAUTH_AUTHORIZE      = 1;
@@ -78,8 +79,17 @@ class SpotifyRequest {
             } else {
                 curl_setopt($this->ch,CURLOPT_POSTFIELDS,$data);
             }
+        } elseif ($this->action == SpotifyRequest::ACTION_PUT) {
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );
+            // Add or extend querystring
+            $url_parts = parse_url($this->endpoint);
+            if ($this->contentType == SpotifyRequest::CONTENT_TYPE_JSON) {
+                curl_setopt($this->ch,CURLOPT_POSTFIELDS,json_encode($data));
+            } else {
+                curl_setopt($this->ch,CURLOPT_POSTFIELDS,http_build_query($data));
+            }
         } else {
-            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );
             // Add or extend querystring
             $url_parts = parse_url($this->endpoint);
             if (empty($url_parts['query'])) {
