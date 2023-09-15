@@ -107,7 +107,7 @@ END_SQL;
             // All good
             //error_log("OK:  CURL returned http code ".$srUpdatePlaylist->http_code);
         } else {
-            //error_log("ERR: CURL returned http code ".$srUpdatePlaylist->http_code);
+            //error_log("ERR: CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
 
             if ($srUpdatePlaylist->http_code >= 400) {
                 $error_messages[] = "Request URL: {$endpoint}";
