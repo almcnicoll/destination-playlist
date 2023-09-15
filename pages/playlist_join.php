@@ -83,6 +83,13 @@ if ($participation == null) {
     $participation->save();
 }
 
+// Follow the playlist, whether or not participation record exists, in case it's been unfollowed
+$srFollow = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/followers");
+$dataFollow = [
+    'public' => false,
+];
+$srFollow->send($dataPublic);
+
 // Dynamic content
 ?>
 <!-- Set vars -->

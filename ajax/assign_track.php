@@ -105,7 +105,10 @@ END_SQL;
         $srUpdatePlaylist->send();
         if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
             // All good
+            //error_log("OK:  CURL returned http code ".$srUpdatePlaylist->http_code);
         } else {
+            //error_log("ERR: CURL returned http code ".$srUpdatePlaylist->http_code);
+
             if ($srUpdatePlaylist->http_code >= 400) {
                 $error_messages[] = "Request URL: {$endpoint}";
                 $error_messages[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
@@ -131,5 +134,6 @@ END_SQL;
     if (count($info_messages)>0) {
         $output['info'] = $info_messages;
     }
+    http_response_code($srUpdatePlaylist->http_code); // Pass on any errors
     ob_end_clean();
     die(json_encode($output));
