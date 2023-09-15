@@ -1,4 +1,5 @@
 <?php
+    ob_start();
     // Expected params
     /*  q: query,
         type: resultType,
@@ -72,9 +73,9 @@
     $data = $_REQUEST;
 
     $sr->send($data);
+    
+    header("Expires: 0");
+    ob_end_clean();
 
     echo $sr->result;
-
-    //echo json_encode($sr->result);
-
     die();

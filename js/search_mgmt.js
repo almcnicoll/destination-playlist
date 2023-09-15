@@ -39,6 +39,9 @@ trackSearch.updateSearchBox = function(data, textStatus, jqXHR) {
     if ('updateSearchBoxCustom' in trackSearch) {
         trackSearch.updateSearchBoxCustom(data, textStatus, jqXHR); // Runs any custom actions for the page on which we're embedding
     }
+}
+
+trackSearch.processQueue = function() {
     trackSearch.search_request_running = false;
     if (trackSearch.search_request_queue !== null) {
         // There was another request waiting in the wings
@@ -58,6 +61,7 @@ trackSearch.ajaxOptions = {
     async: true,
     cache: false,
     success: trackSearch.updateSearchBox,
+    complete: trackSearch.processQueue,
     dataType: 'json',
     method: 'GET',
     timeout: 10000,

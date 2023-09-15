@@ -11,6 +11,11 @@ body {
     padding: 0.5em;
 }
 
+div.top-left-menu {
+    float: left;
+    width: 6em;
+}
+
 div.initial-display {
     background-color: #0099CC;
     color: #fff;
@@ -24,7 +29,7 @@ div.initial-display {
 }
 
 div.letter-display {
-    zfont-family: 'Courier New', Courier, monospace;
+    /*font-family: 'Courier New', Courier, monospace;*/
     background-color: #003399;
     color: #fff;
     width: 2em;
@@ -35,6 +40,30 @@ div.letter-display {
     font-weight: bold;
 }
 
-td.initial-display, td.letter-display {
+td.letter-display {
     width: 3em;
+}
+
+.loading {
+    color: #999;
+    font-style: italic;
+    cursor: wait;
+}
+
+/*td.initial-display {
+    width: 3em;
+}*/
+
+div.name-display {
+    color: #666;
+    font-style: italic;
+}
+
+table.neat * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#tracks-table div.initial-display {
+    display: none;
 }

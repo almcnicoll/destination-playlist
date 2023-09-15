@@ -86,12 +86,18 @@
                 var edit_own = "";
                 if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
                     var u = letterData[i].user;
-                    user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
+                    user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>"
+                                    +"<div class='name-display'>"+u.display_name+"</div>";
                     if (u.id == currentUser) {
-                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"search_letter = '"+l.letter.toUpperCase()+"'; letter_id = "+l.id+";\"><span class='bi bi-pencil-square'></span></a>";
+                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"search_letter = '"
+                                    +l.letter.toUpperCase()+"'; letter_id = "+l.id+";\"><span class='bi bi-pencil-square'></span></a>";
                     }
                 }
-                $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
+                $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"
+                                                +"<td class='edit-track'>"+edit_own+"</td>"
+                                                +"<td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td>"
+                                                +"<td class='initial-display'>"
+                                                +user_display+"</td></tr>");
             }
         }
     }
@@ -120,7 +126,9 @@
             }
             // alter output if not allowed by playlist rules
             // ... code here ...
-            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"+t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)+"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
+            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"
+                    +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
+                    +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
     }
@@ -142,6 +150,7 @@
     
 </script>
 
+<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
 <h2 class="text-center"><?= $playlist->display_name ?></h2>
 <?php
 if (count($error_messages)>0) {
@@ -172,7 +181,7 @@ if ($fatal_error) {
 
 <div class="tab-content" id="nav1-content">
     <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-1" aria-labelledby="nav1-tab-1">
-        <table class="table table-light table-striped" id="people-table">
+        <table class="table table-light table-striped neat" id="people-table">
             <thead>
                 <tr>
                     <th>&nbsp;</th>
@@ -184,12 +193,20 @@ if ($fatal_error) {
                     <td><div class="initial-display"><?= strtoupper(substr($_SESSION['USER']->display_name,0,1)) ?></div></td>
                     <td><?= $_SESSION['USER']->display_name ?></td>
                 </tr>
+                <tr>
+                    <td><div class="initial-display">?</div></td>
+                    <td class='loading-cell'>Loading...</td>
+                </tr>
             </tbody>
         </table>
     </div>
     <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
-        <table class="table table-light table-striped" id="tracks-table">
-            <tbody></tbody>
+        <table class="table table-light table-striped neat" id="tracks-table">
+            <tbody>
+                <tr>
+                    <td class='loading-cell'>Loading...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
