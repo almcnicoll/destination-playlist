@@ -58,6 +58,12 @@
                 $playlist->flags = $_REQUEST['flags'];
                 $playlist->user_id = $_SESSION['USER_ID'];
                 $playlist->save();
+                
+                // Set playlist image
+                $imageResult = $playlist->setImage();
+                if ($imageResult !== true) {
+                    $error_messages[] = $imageResult;
+                }
 
                 // Populate list of letters
                 $letters = [];

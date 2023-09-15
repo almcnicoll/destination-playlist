@@ -2,6 +2,7 @@
 if(!@include_once('inc/db.php')) { require_once('../inc/db.php'); }
 if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
 if(!@include_once('class/user.php')) { require_once('../class/user.php'); }
+if(!@include_once('class/spotifyrequest.php')) { require_once('../class/spotifyrequest.php'); }
 
 class Playlist extends Model {
 
@@ -57,6 +58,29 @@ class Playlist extends Model {
         ];
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
+    }
+
+    public function setImage($image = null) {
+        global $config;
+        if ($image == null) { $image = $config['local_root'].'/img/dp-logo.jpg'; }
+        if (!file_exists($image)) { return "File \"{$image}\" does not exist"; }
+        $imagedata = file_get_contents($image);
+        $base64 = base64_encode($imagedata);
+        $size = strlen($base64);
+        if ($size > (256*1024)) { return "File too large"; } // Size limit imposed by Spotify
+        $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/images";
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+        $sr->send($base64);
+        if (($sr->result!==false) && ($sr->error_number==0) && ($sr->http_code < 400)) {
+            return true;
+        } else {
+            if ($sr->http_code >= 400) {
+                return "Request URL: {$endpoint}\n"
+                        ."Request returned ".$sr->http_code.': '.$sr->result;
+            } else {
+                return "Error #".$sr->error_number.": ".$sr->error_message;
+            }
+        }
     }
 
     /*

@@ -87,19 +87,18 @@ END_SQL;
     $resGetTracks = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($resGetTracks !== false) { 
         $trackList = $resGetTracks['tracks'];
-        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, 
-                                "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/tracks");
         $trackData = [
             'uris'          => $trackList,
-            'range_start'   => 0,
-            'range_length'  => 99,
         ];
-        $srUpdatePlaylist->send($trackData);
-        if (($srUpdatePlaylist->result) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
+        $endpoint = "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/tracks?".http_build_query($trackData);
+        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+        $srUpdatePlaylist->send();
+        if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
             // All good
         } else {
             if ($srUpdatePlaylist->http_code >= 400) {
-                $error_messages[] = "Request returned: ".$srUpdatePlaylist->http_code;
+                $error_messages[] = "Request URL: {$endpoint}";
+                $error_messages[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
             } else {
                 $error_messages[] = $srUpdatePlaylist->error_message;
             }

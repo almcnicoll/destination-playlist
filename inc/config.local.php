@@ -1,6 +1,8 @@
 <?php
 // Absolute path to the root directory of destination playlist. No trailing slash.
 $config['root_path'] = 'http://localhost:8888/destination-playlist';
+// Local filesystem path to the root directory of destination playlist. No trailing slash.
+$config['local_root'] = 'C:/BitNami/wampstack8/apache2/htdocs/destination-playlist';
 
 // DATABASE CONFIG
 $config['DB_HOST']      = 'localhost';

@@ -39,7 +39,7 @@ class SpotifyRequest {
         return $this;
     }
 
-    public function send($data) : SpotifyRequest {
+    public function send($data=null) : SpotifyRequest {
         global $config;
 
         // Initialise curl
@@ -75,29 +75,38 @@ class SpotifyRequest {
         // Set action and data fields in curl
         if ($this->action == SpotifyRequest::ACTION_POST) {
             curl_setopt($this->ch,CURLOPT_POST,1);
+            // Set data fields
+            if (empty($data)) { $data = []; }
             if ($this->contentType == SpotifyRequest::CONTENT_TYPE_JSON) {
                 curl_setopt($this->ch,CURLOPT_POSTFIELDS,json_encode($data));
             } else {
                 curl_setopt($this->ch,CURLOPT_POSTFIELDS,$data);
             }
+            
         } elseif ($this->action == SpotifyRequest::ACTION_PUT) {
-            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );
-            // Add or extend querystring
-            $url_parts = parse_url($this->endpoint);
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );            
+            // Set data fields
+            if (empty($data)) { $data = []; }
             if ($this->contentType == SpotifyRequest::CONTENT_TYPE_JSON) {
                 curl_setopt($this->ch,CURLOPT_POSTFIELDS,json_encode($data));
             } else {
-                curl_setopt($this->ch,CURLOPT_POSTFIELDS,http_build_query($data));
+                if (is_array($data) || is_object($data)) {
+                    curl_setopt($this->ch,CURLOPT_POSTFIELDS,http_build_query($data));
+                } else {
+                    curl_setopt($this->ch,CURLOPT_POSTFIELDS,$data);
+                }
             }
         } else {
             curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );
-            // Add or extend querystring
-            $url_parts = parse_url($this->endpoint);
-            if (empty($url_parts['query'])) {
-                // Create a querystring
-                curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '?' . http_build_query($data));
-            } else {
-                curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '&' . http_build_query($data));
+            if(!empty($data)) {
+                // Add or extend querystring if we have data
+                $url_parts = parse_url($this->endpoint);
+                if (empty($url_parts['query'])) {
+                    // Create a querystring
+                    curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '?' . http_build_query($data));
+                } else {
+                    curl_setopt($this->ch, CURLOPT_URL, $this->endpoint . '&' . http_build_query($data));
+                }
             }
         }
         
