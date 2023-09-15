@@ -52,6 +52,7 @@ if ($user->display_name) {
 ?>
 <?php
 // List all playlists
+// TODO - list playlists which they have (actively) joined
 $criteria = [['user_id','=',$_SESSION['USER_ID']],];
 $my_playlists = Playlist::find($criteria);
 if (count($my_playlists)==0) {

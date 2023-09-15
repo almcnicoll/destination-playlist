@@ -148,6 +148,14 @@
     peopleGetter.init(0,10000,8000);
     letterAssigner.init('#btn-assign-letters');
     
+    $(document).ready(
+        function() {
+            // Modal focus
+            document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
+                document.getElementById('track-search-box').focus()
+            });
+        }
+    );
 </script>
 
 <div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>

@@ -186,17 +186,20 @@ if ($participation == null) {
         function() {
             var currTitle = $('#title').text();
             $('#title').text(currTitle.replace(/Joining/,'Joined'));
-        }
-    );
-    $(document).ready(
-        function () {
-            letterGetter.getLetters();
+            
+            // Modal focus
+            document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
+                document.getElementById('track-search-box').focus()
+            });
         }
     );
 </script>
 
 <table class="table table-light table-striped neat" id="tracks-table">
     <tbody>
+        <tr>
+            <td class='loading'>Loading</td>
+        </tr>
     </tbody>
 </table>
 

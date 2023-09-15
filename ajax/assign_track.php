@@ -71,6 +71,9 @@
         die($output);
     }
 
+    // Backup old values in case we need to revert
+    $old = $letter->clone(true,true,true); // Keep ID, created, modified
+
     // Do the assigning
     $letter->spotify_track_id = $_REQUEST['spotify_id'];
     $letter->cached_title = $_REQUEST['cached_title'];
@@ -109,6 +112,9 @@ END_SQL;
             } else {
                 $error_messages[] = $srUpdatePlaylist->error_message;
             }
+            
+            // Reverse the assigning - SIMPLES
+            $old->save();
         }
     }
 

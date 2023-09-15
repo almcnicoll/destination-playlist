@@ -73,6 +73,8 @@ trackSearch.ajaxOptions = {
 
 trackSearch.handleTrackUpdate = function(jqXHR, textStatus) {
     // "success", "notmodified", "nocontent", "error", "timeout", "abort", or "parsererror"
+    $("html,html *").css("cursor","auto"); // Reset cursor
+
     switch (textStatus) {
         case 'success':
             if ('handleTrackUpdateSuccessCustom' in trackSearch) {
@@ -117,7 +119,8 @@ trackSearch.init = function(inputBox, outputBox, limit=20) {
         });
 
         $(outputBox).on('click','a.search-result',function(){
-            // TODO - some kind of "please wait" cursor?
+            $("html,html *").css("cursor","wait"); // Set wait cursor
+
             var ele = $(this);
 
             // Pass the request to save the track to the playlist

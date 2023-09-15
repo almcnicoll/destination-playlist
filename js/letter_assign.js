@@ -6,7 +6,7 @@ letterAssigner.updateLettersNow = function() {
     // Refresh immediately
     clearTimeout(letterGetter.timer);
     letterGetter.getLetters();
-    $("html").css("cursor","auto");
+    $("html,html *").css("cursor","auto");
 }
 
 letterAssigner.ajaxOptions = {
@@ -22,7 +22,7 @@ letterAssigner.init = function(target) {
     $(document).ready(
         function () {
             $(target).on('click',function() {
-                $("html").css("cursor","wait");
+                $("html, html *").css("cursor","wait");
                 $.ajax(letterAssigner.url, letterAssigner.ajaxOptions);
             });
         }

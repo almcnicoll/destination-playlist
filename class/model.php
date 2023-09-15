@@ -209,4 +209,27 @@ class Model {
         // TODO - pay attention to results
         return true;
     }
+
+    public function clone($preserveID = false, $preserveCreated = false, $preserveModified = false) {
+        $clone = new static();
+        if ($preserveID) {
+            $clone->id = $this->id;
+        }
+        if ($preserveCreated) {
+            $clone->created = $this->created;
+        } else {
+            $clone->created = new DateTime();
+        }
+        if ($preserveModified) {
+            $clone->modified = $this->modified;
+        } else {
+            $clone->modified = new DateTime();
+        }
+
+        foreach(static::$fields as $f) {
+            $clone->$f = $this->$f;
+        }
+
+        return $clone;
+    }
 }
