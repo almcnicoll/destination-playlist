@@ -2,7 +2,7 @@ if (typeof letterGetter === 'undefined') { letterGetter = {}; }
 letterGetter.letterHash = '';
 letterGetter.search_letter = '';
 letterGetter.letter_id = null;
-letterGetter.timer;
+letterGetter.timer = null;
 letterGetter.url = root_path+"/ajax/get_letters.php?playlist_id="+playlist_id;
 letterGetter.updateLetters = function(data, textStatus, jqXHR) {
     // Check hash

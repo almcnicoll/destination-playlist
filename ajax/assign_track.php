@@ -20,6 +20,7 @@
         }
     }
 
+    // Pre-flight checks
     $fatal_error = false;
 
     $error_messages = [];
@@ -70,6 +71,12 @@
         die($output);
     }
 
+    // Do the assigning
+    $letter->spotify_track_id = $_REQUEST['spotify_id'];
+    $letter->cached_title = $_REQUEST['cached_title'];
+    $letter->cached_artist = $_REQUEST['cached_artist'];
+    $letter->save();
+
     // Update the playlist
     $sqlGetTracks = <<<END_SQL
     SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY id SEPARATOR ',spotify:track:')) AS tracks FROM letters
@@ -104,12 +111,6 @@ END_SQL;
             }
         }
     }
-
-    // Do the assigning
-    $letter->spotify_track_id = $_REQUEST['spotify_id'];
-    $letter->cached_title = $_REQUEST['cached_title'];
-    $letter->cached_artist = $_REQUEST['cached_artist'];
-    $letter->save();
 
     // Return values
     $output = [];

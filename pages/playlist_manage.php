@@ -129,6 +129,9 @@
     }
     trackSearch.handleTrackUpdateSuccessCustom = function() {
         $('#trackSearchModalCloseX').trigger('click');
+        // Refresh immediately
+        clearTimeout(letterGetter.timer);
+        letterGetter.getLetters();
     }
 
     // Initialisations
