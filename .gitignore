@@ -1,4 +1,5 @@
 inc/secret.php
+inc/config.local.php
 */*.log
 tests.php
 *.log
