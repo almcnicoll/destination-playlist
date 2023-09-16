@@ -36,7 +36,7 @@
 
     // If we're the playlist owner, see if there's any changes to push to Spotify
     if ($playlist->user_id == $_SESSION['USER_ID']) {
-        if (empty($_SESSION['last_updates_check'])) { $_SESSION['last_updates_check'] = $playlist->created->format('Y-m-d H:i:s'); }
+        if (empty($_SESSION['last_updates_check'])) { $_SESSION['last_updates_check'] = $playlist->created; }
 
         $sqlCheckIfUpdatesNeeded = <<<END_SQL
         SELECT COUNT(id) AS c
@@ -83,9 +83,9 @@ END_SQL;
                     $srUpdatePlaylist->send();
                     if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
                         // All good
-                        error_log("OK:  get_letters CURL returned http code ".$srUpdatePlaylist->http_code);
+                        //error_log("OK:  get_letters CURL returned http code ".$srUpdatePlaylist->http_code);
                     } else {
-                        error_log("ERR: get_letters CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
+                        //error_log("ERR: get_letters CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
 
                         if ($srUpdatePlaylist->http_code >= 400) {
                             $error_messages[] = "Request URL: {$endpoint}";
