@@ -6,6 +6,8 @@ if (!include_once('class/authmethod.php')) {
 
 // $get_back will be set to ../ or empty string if we are using handler.php to manage pages deeper than root level
 
+$redirect_url_if_needed = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+
 if(!(
  isset($_SESSION['USER']) &&
  isset($_SESSION['USER_ID']) &&
@@ -15,9 +17,9 @@ if(!(
  isset($_SESSION['USER_REFRESHNEEDED'])
  )) {
     // Need to log in
-    echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+    //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
     //if(!isset($get_back)) { $get_back = ''; }
-    header("Location: {$config['root_path']}/login.php");
+    header("Location: {$config['root_path']}/login.php?redirect_url=".urlencode($redirect_url_if_needed));
     die();
 } else {
     // Check if our token is still valid
@@ -28,7 +30,7 @@ if(!(
         $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
         //if(!isset($get_back)) { $get_back = ''; }
         //header("Location: {$get_back}{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
-        header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($_SERVER['REQUEST_URI']));
+        header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($redirect_url_if_needed));
         die();
     }
     // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object

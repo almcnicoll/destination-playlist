@@ -41,7 +41,8 @@ class Playlist extends Model {
         foreach ($testFlags as $f) {
             $flagSum = $flagSum | $f;
         }
-        return ($this->flags & $flagSum == $flagSum);
+        $compResult = $this->flags & $flagSum;
+        return ($compResult == $flagSum);
     }
 
     public function getShareCode() : string {
