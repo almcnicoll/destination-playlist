@@ -57,6 +57,7 @@
 
 ?>
 
+<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
 <h2 class="text-center" id="title">Joining playlist <?= $playlist->display_name ?>...</h2>
 <?php
 if (count($error_messages)>0) {
