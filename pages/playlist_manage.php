@@ -177,7 +177,9 @@ if ($fatal_error) {
     die();
 }
 ?>
-
+<div class="alert alert-warning" role="alert">
+  Keep this page open while your guests are adding their tracks!
+</div>
 <ul class="nav nav-tabs" id="nav1" role="tablist">
     <li class="nav-item" role="presentation">
         <a class="nav-link active" aria-current="page" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1" aria-selected="true">People</a>
