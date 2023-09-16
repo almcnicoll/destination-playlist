@@ -50,6 +50,11 @@
     } else {
         echo "trackSearch.strict_mode=false;\n";
     }
+    if(isset($playlist_id) && $playlist->hasFlags(Playlist::FLAGS_THEAGNOSTIC)) {
+        echo "trackSearch.the_agnostic=true;\n";
+    } else {
+        echo "trackSearch.the_agnostic=false;\n";
+    }
     echo "trackSearch.token = \"{$_SESSION['USER_ACCESSTOKEN']}\";\n";
     $user = $_SESSION['USER'];
     //echo "/*\n".print_r($user,true)."\n*/\n\n";
@@ -89,7 +94,7 @@
                     user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>"
                                     +"<div class='name-display'>"+u.display_name+"</div>";
                     if (u.id == currentUser) {
-                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"search_letter = '"
+                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                                     +l.letter.toUpperCase()+"'; letter_id = "+l.id+";\"><span class='bi bi-pencil-square'></span></a>";
                     }
                 }
@@ -111,26 +116,37 @@
     }
 
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
-        output = '';
-        title_valid = false;
-        artist_valid = false;
-        for(var i in data.tracks.items) {
-            var t = data.tracks.items[i];
-            var t_a = t.artists;
-            title_valid = (t.name.substr(0,1).toUpperCase() == search_letter); // check if title meets criteria (but need to handle "the")
-            t.artist_string = '';
-            for(var ii in t.artists) {
-                if (t.artist_string != '') { t.artist_string += ' // '; }
-                t.artist_string += t.artists[ii].name;
-                artist_valid = artist_valid | (t.artists[ii].name.substr(0,1).toUpperCase() == search_letter); // check if artist meets criteria
+        if (('tracks' in data) && ('items' in data.tracks)) {
+            // Loop through the tracks
+            for(var i in data.tracks.items) {
+                var t = data.tracks.items[i];
+                var t_a = t.artists;
+                var artistNames = new Array();
+                for (var ii in t.artists) {
+                    artistNames.push(t.artists[ii].name);
+                }
+                t.artist_string = t.artistNames.join(' // ');
+                output += "<li class='list-group-item validating'><a href='#' class='search-result' data-track-id='"
+                        +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
+                        +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
             }
-            // alter output if not allowed by playlist rules
-            // ... code here ...
-            output += "<li class='list-group-item'><a href='#' class='search-result' data-track-id='"
-                    +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
-                    +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
+        $('#search-results-container li').each( function() {
+            var link = $(this).children('a').first();
+            if (link.data('track-title') === undefined) { link.data('track-title',''); }
+            if (link.data('track-artists') === undefined) { link.data('track-artists',''); }
+            if (trackSearch.checkTrack( 
+                    decodeURIComponent( link.data('track-title') ), 
+                    decodeURIComponent( link.data('track-artists') ) 
+            )) {
+                // Valid choice
+                $(this).addClass('valid').removeClass('invalid').removeClass('validating');
+            } else {
+                // Invalid choice
+                $(this).addClass('invalid').removeClass('valid').removeClass('validating');
+            }
+        } );
     }
     trackSearch.handleSearchClickCustom = function(clickedElement) {
 
@@ -239,6 +255,9 @@ if ($fatal_error) {
       <div class="row">
         <div class="col-12">
             <input type="text" placeholder="Type here to search..." id="track-search-box">
+            <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
         <div class="col-12" style="min-height: 10em;" id='search-results-container'>
         </div>
