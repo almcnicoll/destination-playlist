@@ -4,6 +4,8 @@ require_once('class/user.php');
 require_once('class/playlist.php');
 require_once('class/participation.php');
 
+require_once('inc/header.php');
+
 if (isset($_REQUEST['newname'])) {
     $user = $_SESSION['USER'];
     $user->display_name = $_REQUEST['newname'];
@@ -118,8 +120,7 @@ if (count($joined_playlists)==0) {
     
     <div class="row">
         <div class="col-12">
-            <h3>You haven't joined any playlists.</h3>
-            <a class="btn btn-primary" href="playlist/create">Create</a>
+            <h4>You haven't joined any playlists.</h4>
         </div>
     </div>
     <?php

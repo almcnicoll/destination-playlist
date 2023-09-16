@@ -39,3 +39,5 @@ if(!(
     }
     $_SESSION['USER'] = unserialize(serialize($_SESSION['USER']));
 }
+
+$login_checked = true;
