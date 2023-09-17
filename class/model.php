@@ -1,6 +1,6 @@
 <?php
 class Model {
-    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT'];
+    static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT','IN'];
 
     public ?int $id = null;
     public ?string $created = null;
@@ -105,12 +105,24 @@ class Model {
                 throw new Exception("Operator {$operator} is not allowed");
             }
 
-            // Need special treatment for IS NULL / IS NOT NULL
+            // Need special treatment for IS NULL / IS NOT NULL / IN ()
             if ((strtoupper($operator) == 'IS') || (strtoupper($operator) == 'IS NOT')) {
                 if (is_null($value) || trim(strtoupper($value))=='NULL') {
                     $criteria_strings[] = "`{$field}` {$operator} NULL";
                 } else {
                     throw new Exception("Operator {$operator} can only take NULL as its argument (supplied as literal null or 'NULL')");
+                }
+            } elseif (strtoupper($operator) == 'IN') {
+                $value_array = $value;
+                //error_log("Value: ".print_r($value,true));
+                if (!is_array($value)) { $value_array = [[0]=>$value]; }
+                //error_log("Value array: ".print_r($value_array,true));
+                if (count($value_array) == 0) {
+                    $criteria_strings[] = "FALSE"; // IN () would throw an error
+                } else {
+                    $qmarks = array_fill(0, count($value), '?');
+                    $criteria_strings[] = "`{$field}` {$operator} (".implode(',',$qmarks).")";
+                    $criteria_values = array_merge($criteria_values,$value_array);
                 }
             } else {
                 $criteria_strings[] = "`{$field}` {$operator} ?";
@@ -119,6 +131,8 @@ class Model {
         }
 
         $sql = "SELECT * FROM `".static::$tableName."` WHERE ".implode(" AND ", $criteria_strings);
+        //error_log($sql);
+        //error_log(print_r($criteria_values,true));
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
 

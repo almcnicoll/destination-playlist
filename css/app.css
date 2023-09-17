@@ -11,6 +11,10 @@ body {
     padding: 0.5em;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
 div.top-left-menu {
     float: left;
     width: 6em;
@@ -66,4 +70,29 @@ table.neat * {
 
 #tracks-table div.initial-display {
     display: none;
+}
+
+#search-results-container li.validating {
+    cursor: no-drop;
+}
+#search-results-container li a.validating {
+    color: #666;
+    cursor: no-drop;
+}
+
+#search-results-container li.valid {
+    cursor: auto;
+}
+#search-results-container li.valid a {
+    color: #003399;
+    cursor: pointer;
+}
+#search-results-container li.invalid {
+    cursor: no-drop;
+}
+#search-results-container li.invalid a {
+    font-style: italic;
+    color: #CCC;
+    text-decoration: line-through;
+    cursor: no-drop;
 }

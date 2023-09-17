@@ -3,3 +3,5 @@ inc/config.local.php
 */*.log
 tests.php
 *.log
+php_errors.log
+*/php_errors.log

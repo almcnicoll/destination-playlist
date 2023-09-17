@@ -53,7 +53,7 @@
             $participation = Participation::findFirst([['playlist_id','=',$playlist->id],['user_id','=',$_SESSION['USER_ID']]]);
             if ($participation == null) {
                 // They're not part of this playlist
-                $error_messages[] = "Sorry, you have nto joined this playlist. Please talk to the playlist owner to join.";
+                $error_messages[] = "Sorry, you have not joined this playlist. Please talk to the playlist owner to join.";
                 $fatal_error = true;
             } else {
                 if ($participation->removed == 1) {

@@ -134,7 +134,7 @@ END_SQL;
     if (count($error_messages)>0) {
         $hash = sha1(serialize($error_messages));
         $container = [
-            'errors'    => $errors,
+            'errors'    => $error_messages,
             'hash'      => $hash,
         ];
         $output = json_encode($container);

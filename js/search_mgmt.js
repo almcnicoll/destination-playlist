@@ -3,6 +3,9 @@ if (typeof trackSearch === 'undefined') { trackSearch = {}; }
 trackSearch.search_request_queue = null;
 trackSearch.search_request_running = false;
 
+trackSearch.reThe = /^the\s+/i; // Matches "the" at the start of a string, case-insensitive
+trackSearch.reArtistSplit = /\s*\/\/\s*/; // Matches two forward-slashes with any leading/trailing whitespace
+
 trackSearch.build_search_request = function(txt) {
     var querystring = '';
     if (trackSearch.allow_title && trackSearch.allow_artist) {
@@ -32,6 +35,7 @@ trackSearch.search_request = function(query,resultType,userMarket,resultLimit) {
         limit: resultLimit,
         playlist_id: trackSearch.playlist_id
     };
+    $('#search_spinner').removeClass('hidden');
     $.ajax(root_path + '/ajax/proxy_search.php', trackSearch.ajaxOptions);
 }
 
@@ -43,6 +47,7 @@ trackSearch.updateSearchBox = function(data, textStatus, jqXHR) {
 
 trackSearch.processQueue = function() {
     trackSearch.search_request_running = false;
+    $('#search_spinner').addClass('hidden');
     if (trackSearch.search_request_queue !== null) {
         // There was another request waiting in the wings
         // Stash variables
@@ -56,20 +61,6 @@ trackSearch.processQueue = function() {
         trackSearch.search_request(_q,_rT,_m,_l);
     }
 }
-
-trackSearch.ajaxOptions = {
-    async: true,
-    cache: false,
-    success: trackSearch.updateSearchBox,
-    complete: trackSearch.processQueue,
-    dataType: 'json',
-    method: 'GET',
-    timeout: 10000,
-    headers: {
-        Authorization: 'Bearer '+trackSearch.token,
-        'Content-type': 'application/json'
-    }
-};
 
 trackSearch.handleTrackUpdate = function(jqXHR, textStatus) {
     // "success", "notmodified", "nocontent", "error", "timeout", "abort", or "parsererror"
@@ -100,9 +91,66 @@ trackSearch.handleTrackUpdate = function(jqXHR, textStatus) {
     }
 }
 
+trackSearch.ajaxOptions = {
+    async: true,
+    cache: false,
+    success: trackSearch.updateSearchBox,
+    complete: trackSearch.processQueue,
+    dataType: 'json',
+    method: 'GET',
+    timeout: 10000,
+    headers: {
+        Authorization: 'Bearer '+trackSearch.token,
+        'Content-type': 'application/json'
+    }
+};
+
+trackSearch.checkTrack = function(trackName, artistName) {
+    // Checks if this track is valid, using the relevant options
+    // Return true at the first sign of success
+
+    if (!trackSearch.strict_mode) { return true; } // Unless we're in strict mode, allow all tracks
+
+    // Create arrays of the variants to check - empty if that field isn't valid for search
+    var tracks = new Array();
+    if (trackSearch.allow_title) {
+        // We can validate on title
+        trackName = trackName.toUpperCase(); // Match in uppercase, matching trackSearch.search_letter
+        tracks.push(trackName.replace(trackSearch.reThe,'')); // Always include a "no the" variant
+        if (trackSearch.the_agnostic) {
+            tracks.push(trackName);
+        }
+    }
+    // Now check them
+    for (var i in tracks) {
+        if (tracks[i].substr(0,1) == trackSearch.search_letter) {return true;}
+    }
+
+    // Repeat process for artists - but they can be comma-separated
+    var artists = new Array();
+    if (trackSearch.allow_artist) {
+        // Split artist names by separator (//)
+        var splitArtists = artistName.toUpperCase().split(this.reArtistSplit); // Match in uppercase, matching trackSearch.search_letter
+        for (var i in splitArtists) {
+            artists.push(splitArtists[i].replace(trackSearch.reThe,'')); // Always include a "no the" variant
+            if (trackSearch.the_agnostic) {
+                artists.push(splitArtists[i]);
+            }
+        }
+    }
+    // Now check them
+    for (var i in artists) {
+        if (artists[i].substr(0,1) == trackSearch.search_letter) {return true;}
+    }
+
+    // If we got here, there's no valid matches
+    return false;
+}
+
 trackSearch.init = function(inputBox, outputBox, limit=20) {
     trackSearch.limit = limit;
     $(document).ready(function() {
+        // Handle typing in search box
         $(inputBox).on('keyup',function() {
             // Don't run loads of simultaneous queries
             var txt=$(this).val();
@@ -118,7 +166,8 @@ trackSearch.init = function(inputBox, outputBox, limit=20) {
             }
         });
 
-        $(outputBox).on('click','a.search-result',function(){
+        // Handle clicking on a search result
+        $(outputBox).on('click','li.valid a.search-result',function(){
             $("html,html *").css("cursor","wait"); // Set wait cursor
 
             var ele = $(this);

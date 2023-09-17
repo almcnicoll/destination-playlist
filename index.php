@@ -1,7 +1,9 @@
 <?php
+$login_check_redirect_on_fail = "/dp/intro";
 require_once('inc/login_check.php');
 require_once('class/user.php');
 require_once('class/playlist.php');
+require_once('class/participation.php');
 
 if (isset($_REQUEST['newname'])) {
     $user = $_SESSION['USER'];
@@ -22,6 +24,8 @@ if (isset($_REQUEST['newname'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 
 <?php
+require_once('inc/header.php');
+
 $user = $_SESSION['USER'];
 if ($user->display_name) {
 ?>
@@ -50,18 +54,29 @@ if ($user->display_name) {
 <?php
 }
 ?>
+<div class='card text-bg-dark'>
+<div class='card-body'>
+<h2 class='card-title'>Your Playlists</h2>
 <?php
 // List all playlists
+$criteriaMine = ['user_id','=',$_SESSION['USER_ID']];
+$my_playlists = Playlist::find($criteriaMine);
 // TODO - list playlists which they have (actively) joined
-$criteria = [['user_id','=',$_SESSION['USER_ID']],];
-$my_playlists = Playlist::find($criteria);
+$my_participations = Participation::find($criteriaMine);
+$joined_playlist_ids = [];
+foreach ($my_participations as $part) {
+    $joined_playlist_ids[$part->playlist_id] = true;
+}
+$criteriaJoined = [['id','IN',array_keys($joined_playlist_ids)],];
+$joined_playlists = Playlist::find($criteriaJoined);
+
 if (count($my_playlists)==0) {
 ?>
 
 <div class="row">
     <div class="col-12">
-        <h2>You don't have any playlists. How sad!</h2>
-        <h3>Click below to create one.</h3>
+        <h3>You don't have any playlists. How sad!</h3>
+        <h4>Click below to create one.</h4>
         <a class="btn btn-primary" href="playlist/create">Create</a>
     </div>
 </div>
@@ -94,5 +109,51 @@ if (count($my_playlists)==0) {
 <?php
 }
 ?>
+</div> <!-- CARD-BODY -->
+</div> <!-- CARD -->
+<br /><hr /><br />
+<div class='card text-bg-dark'>
+<div class='card-body'>
+<h2 class='card-title'>Joined Playlists</h2>
+<?php
+if (count($joined_playlists)==0) {
+    ?>
+    
+    <div class="row">
+        <div class="col-12">
+            <h4>You haven't joined any playlists.</h4>
+        </div>
+    </div>
+    <?php
+    } else {
+    ?>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Playlist</th>
+                <th>Destination</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+    <?php
+        foreach ($joined_playlists as $playlist) {
+            echo "<tr style='vertical-align: middle;'>\n";
+            echo "<th scope='row'>{$playlist->display_name}</th>\n";
+            echo "<td>{$playlist->destination}</td>\n";
+            echo "<td>";
+            echo "<a href='playlist/join/".$playlist->getShareCode()."' class='btn btn-md btn-success'>View</a>";
+            echo "</td>\n";
+            echo "</tr>\n";
+        }
+    ?>
+        </tbody>
+    </table>
+    <?php
+    }
+?>
+</div> <!-- CARD-BODY -->
+</div> <!-- CARD -->
+    
 </body>
 </html>
