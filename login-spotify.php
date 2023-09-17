@@ -44,7 +44,7 @@ if (isset($_REQUEST['refresh_needed'])) {
     $options = http_build_query([
         'grant_type'        =>  'authorization_code',
         'code'              =>  $_REQUEST['code'],
-        'redirect_uri'      => 'http://localhost:8888/destination-playlist/login-spotify.php',
+        'redirect_uri'      => $config['root_path'].'/login-spotify.php',
     ]);
     $ch = curl_init($endpoint);
     curl_setopt_array ( $ch, array (
@@ -130,11 +130,12 @@ if (isset($_REQUEST['refresh_needed'])) {
     $options = [
         'client_id'         => $config['SPOTIFY_CLIENTID'],
         'response_type'      => 'code',
-        'redirect_uri'      => 'http://localhost:8888/destination-playlist/login-spotify.php',
+        'redirect_uri'      => $config['root_path'].'/login-spotify.php',
         /* 'state'             => '', */ // TODO - look this up and implement it sometime: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
         'scope'             =>  'user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-library-read user-library-modify user-read-private user-read-email ugc-image-upload',
         'show_dialog'       => false,
     ];
+    //var_dump($options); die();
     $url = $endpoint . '?' . http_build_query($options);
     session_write_close();
     header("Location: {$url}");
