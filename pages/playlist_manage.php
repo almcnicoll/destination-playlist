@@ -116,6 +116,7 @@
     }
 
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
+        output = '';
         if (('tracks' in data) && ('items' in data.tracks)) {
             // Loop through the tracks
             for(var i in data.tracks.items) {
@@ -125,7 +126,7 @@
                 for (var ii in t.artists) {
                     artistNames.push(t.artists[ii].name);
                 }
-                t.artist_string = t.artistNames.join(' // ');
+                t.artist_string = artistNames.join(' // ');
                 output += "<li class='list-group-item validating'><a href='#' class='search-result' data-track-id='"
                         +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
                         +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
