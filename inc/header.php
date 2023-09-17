@@ -37,7 +37,7 @@
                 <span class='d-md-none initial-display'><?= substr($_SESSION['USER']->display_name,0,1) ?></span>
             </a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Logout</a></li>
+                <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/logout.php">Logout</a></li>
             </ul>
             </li>    
         </ul>

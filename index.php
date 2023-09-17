@@ -1,10 +1,9 @@
 <?php
+$login_check_redirect_on_fail = "/dp/intro";
 require_once('inc/login_check.php');
 require_once('class/user.php');
 require_once('class/playlist.php');
 require_once('class/participation.php');
-
-require_once('inc/header.php');
 
 if (isset($_REQUEST['newname'])) {
     $user = $_SESSION['USER'];
@@ -25,6 +24,8 @@ if (isset($_REQUEST['newname'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 
 <?php
+require_once('inc/header.php');
+
 $user = $_SESSION['USER'];
 if ($user->display_name) {
 ?>
