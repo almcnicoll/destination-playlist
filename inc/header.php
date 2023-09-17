@@ -18,8 +18,8 @@
     if (empty($_SESSION['USER'])) {
 ?>
     <!-- User menu (not logged in) -->
-            <div class="collapse navbar-collapse" id="navbarUserMenu">
-                <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
+                <ul class="navbar-nav ml-auto mb-2 mb-lg-0" text-right pull-right>
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="<?= $config['root_path'] ?>/login.php" role="button">Login</a>
                     </li>    
@@ -29,7 +29,7 @@
     } else {
 ?>
     <!-- User menu (logged in) -->
-    <div class="collapse navbar-collapse" id="navbarUserMenu">
+    <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
         <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
