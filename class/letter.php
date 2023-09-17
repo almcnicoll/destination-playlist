@@ -8,8 +8,8 @@ class Letter extends Model {
     public ?int $user_id;
     public string $letter;
     public ?string $spotify_track_id = null;
-    public ?string $cached_artist = null;
-    public ?string $cached_title = null;
+    public string $cached_artist = '';
+    public string $cached_title = '';
 
     static string $tableName = "letters";
     static $fields = ['id','playlist_id','user_id','letter','spotify_track_id','cached_artist','cached_title','created','modified'];
