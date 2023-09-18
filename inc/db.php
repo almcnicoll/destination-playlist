@@ -1,5 +1,5 @@
 <?php
-session_start();
+@session_start();
 // Make sure we have config.php
 if (!@include_once('inc/config.php')) {
     if (!@include_once('../inc/config.php')) {
