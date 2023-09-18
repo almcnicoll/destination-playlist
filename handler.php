@@ -1,6 +1,10 @@
 <?php
 session_start();
-require_once('inc/config.php'); // Do this manually, as login-check being called much later
+/* Do these steps manually, as login-check being called much later */
+require_once('inc/config.php');
+require_once('class/user.php');
+if (isset($_SESSION['USER'])) { $_SESSION['USER'] = unserialize(serialize($_SESSION['USER'])); }
+/* END BLOCK */
 
 $page_parts = explode('/', $_GET['params']);
 $params = [];
