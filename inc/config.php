@@ -1,5 +1,5 @@
 <?php
-session_start();
+@session_start();
 $config = [];
 // Include secrets
 if (!@include_once('inc/secret.php')) {

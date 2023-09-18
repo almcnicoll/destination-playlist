@@ -1,3 +1,6 @@
+<?php
+$login_check_soft_fail = true;
+?>
 <div class='card text-bg-dark'>
     <div class='card-body'>
         <h1 class='card-title'>Destination Playlist</h1>
