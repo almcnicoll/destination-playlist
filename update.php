@@ -101,13 +101,20 @@ if (file_exists('sql/db-updates.sql')) {
 
     // Now apply any updates we haven't already tried
     $pdo = db::getPDO();
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     foreach (array_keys($updates) as $v) {
+        if ($v <= $current_version) { continue; }
         $sql = $updates[$v];
         if (!$pdo->beginTransaction()) {
             pre_die("Unable to start a transaction at version #{$v}.");
         }
+        try {
         $pdo->exec($sql);
+        } catch (Exception $e) {
+            pre_die("Error running SQL for version #{$v}.",
+                    "You will need to check that the database is in a valid state.",
+                    "SQL reads ".ellipsis($sql, 1000));
+        }
         $sql = "INSERT INTO dbupdates (`version`,`created`,`modified`) VALUES ({$v},NOW(),NOW());";
         $pdo->exec($sql);
         if ($pdo->inTransaction()) {
