@@ -96,3 +96,12 @@ table.neat * {
     text-decoration: line-through;
     cursor: no-drop;
 }
+.step-done {
+    font-style: italic;
+    color: #009933;
+    text-decoration: line-through;
+}
+.step-explain {
+    font-style: italic;
+    color: #666;
+}
