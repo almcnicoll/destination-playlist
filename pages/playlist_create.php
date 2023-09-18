@@ -31,8 +31,8 @@
             $ch = curl_init($endpoint);
             $options = [
                 'name'              => $_REQUEST['display_name'],
-                'public'            => false,
-                'collaborative'     => true,
+                'public'            => true,
+                'collaborative'     => false,
                 'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),
             ];
             $url = $endpoint;

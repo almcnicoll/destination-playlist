@@ -101,6 +101,7 @@ if (count($my_playlists)==0) {
         echo "<td>";
         echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-success'>Share</a>";
         echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'>Manage</a>";
+        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-primary m-2'>Edit</a>";
         echo "</td>\n";
         echo "</tr>\n";
     }

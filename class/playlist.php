@@ -84,6 +84,85 @@ class Playlist extends Model {
         }
     }
 
+    public function existsOnSpotify() : bool {
+        global $config;
+        if (empty($this->spotify_playlist_id)) { return false; } // No id therefore can't exist
+        $endpoint = "https://api.spotify.com/v1/playlists/{$this->id}";
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, $endpoint);
+        $sr->send();
+        return !$sr->hasErrors(); // If there's no errors, it exists - a bit crude because we might have a quota error or something
+    }
+
+    public function pushToSpotify() {
+        global $config;
+        // Create playlist on spotify
+        $user = $_SESSION['USER'];
+
+        if ($this->existsOnSpotify()) {
+            $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
+            die("Endpoint #1: ".$endpoint);
+            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+            
+            $editData = [
+                'name'              => $this->display_name,
+                'public'            => true,
+                'collaborative'     => false,
+                /*'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),*/ // Don't overwrite
+            ];
+            
+            return $sr->send($editData);
+        } else {
+            $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
+            die("Endpoint #2: ".$endpoint);
+            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+            $createdData = [
+                'name'              => $this->display_name,
+                'public'            => true,
+                'collaborative'     => false,
+                'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),
+            ];
+            
+            return $sr->send($createdData);            
+        }
+
+        
+    }
+
+    // This function resets the ranks of the letters to start at 1 and increase from there
+    public function tidyLetterRanks() : void {
+        $dbo = db::getPDO();
+        $sql = <<<END_SQL
+UPDATE letters lOne
+INNER JOIN
+(
+SELECT playlist_id, MIN(id) AS minid FROM letters
+GROUP BY playlist_id
+) lTwo ON lOne.playlist_id = lTwo.playlist_id
+SET lOne.`rank` = lOne.id-lTwo.minid
+WHERE lOne.playlist_id = :playlist_id
+;
+END_SQL;
+        $stmt = $dbo->prepare($sql);
+        $stmt->execute(['playlist_id' => $this->id]);
+        $stmt->closeCursor();
+    }
+
+    // This function increases the rank of letters at or after a certain index by an offset, so more letters can be inserted before them
+    public function makeLetterSpaceAt($index, $offset) : int {
+        if (!is_numeric($index)) { throw new Exception("Number expected for argument \$index."); }
+        if (!is_numeric($offset)) { throw new Exception("Number expected for argument \$offset."); }
+        $letters = $this->getLetters();
+        $changes = 0;
+        foreach ($letters as $letter) {
+            if ($letter->rank >= $index) {
+                $letter->rank += $offset;
+                $letter->save();
+                $changes++;
+            }
+        }
+        return $changes;
+    }
+
     /*
     // At some point, implement this to have limited-duration easy-to-share codes
     public function setShareCode() {

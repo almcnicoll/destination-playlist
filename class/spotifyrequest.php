@@ -34,6 +34,22 @@ class SpotifyRequest {
         $this->endpoint = $endpoint;
     }
 
+    public function hasErrors() : bool {
+        if ($this->http_code === null) { return true; } // Request not sent
+        if ($this->http_code >= 400) { return true; }
+        if ($this->error_message != '') { return true; }
+        if ($this->error_number > 0) { return true; }
+        return false;
+    }
+
+    public function getErrors() : ?string {
+        if ($this->http_code === null) { return null; } // Request not sent
+        if ($this->http_code >= 400) { return "Error {$this->http_code}: {$this->result}"; }
+        if ($this->error_message != '') { return "Error: {$this->error_message}"; }
+        if ($this->error_number > 0) { return "Error #{$this->error_number}"; }
+        return null;
+    }
+
     public function setHeader($key, $value) : SpotifyRequest {
         $headers[$key] = $value;
         return $this;
