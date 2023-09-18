@@ -6,14 +6,6 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarUserMenu" aria-controls="navbarUserMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <!-- User menu -->
-    <!-- <div class="collapse navbar-collapse" id="navbarCreateButton">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li>
-                <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/playlist/create">Home</a>      
-            </li>
-        </ul>
-    </div> -->
 <?php
     if (empty($_SESSION['USER'])) {
 ?>
@@ -28,19 +20,28 @@
 <?php
     } else {
 ?>
-    <!-- User menu (logged in) -->
-    <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
-        <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class='d-none d-md-inline'><?= $_SESSION['USER']->display_name ?></span>
-                <span class='d-md-none initial-display'><?= substr($_SESSION['USER']->display_name,0,1) ?></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/logout.php">Logout</a></li>
-            </ul>
-            </li>    
+    <!-- Full menu (logged in) -->
+    <div class="collapse navbar-collapse" id="navbarUserMenu">
+        <!-- Create button -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li>
+                <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/playlist/create">+ New</a>      
+            </li>
         </ul>
+        <!-- User menu (logged in) -->
+        <div class="justify-content-end" id="navbarUserMenu2">
+            <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class='d-none d-md-inline'><?= $_SESSION['USER']->display_name ?></span>
+                    <span class='d-md-none initial-display'><?= substr($_SESSION['USER']->display_name,0,1) ?></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/logout.php">Logout</a></li>
+                </ul>
+                </li>    
+            </ul>
+        </div>
     </div>
 <?php
     }
