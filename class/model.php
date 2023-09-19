@@ -9,6 +9,22 @@ class Model {
     static string $tableName;
     static $fields = ['id','created','modified'];
 
+    public static function getDefaultOrderBy() : string {
+        $calledClass = get_called_class();
+        $soughtProperty = 'defaultOrderBy';
+        if(property_exists($calledClass,$soughtProperty)) {
+            $fields = $calledClass::$$soughtProperty;
+            if (is_array($fields)) {
+                if (count($fields) == 0) { return ''; }
+                return ' ORDER BY `'.implode('`,`',$fields).'` ';
+            } else {
+                if (empty($fields)) { return ''; }
+                return "`{$fields}`";
+            }
+        }
+        return ''; // No defaultOrderBy set
+    }
+
     public function getCreated():?DateTime {
         return $this->created;
     }
@@ -19,7 +35,8 @@ class Model {
     public static function getAll() : array {
         $pdo = db::getPDO();
         
-        $sql = "SELECT * FROM `".static::$tableName."`";
+        $sql = "SELECT * FROM `".static::$tableName."`"
+                .static::getDefaultOrderBy();
         $query = $pdo->query($sql);
 
         $query->setFetchMode(PDO::FETCH_CLASS, static::class);
@@ -130,7 +147,9 @@ class Model {
             }
         }
 
-        $sql = "SELECT * FROM `".static::$tableName."` WHERE ".implode(" AND ", $criteria_strings);
+        $sql = "SELECT * FROM `".static::$tableName."` "
+                ."WHERE ".implode(" AND ", $criteria_strings)
+                .static::getDefaultOrderBy();
         //error_log($sql);
         //error_log(print_r($criteria_values,true));
         $stmt = $pdo->prepare($sql);
@@ -226,22 +245,30 @@ class Model {
 
     public function clone($preserveID = false, $preserveCreated = false, $preserveModified = false) {
         $clone = new static();
+
+        $handleManually = ['id','created','modified'];
+        // Copy all fields except those specified above
+        foreach(static::$fields as $f) {
+            if (!in_array($f, $handleManually)) {
+                $clone->$f = $this->$f;
+            }
+        }
+
+        // Handle special fields according to arguments passed
         if ($preserveID) {
             $clone->id = $this->id;
+        } else {
+            $clone->id = null;
         }
         if ($preserveCreated) {
             $clone->created = $this->created;
         } else {
-            $clone->created = new DateTime();
+            $clone->created = (new DateTime())->format('Y-m-d H:i:s');
         }
         if ($preserveModified) {
             $clone->modified = $this->modified;
         } else {
-            $clone->modified = new DateTime();
-        }
-
-        foreach(static::$fields as $f) {
-            $clone->$f = $this->$f;
+            $clone->modified = (new DateTime())->format('Y-m-d H:i:s');
         }
 
         return $clone;

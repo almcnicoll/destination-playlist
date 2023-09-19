@@ -94,7 +94,7 @@
                 $current_letters_string = strtoupper($current_letters_string); // Shouldn't be needed, but do it anyway
 
                 // If letters have changed, we need to make some changes...
-                if ($current_letters != $usable_letters_string) {
+                if ($current_letters_string != $usable_letters_string) {
                     // TODO - make changes to Letters objects
                     // Populate list of letters
                     $letters = str_split($usable_letters_string);

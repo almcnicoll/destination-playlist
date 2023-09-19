@@ -12,6 +12,8 @@ class Letter extends Model {
     public string $cached_artist = '';
     public string $cached_title = '';
 
+    public static $defaultOrderBy = ['rank','id'];
+
     static string $tableName = "letters";
     static $fields = ['id','playlist_id','user_id','letter','spotify_track_id','cached_artist','cached_title','rank','created','modified'];
 

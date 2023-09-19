@@ -87,7 +87,7 @@ class Playlist extends Model {
     public function existsOnSpotify() : bool {
         global $config;
         if (empty($this->spotify_playlist_id)) { return false; } // No id therefore can't exist
-        $endpoint = "https://api.spotify.com/v1/playlists/{$this->id}";
+        $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}";
         $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, $endpoint);
         $sr->send();
         return !$sr->hasErrors(); // If there's no errors, it exists - a bit crude because we might have a quota error or something
@@ -100,9 +100,9 @@ class Playlist extends Model {
 
         if ($this->existsOnSpotify()) {
             $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
-            die("Endpoint #1: ".$endpoint);
+            //die("Endpoint #1: ".$endpoint);
             $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-            
+            $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
             $editData = [
                 'name'              => $this->display_name,
                 'public'            => true,
@@ -113,7 +113,7 @@ class Playlist extends Model {
             return $sr->send($editData);
         } else {
             $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
-            die("Endpoint #2: ".$endpoint);
+            //die("Endpoint #2: ".$endpoint);
             $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
             $createdData = [
                 'name'              => $this->display_name,
