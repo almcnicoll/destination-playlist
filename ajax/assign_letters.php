@@ -1,18 +1,7 @@
 <?php
+    require_once('../autoload.php');
     // Assigns letters to participants
     ob_start();
-    // Include Letter class
-    if (!@include_once('class/letter.php')) {
-        if (!@include_once('../class/letter.php')) {
-            require_once('../../class/letter.php');
-        }
-    }
-    // Include Participation class
-    if (!@include_once('class/participation.php')) {
-        if (!@include_once('../class/participation.php')) {
-            require_once('../../class/participation.php');
-        }
-    }
 
     $fatal_error = false;
 

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <?php
-    require_once('class/authmethod.php');
     if (isset($_REQUEST['redirect_url'])) {
         $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
     }

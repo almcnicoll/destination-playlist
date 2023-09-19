@@ -1,7 +1,6 @@
 <?php
 require_once('inc/config.php');
 require_once('inc/db.php');
-require_once('class/dbupdate.php');
 
 $version = 0;
 $updates = [];

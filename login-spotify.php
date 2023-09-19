@@ -1,7 +1,7 @@
 <?php
 // TODO - switch to the PKCE auth method https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 // TODO - build redirect_uri from a server variable or constant so all instances update when hosting changes
-require_once('class/user.php');
+$discard = new User(); // ensure User class loaded
 
 if (isset($_REQUEST['refresh_needed'])) {
     // This branch is for refreshing the access token

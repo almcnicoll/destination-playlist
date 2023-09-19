@@ -1,13 +1,6 @@
 <?php
     $fatal_error = false;
 
-    // Include Playlist class
-    if (!@include_once('class/playlist.php')) {
-        if (!@include_once('../class/playlist.php')) {
-            require_once('../../class/playlist.php');
-        }
-    }
-
     $error_messages = [];
     if (isset($_REQUEST['error_message'])) {
         $error_messages[] = $_REQUEST['error_message'];
@@ -38,25 +31,6 @@
     // If form submitted, handle edit
     if (isset($_REQUEST['action'])) {
         if ($_REQUEST['action'] == 'formsubmitted') {
-            // Include User class
-            if (!@include_once('class/user.php')) {
-                if (!@include_once('../class/user.php')) {
-                    require_once('../../class/user.php');
-                }
-            }
-            // Include Letter class
-            if (!@include_once('class/letter.php')) {
-                if (!@include_once('../class/letter.php')) {
-                    require_once('../../class/letter.php');
-                }
-            }
-            // Include SpotifyRequest class
-            if (!@include_once('class/spotifyrequest.php')) {
-                if (!@include_once('../class/spotifyrequest.php')) {
-                    require_once('../../class/spotifyrequest.php');
-                }
-            }
-            
             // Make changes, but don't save
             $playlist->destination = $_REQUEST['destination'];
             $playlist->display_name = $_REQUEST['display_name'];
@@ -99,13 +73,7 @@
                     // Populate list of letters
                     $letters = str_split($usable_letters_string);
 
-                    // Include diff code
-                    if (!@include_once('inc/diff_match_patch.php')) {
-                        if (!@include_once('../inc/diff_match_patch.php')) {
-                            require_once('../../inc/diff_match_patch.php');
-                        }
-                    }
-
+                    // Diff code in this class
                     $dmp = new diff_match_patch();
                     $diffs = $dmp->diff_main($current_letters_string,$usable_letters_string);
                     $i=0;
