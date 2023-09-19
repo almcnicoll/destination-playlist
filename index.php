@@ -20,7 +20,10 @@ if (isset($_REQUEST['newname'])) {
     <link href="css/app.css" rel="stylesheet">
 </head>
 <body>
-    <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
+    <script type='text/javascript'>
+        var root_path = "<?= $config['root_path']; ?>";
+    </script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <script src='js/delete_handler.js'></script>
 <?php
@@ -102,7 +105,7 @@ if (count($my_playlists)==0) {
         echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'><span class='bi bi-eye'></span></a>";
         echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>";
         echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-warning m-2'><span class='bi bi-pencil-square' role='edit'></span></a>";
-        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-danger m-2' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete'><span class='bi bi-trash3'></span></a>";
+        echo "<a href='#' class='btn btn-md btn-danger m-2' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = {$playlist->id};'><span class='bi bi-trash3'></span></a>";
         echo "</td>\n";
         echo "</tr>\n";
     }
