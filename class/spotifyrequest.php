@@ -4,6 +4,7 @@ class SpotifyRequest {
     const ACTION_GET    = "GET";
     const ACTION_POST   = "POST";
     const ACTION_PUT    = "PUT";
+    const ACTION_DELETE = "DELETE";
 
     const TYPE_UNKNOWN              = 0;
     const TYPE_OAUTH_AUTHORIZE      = 1;
@@ -113,6 +114,7 @@ class SpotifyRequest {
                 }
             }
         } else {
+            // GET and DELETE
             curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $this->action );
             if(!empty($data)) {
                 // Add or extend querystring if we have data
