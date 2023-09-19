@@ -22,7 +22,7 @@ if (isset($_REQUEST['newname'])) {
 <body>
     <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-
+    <script src='js/delete_handler.js'></script>
 <?php
 //echo "<!-- SERVER DOC ROOT: {$_SERVER['DOCUMENT_ROOT']} -->";
 require_once('inc/header.php');
