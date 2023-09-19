@@ -60,7 +60,6 @@ if ($user->display_name) {
 ?>
 <div class='card text-bg-dark'>
 <div class='card-body'>
-<h2 class='card-title'>Your Playlists</h2>
 <?php
 // List all playlists
 $criteriaMine = ['user_id','=',$_SESSION['USER_ID']];
@@ -75,8 +74,10 @@ $criteriaJoined = [['id','IN',array_keys($joined_playlist_ids)],];
 $joined_playlists = Playlist::find($criteriaJoined);
 
 if (count($my_playlists)==0) {
+    // No playlists of our own
 ?>
 
+<h2 class='card-title'>Your Playlists</h2>
 <div class="row">
     <div class="col-12">
         <h3>You don't have any playlists. How sad!</h3>
@@ -86,7 +87,10 @@ if (count($my_playlists)==0) {
 </div>
 <?php
 } else {
+    // At least one playlist of our own
 ?>
+<h2 class='card-title'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
+
 <table class="table table-striped table-hover">
     <thead>
         <tr>
@@ -102,7 +106,7 @@ if (count($my_playlists)==0) {
         echo "<th scope='row'>{$playlist->display_name}</th>\n";
         echo "<td>{$playlist->destination}</td>\n";
         echo "<td>";
-        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'><span class='bi bi-eye'></span></a>";
+        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
         echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>";
         echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-warning m-2'><span class='bi bi-pencil-square' role='edit'></span></a>";
         echo "<a href='#' class='btn btn-md btn-danger m-2' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = {$playlist->id};'><span class='bi bi-trash3'></span></a>";
@@ -148,7 +152,7 @@ if (count($joined_playlists)==0) {
             echo "<th scope='row'>{$playlist->display_name}</th>\n";
             echo "<td>{$playlist->destination}</td>\n";
             echo "<td>";
-            echo "<a href='playlist/join/".$playlist->getShareCode()."' class='btn btn-md btn-success'>View</a>";
+            echo "<a href='playlist/join/".$playlist->getShareCode()."' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
             echo "</td>\n";
             echo "</tr>\n";
         }
