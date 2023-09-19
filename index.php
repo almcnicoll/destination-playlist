@@ -1,5 +1,6 @@
 <?php
 require_once('autoload.php');
+require_once('inc/config.php');
 
 $login_check_redirect_on_fail = "/dp/intro";
 require_once('inc/login_check.php');

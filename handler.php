@@ -1,5 +1,6 @@
 <?php
 require_once('autoload.php');
+require_once('inc/config.php');
 session_start();
 /* Do these steps manually, as login-check being called much later */
 require_once('inc/config.php');

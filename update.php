@@ -1,6 +1,6 @@
 <?php
+require_once('autoload.php');
 require_once('inc/config.php');
-require_once('inc/db.php');
 
 $version = 0;
 $updates = [];
