@@ -23,6 +23,13 @@
         $error_messages[] = "No playlist specified";
         $fatal_error = true;
     }
+
+    if (!isset($_REQUEST['USER_ID'])) {
+        $error_messages[] = "You are not logged in. Please refresh the page.";
+        $fatal_error = true;
+        header('Location: '.$config['root_path'].'/login.php?redirect_url='.$_SERVER['REQUEST_URI']);
+        die();
+    }
     
     list($playlist_id,$auth_suffix) = explode('-',$params[0]);
     $playlist_id = (int)$playlist_id;
