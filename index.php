@@ -99,9 +99,10 @@ if (count($my_playlists)==0) {
         echo "<th scope='row'>{$playlist->display_name}</th>\n";
         echo "<td>{$playlist->destination}</td>\n";
         echo "<td>";
-        echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-success'>Share</a>";
-        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'>Manage</a>";
-        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-primary m-2'>Edit</a>";
+        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-primary m-2'><span class='bi bi-eye'></span></a>";
+        echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>";
+        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-warning m-2'><span class='bi bi-pencil-square' role='edit'></span></a>";
+        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-danger m-2' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete'><span class='bi bi-trash3'></span></a>";
         echo "</td>\n";
         echo "</tr>\n";
     }
@@ -156,6 +157,34 @@ if (count($joined_playlists)==0) {
 ?>
 </div> <!-- CARD-BODY -->
 </div> <!-- CARD -->
+
+<div class="modal fade" id="playlistDeleteModal" tabindex="-1">
+  <div class="modal-dialog .modal-fullscreen-lg-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Playlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="deleteModalCloseX"></button>
+      </div>
+      <div class="modal-body">
+      <div class="row">
+        <div class="col-12">
+            Where would you like to delete the playlist from?
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4-md p-2">
+            <a class='btn btn-md btn-warning' id='deleteHere' style='width: 100%;'>Just here</a>
+        </div>
+        <div class="col-4-md p-2">
+            <a class='btn btn-md btn-danger' id='deleteBoth' style='width: 100%;'>Here and on Spotify</a>
+        </div>
+        <div class="col-4-md p-2" id='search-results-container'>
+            <button class='btn btn-md btn-success' id='deleteCancel' data-bs-dismiss="modal" style='width: 100%;'>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     
 </body>
 </html>
