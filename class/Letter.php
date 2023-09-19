@@ -1,7 +1,4 @@
 <?php
-if(!@include_once('inc/db.php')) { require_once('../inc/db.php'); }
-if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
-if(!@include_once('class/user.php')) { require_once('../class/user.php'); }
 
 class Letter extends Model {
     public int $playlist_id;
