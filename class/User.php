@@ -1,9 +1,4 @@
 <?php
-// TODO - add market field
-
-if(!@include_once('inc/db.php')) { require_once('../inc/db.php'); }
-if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
-if(!@include_once('class/authmethod.php')) { require_once('../class/authmethod.php'); }
 
 class User extends Model {
     public int $authmethod_id;

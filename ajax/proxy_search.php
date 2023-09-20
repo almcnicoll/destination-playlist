@@ -1,4 +1,5 @@
 <?php
+    require_once('../autoload.php');
     ob_start();
     // Expected params
     /*  q: query,
@@ -7,25 +8,6 @@
         limit: resultLimit,
         playlist_id: dp internal playlist id
     */
-
-    // Include Playlist class
-    if (!@include_once('class/playlist.php')) {
-        if (!@include_once('../class/playlist.php')) {
-            require_once('../../class/playlist.php');
-        }
-    }    
-    // Include Participation class
-    if (!@include_once('class/participation.php')) {
-        if (!@include_once('../class/participation.php')) {
-            require_once('../../class/participation.php');
-        }
-    }
-    // Include SpotifyRequest class
-    if (!@include_once('class/spotifyrequest.php')) {
-        if (!@include_once('../class/spotifyrequest.php')) {
-            require_once('../../class/spotifyrequest.php');
-        }
-    }
 
     // Check participation etc.
     $fatal_error = false;

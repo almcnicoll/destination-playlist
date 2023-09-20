@@ -1,13 +1,4 @@
 <?php
-@session_start();
-// Make sure we have config.php
-if (!@include_once('inc/config.php')) {
-    if (!@include_once('../inc/config.php')) {
-        if (!@include_once('../../inc/config.php')) {
-            require_once('../../../inc/config.php');
-        }
-    }
-}
 
 class db {
     private static $pdo; 

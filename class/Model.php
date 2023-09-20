@@ -1,4 +1,5 @@
 <?php
+
 class Model {
     static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT','IN'];
 

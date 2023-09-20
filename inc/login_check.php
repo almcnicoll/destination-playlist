@@ -2,9 +2,6 @@
 // $login_check_redirect_on_fail allows pages to redirect unauthenticated users to custom URLs (e.g. / -> /dp/intro)
 // $login_check_soft_fail allows pages to refresh tokens if needed, but not redirect to login on fail (e.g. /dp/intro page, which is valid for unauthenticated users)
 @session_start();
-if (!include_once('class/authmethod.php')) {
-    require_once('../class/authmethod.php');
-}
 
 $redirect_url_if_needed = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
 
@@ -37,9 +34,7 @@ if(!(
         die();
     }
     // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object
-    if (!include_once('class/user.php')) {
-        require_once('../class/user.php');
-    }
+    $discard = new User(); // Ensure that User class is autoloaded
     $_SESSION['USER'] = unserialize(serialize($_SESSION['USER']));
 }
 

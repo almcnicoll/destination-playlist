@@ -1,8 +1,4 @@
 <?php
-if(!@include_once('inc/db.php')) { require_once('../inc/db.php'); }
-if(!@include_once('class/model.php')) { require_once('../class/model.php'); }
-if(!@include_once('class/user.php')) { require_once('../class/user.php'); }
-if(!@include_once('class/playlist.php')) { require_once('../class/playlist.php'); }
 
 class Participation extends Model {
     public int $user_id;
