@@ -11,6 +11,14 @@ class Autoloader
             if (file_exists($file)) {
                 require $file;
                 return true;
+            } else {
+                // Allow for us calling this one directory down (e.g. in ajax call)
+                $file = '../'.$file;
+                if (file_exists($file)) {
+                    require $file;
+                    return true;
+                }
+                return false;
             }
             return false;
         });

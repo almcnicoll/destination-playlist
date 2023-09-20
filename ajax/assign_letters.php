@@ -136,4 +136,4 @@
         $output['info'] = $info_messages;
     }
     ob_end_clean();
-    die($output);
+    die(json_encode($output));

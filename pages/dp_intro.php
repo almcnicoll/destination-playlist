@@ -2,7 +2,7 @@
 $login_check_soft_fail = true;
 ?>
 <div class='card text-bg-dark'>
-    <div class='card-body'>
+    <div class='card-body bg-primary'>
         <h1 class='card-title'>Destination Playlist</h1>
         <h2 class='card-title'>Music for the journey</h2>
     </div>
