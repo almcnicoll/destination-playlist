@@ -5,7 +5,7 @@ class Autoloader
     {
         global $config;
         spl_autoload_register(function ($class) {
-            global $config;
+            //global $config;
             $file = 'class'.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
             if (file_exists($file)) {
                 require $file;
@@ -16,3 +16,5 @@ class Autoloader
     }
 }
 Autoloader::register();
+
+$config = Config::get(); // Retrieve config while we're here

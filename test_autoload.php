@@ -1,7 +1,8 @@
 <?php
 require_once('autoload.php');
 
-$l = new Letter();
-$l->user_id = 4;
+$sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, '');
+
+var_dump($config);
 
 die("OK: ".__LINE__);
