@@ -1,4 +1,5 @@
 <?php
+@session_start();
 class Autoloader
 {
     public static function register()

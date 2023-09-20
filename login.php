@@ -1,8 +1,8 @@
 <?php
-    require_once('autoload.php');
-    if (isset($_REQUEST['redirect_url'])) {
-        $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
-    }
+require_once('autoload.php');
+if (isset($_REQUEST['redirect_url'])) {
+    $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

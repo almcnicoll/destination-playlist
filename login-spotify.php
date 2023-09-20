@@ -1,6 +1,6 @@
 <?php
 require_once('autoload.php');
-@session_start();
+
 // TODO - switch to the PKCE auth method https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 // TODO - build redirect_uri from a server variable or constant so all instances update when hosting changes
 $discard = new User(); // ensure User class loaded

@@ -1,5 +1,4 @@
 <?php
-@session_start();
 
 class Config {
     private static $__config = [];
