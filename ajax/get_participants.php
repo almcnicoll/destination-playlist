@@ -2,10 +2,9 @@
     require_once('../autoload.php');
     // TODO - also return a results hash so pages can refresh only if hash is different
 
-    
     // Returns the current participant list for the playlist
     ob_start();
-
+    
     $fatal_error = false;
 
     $error_messages = [];

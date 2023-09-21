@@ -11,7 +11,7 @@
 
     // Assigns track to letter
     ob_start();
-
+    
     // Pre-flight checks
     $fatal_error = false;
 
@@ -129,6 +129,10 @@ END_SQL;
     if (count($info_messages)>0) {
         $output['info'] = $info_messages;
     }
-    http_response_code($srUpdatePlaylist->http_code); // Pass on any errors
+    // We only perform a SpotifyRequest if we're the owner (see note at start of script)
+    // Hence $srUpdatePlaylist could be null / undefined
+    if (!empty($srUpdatePlaylist)) {
+        http_response_code($srUpdatePlaylist->http_code); // Pass on any errors
+    }
     ob_end_clean();
     die(json_encode($output));

@@ -1,9 +1,8 @@
 <?php
+require_once('autoload.php');
+
 $login_check_redirect_on_fail = "/dp/intro";
 require_once('inc/login_check.php');
-require_once('class/user.php');
-require_once('class/playlist.php');
-require_once('class/participation.php');
 
 if (isset($_REQUEST['newname'])) {
     $user = $_SESSION['USER'];

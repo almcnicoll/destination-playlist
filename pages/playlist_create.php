@@ -1,11 +1,4 @@
 <?php
-    // Include Playlist class
-    if (!@include_once('class/playlist.php')) {
-        if (!@include_once('../class/playlist.php')) {
-            require_once('../../class/playlist.php');
-        }
-    }
-
     $error_messages = [];
     if (isset($_REQUEST['error_message'])) {
         $error_messages[] = $_REQUEST['error_message'];
@@ -14,17 +7,6 @@
     // If form submitted, handle creation
     if (isset($_REQUEST['action'])) {
         if ($_REQUEST['action'] == 'formsubmitted') {
-            if (!@include_once('class/user.php')) {
-                if (!@include_once('../class/user.php')) {
-                    require_once('../../class/user.php');
-                }
-            }
-            if (!@include_once('class/letter.php')) {
-                if (!@include_once('../class/letter.php')) {
-                    require_once('../../class/letter.php');
-                }
-            }
-
             // Create playlist on spotify
             $user = $_SESSION['USER'];
             $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";

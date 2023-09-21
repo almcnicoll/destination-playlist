@@ -1,11 +1,4 @@
 <?php
-    // Include Playlist class
-    if (!@include_once('class/playlist.php')) {
-        if (!@include_once('../class/playlist.php')) {
-            require_once('../../class/playlist.php');
-        }
-    }
-
     $fatal_error = false;
 
     $error_messages = [];

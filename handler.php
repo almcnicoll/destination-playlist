@@ -1,8 +1,8 @@
 <?php
-session_start();
+require_once('autoload.php');
+
 /* Do these steps manually, as login-check being called much later */
-require_once('inc/config.php');
-require_once('class/user.php');
+$discard = new User(); // To force autoloading of User class
 if (isset($_SESSION['USER'])) { $_SESSION['USER'] = unserialize(serialize($_SESSION['USER'])); }
 /* END BLOCK */
 
