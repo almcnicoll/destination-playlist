@@ -1,4 +1,5 @@
 <?php
+    require_once('../autoload.php');
     /*
      * Note to future me:
      * At the moment, Spotify doesn't do collaborative playlists very well via API
@@ -10,24 +11,6 @@
 
     // Assigns track to letter
     ob_start();
-    // Include Letter class
-    if (!@include_once('class/letter.php')) {
-        if (!@include_once('../class/letter.php')) {
-            require_once('../../class/letter.php');
-        }
-    }
-    // Include Participation class
-    if (!@include_once('class/participation.php')) {
-        if (!@include_once('../class/participation.php')) {
-            require_once('../../class/participation.php');
-        }
-    }
-    // Include SpotifyRequest class
-    if (!@include_once('class/spotifyrequest.php')) {
-        if (!@include_once('../class/spotifyrequest.php')) {
-            require_once('../../class/spotifyrequest.php');
-        }
-    }
 
     // Pre-flight checks
     $fatal_error = false;

@@ -8,7 +8,7 @@ deleteHandler.reportOnDelete = function(jqXHR, textStatus) {
     top.location.reload(); // Reload page
 }
 
-function deletePlaylist(local, fromSpotify) {
+deleteHandler.deletePlaylist = function(local, fromSpotify) {
     // Check we've specified an id
     if (deleteHandler.idToDelete == null) {
         alert("Could not delete playlist. Please try again later.");
@@ -32,6 +32,6 @@ function deletePlaylist(local, fromSpotify) {
 }
 
 $(document).ready( function() {
-    $('#deleteHere').click( function() { deletePlaylist(true,false); } );
-    $('#deleteBoth').click( function() { deletePlaylist(true,true); } );
+    $('#deleteHere').click( function() { deleteHandler.deletePlaylist(true,false); } );
+    $('#deleteBoth').click( function() { deleteHandler.deletePlaylist(true,true); } );
 } );

@@ -153,6 +153,7 @@ if (count($joined_playlists)==0) {
             echo "<td>{$playlist->destination}</td>\n";
             echo "<td>";
             echo "<a href='playlist/join/".$playlist->getShareCode()."' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
+            echo "<a href='#' class='btn btn-md btn-success m-2' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
             echo "</td>\n";
             echo "</tr>\n";
         }
@@ -185,8 +186,34 @@ if (count($joined_playlists)==0) {
         <div class="col-4-md p-2">
             <a class='btn btn-md btn-danger' id='deleteBoth' style='width: 100%;'>Here and on Spotify</a>
         </div>
-        <div class="col-4-md p-2" id='search-results-container'>
+        <div class="col-4-md p-2">
             <button class='btn btn-md btn-success' id='deleteCancel' data-bs-dismiss="modal" style='width: 100%;'>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="playlistLeaveModal" tabindex="-1">
+  <div class="modal-dialog .modal-fullscreen-lg-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Leave Playlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="leaveModalCloseX"></button>
+      </div>
+      <div class="modal-body">
+      <div class="row">
+        <div class="col-12">
+            <div>Leave this playlist?</div>
+            <div class='fs-6 fw-lighter fst-italic'>You won't see it in Spotify any more.</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6-md p-2">
+            <a class='btn btn-md btn-danger' id='leavePlaylist' style='width: 100%;'>Leave</a>
+        </div>
+        <div class="col-6-md p-2">
+            <button class='btn btn-md btn-success' id='leaveCancel' data-bs-dismiss="modal" style='width: 100%;'>Cancel</button>
         </div>
       </div>
     </div>
