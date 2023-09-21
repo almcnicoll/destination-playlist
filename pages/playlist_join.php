@@ -234,7 +234,12 @@ $srFollow->send($dataPublic);
       <div class="modal-body">
       <div class="row">
         <div class="col-12">
-            <input type="text" placeholder="Type here to search..." id="track-search-box">
+            <div class='input-group'>
+                <input type="text" class='form-control' placeholder="Type here to search..." id="track-search-box">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
+                </div>
+            </div>
             <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>

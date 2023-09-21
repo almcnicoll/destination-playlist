@@ -89,6 +89,7 @@ table.neat * {
 }
 #search-results-container li.invalid {
     cursor: no-drop;
+    display: none;
 }
 #search-results-container li.invalid a {
     font-style: italic;

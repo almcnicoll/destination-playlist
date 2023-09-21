@@ -18,7 +18,7 @@ trackSearch.build_search_request = function(txt) {
         // Not sure what to do here!
         querystring = encodeURIComponent(txt);
     }
-    if (!'limit' in trackSearch) { trackSearch.limit = 20; }
+    if (!'limit' in trackSearch) { trackSearch.limit = 40; }
     return {
         query: querystring,
         resultType: 'track',
@@ -151,7 +151,11 @@ trackSearch.init = function(inputBox, outputBox, limit=20) {
     trackSearch.limit = limit;
     $(document).ready(function() {
         // Handle typing in search box
-        $(inputBox).on('keyup',function() {
+        $(inputBox).on('keyup',function(event) {
+            // Only deal with actual characters
+            if (((event.which < 40)||(event.which > 90)) && (event.which != 8)) {
+                return;
+            }
             // Don't run loads of simultaneous queries
             var txt=$(this).val();
             if (trackSearch.search_request_running) {

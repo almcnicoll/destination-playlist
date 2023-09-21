@@ -126,6 +126,9 @@
             }
         }
         $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
+        trackSearch.validateTracks();
+    }
+    trackSearch.validateTracks = async function() {
         $('#search-results-container li').each( function() {
             var link = $(this).children('a').first();
             if (link.data('track-title') === undefined) { link.data('track-title',''); }
@@ -248,9 +251,16 @@ if ($fatal_error) {
       <div class="modal-body">
       <div class="row">
         <div class="col-12">
-            <input type="text" placeholder="Type here to search..." id="track-search-box">
-            <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
+            <div class='input-group'>
+                <input type="text" class='form-control' placeholder="Type here to search..." id="track-search-box">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
+                </div>
+                <div class='input-group-append'>
+                    <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-12" style="min-height: 10em;" id='search-results-container'>
