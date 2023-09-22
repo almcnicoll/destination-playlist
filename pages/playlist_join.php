@@ -90,6 +90,7 @@ $srFollow->send($dataPublic);
 <!-- Set vars -->
 <script type="text/javascript">
     if (typeof trackSearch === 'undefined') { trackSearch = {}; }
+    if (typeof playHandler === 'undefined') { var playHandler = {}; }
     <?php
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
         echo "trackSearch.allow_title=false;\n";
@@ -119,6 +120,7 @@ $srFollow->send($dataPublic);
     echo "var root_path = \"{$config['root_path']}\";\n";
     echo "var playlist_id = {$playlist->id};\n";
     echo "var currentUser = {$_SESSION['USER_ID']};\n";
+    echo "playHandler.playlist_id = \"{$playlist->id}\";\n\n";
     ?>
 </script>
 <!-- Include search script -->

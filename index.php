@@ -24,7 +24,10 @@ if (isset($_REQUEST['newname'])) {
     </script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <!-- Include playlist-delete script -->
     <script src='js/delete_handler.js'></script>
+    <!-- Include leave-playlist script -->
+    <script type='text/javascript' src='<?= $config['root_path'] ?>/js/leave_handler.js'></script>
 <?php
 //echo "<!-- SERVER DOC ROOT: {$_SERVER['DOCUMENT_ROOT']} -->";
 require_once('inc/header.php');
@@ -101,16 +104,24 @@ if (count($my_playlists)==0) {
     <tbody>
 <?php
     foreach ($my_playlists as $playlist) {
-        echo "<tr style='vertical-align: middle;'>\n";
-        echo "<th scope='row'>{$playlist->display_name}</th>\n";
-        echo "<td>{$playlist->destination}</td>\n";
-        echo "<td>";
-        echo "<a href='playlist/manage/{$playlist->id}' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
-        echo "<a href='playlist/share/{$playlist->id}' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>";
-        echo "<a href='playlist/edit/{$playlist->id}' class='btn btn-md btn-warning m-2'><span class='bi bi-pencil-square' role='edit'></span></a>";
-        echo "<a href='#' class='btn btn-md btn-danger m-2' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = {$playlist->id};'><span class='bi bi-trash3'></span></a>";
-        echo "</td>\n";
-        echo "</tr>\n";
+?>
+        <tr style='vertical-align: middle;'>
+        <th scope='row'><?=$playlist->display_name?></th>
+        <td><?=$playlist->destination?></td>
+        <td>
+            <div class='row'>
+                <div class='col-md-6'>
+                    <a href='playlist/manage/<?=$playlist->id?>' title='View playlist' class='btn btn-md btn-success'><span class='bi bi-eye'></span></a>
+                    <a href='playlist/share/<?=$playlist->id?>' title='Share playlist' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>
+                </div>
+                <div class='col-md-6'>
+                    <a href='playlist/edit/<?=$playlist->id?>' title='Edit playlist' class='btn btn-md btn-warning'><span class='bi bi-pencil-square' role='edit'></span></a>
+                    <a href='#' class='btn btn-md btn-danger' title='Delete playlist' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = <?=$playlist->id?>;'><span class='bi bi-trash3'></span></a>
+                </div>
+            </div>
+        </td>
+        </tr>
+<?php
     }
 ?>
     </tbody>
@@ -151,8 +162,8 @@ if (count($joined_playlists)==0) {
             echo "<th scope='row'>{$playlist->display_name}</th>\n";
             echo "<td>{$playlist->destination}</td>\n";
             echo "<td>";
-            echo "<a href='playlist/join/".$playlist->getShareCode()."' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
-            echo "<a href='#' class='btn btn-md btn-success m-2' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
+            echo "<a href='playlist/join/".$playlist->getShareCode()."' title='View playlist' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
+            echo "<a href='#' class='btn btn-md btn-danger m-2' title='Leave playlist' id='leavePlaylist' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
             echo "</td>\n";
             echo "</tr>\n";
         }
