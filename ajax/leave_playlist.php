@@ -46,7 +46,7 @@ if ($fatal_error) {
     die($output);
 }
 
-if ($deleteFromSpotify) {
+if (true) {
     // It actually just unfollows it
     $endpoint = "https://api.spotify.com/v1/playlists/{$playlist->spotify_playlist_id}/followers";
     $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_DELETE, $endpoint);
@@ -58,7 +58,7 @@ if ($deleteFromSpotify) {
         echo "Unfollowed Spotify playlist: OK\n";
     }
 }
-if ($deleteLocal) {
+if (true) {
     try {
         $participation->delete();
         echo "Removed user from playlist in local db: OK\n";

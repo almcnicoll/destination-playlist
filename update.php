@@ -1,6 +1,5 @@
 <?php
 require_once('autoload.php');
-require_once('inc/config.php');
 
 $version = 0;
 $updates = [];

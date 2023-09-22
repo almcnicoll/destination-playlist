@@ -14,7 +14,7 @@ leaveHandler.leavePlaylist = function() {
         alert("Could not leave playlist. Please try again later.");
         return;
     }
-    leaveHandler.url = root_path+"/ajax/leave_playlist.php?playlist_id="+leaveHandler.idToDelete;
+    leaveHandler.url = root_path+"/ajax/leave_playlist.php?playlist_id="+leaveHandler.idToLeave;
     leaveHandler.ajaxOptions = {
         async: true,
         cache: false,

@@ -26,7 +26,8 @@
 ?>
 <!-- Set vars -->
 <script type="text/javascript">
-    if (typeof trackSearch === 'undefined') { trackSearch = {}; }
+    if (typeof trackSearch === 'undefined') { var trackSearch = {}; }
+    if (typeof playHandler === 'undefined') { var playHandler = {}; }
     <?php
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
         echo "trackSearch.allow_title=false;\n";
@@ -56,6 +57,7 @@
     echo "var root_path = \"{$config['root_path']}\";\n";
     echo "var playlist_id = {$playlist->id};\n";
     echo "var currentUser = {$_SESSION['USER_ID']};\n";
+    echo "playHandler.playlist_id = \"{$playlist->id}\";\n\n";
     ?>
 </script>
 <!-- Include search script -->
@@ -66,8 +68,12 @@
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/people_refresh.js'></script>
 <!-- Include letter-assign script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
+<!-- Include play-devices script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
+    playHandler.init('#playDevicesContainer');
+
     letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
         $('#tracks-table tbody tr').remove();
         // Manage errors or good data
@@ -167,7 +173,7 @@
 </script>
 
 <div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
-<h2 class="text-center"><?= $playlist->display_name ?></h2>
+<h2 class="text-center"><?= $playlist->display_name ?> <a href='#' id='play-button' data-bs-toggle='modal' data-bs-target='#playDevicesModal' onclick="playHandler.getDevices();"><span class='bi bi-play-circle'></span></a></h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
@@ -237,37 +243,53 @@ if ($fatal_error) {
 </div>
 
 <div class="modal fade" id="trackSearchModal" tabindex="-1">
-  <div class="modal-dialog .modal-fullscreen-lg-down">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Track search</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="trackSearchModalCloseX"></button>
-      </div>
-      <div class="modal-body">
-      <div class="row">
-        <div class="col-12">
-            <div class='input-group'>
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Beginning with<span id='beginning-with-letter' class='text-primary'></span></span>
-                </div>
-                <input type="text" class='form-control' autocomplete="off" placeholder="Type here to search..." id="track-search-box">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
-                </div>
-                <div class='input-group-append'>
-                    <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
-                        <span class="visually-hidden">Loading...</span>
+    <div class="modal-dialog .modal-fullscreen-lg-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Track search</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="trackSearchModalCloseX"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class='input-group'>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Beginning with<span id='beginning-with-letter' class='text-primary'></span></span>
+                            </div>
+                            <input type="text" class='form-control' autocomplete="off" placeholder="Type here to search..." id="track-search-box">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
+                            </div>
+                            <div class='input-group-append'>
+                                <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <div class="col-12" style="min-height: 10em;" id='search-results-container'>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-        <div class="col-12" style="min-height: 10em;" id='search-results-container'>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
-      </div>
     </div>
-  </div>
+</div>
+
+<div class="modal fade" id="playDevicesModal" tabindex="-1">
+    <div class="modal-dialog .modal-fullscreen-lg-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Play <?= $playlist->display_name ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="playDevicesModalCloseX"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12" id='playDevicesContainer'>Loading</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
