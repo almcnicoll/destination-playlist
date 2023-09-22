@@ -72,6 +72,12 @@ table.neat * {
     display: none;
 }
 
+#search-results-container {
+    max-height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 #search-results-container li.validating {
     cursor: no-drop;
 }
@@ -89,6 +95,7 @@ table.neat * {
 }
 #search-results-container li.invalid {
     cursor: no-drop;
+    display: none;
 }
 #search-results-container li.invalid a {
     font-style: italic;

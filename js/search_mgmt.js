@@ -2,6 +2,7 @@ if (typeof trackSearch === 'undefined') { trackSearch = {}; }
 
 trackSearch.search_request_queue = null;
 trackSearch.search_request_running = false;
+trackSearch.extraRetrievals = 0;
 
 trackSearch.reThe = /^the\s+/i; // Matches "the" at the start of a string, case-insensitive
 trackSearch.reArtistSplit = /\s*\/\/\s*/; // Matches two forward-slashes with any leading/trailing whitespace
@@ -18,7 +19,7 @@ trackSearch.build_search_request = function(txt) {
         // Not sure what to do here!
         querystring = encodeURIComponent(txt);
     }
-    if (!'limit' in trackSearch) { trackSearch.limit = 20; }
+    if (!'limit' in trackSearch) { trackSearch.limit = 40; }
     return {
         query: querystring,
         resultType: 'track',
@@ -27,12 +28,13 @@ trackSearch.build_search_request = function(txt) {
     };
 }
 
-trackSearch.search_request = function(query,resultType,userMarket,resultLimit) {
+trackSearch.search_request = function(query,resultType,userMarket,resultLimit, resultOffset = 0) {
     trackSearch.ajaxOptions.data = {
         q: query,
         type: resultType,
         market: userMarket,
         limit: resultLimit,
+        offset: resultOffset,
         playlist_id: trackSearch.playlist_id
     };
     $('#search_spinner').removeClass('hidden');
@@ -48,7 +50,17 @@ trackSearch.updateSearchBox = function(data, textStatus, jqXHR) {
 trackSearch.processQueue = function() {
     trackSearch.search_request_running = false;
     $('#search_spinner').addClass('hidden');
-    if (trackSearch.search_request_queue !== null) {
+    if (trackSearch.search_request_queue === null) {
+        // No waiting request, so try retrieving more results
+        if (trackSearch.extraRetrievals < 3) {
+            var txt=$(trackSearch.inputBox).val();
+            trackSearch.search_request_running = true;
+            var req = trackSearch.build_search_request(txt);
+            trackSearch.extraRetrievals++;
+            var offset = trackSearch.limit * trackSearch.extraRetrievals;
+            trackSearch.search_request(req.query,req.resultType,req.market,req.limit,offset);
+        }
+    } else {
         // There was another request waiting in the wings
         // Stash variables
         var _q  = trackSearch.search_request_queue.query;
@@ -147,11 +159,35 @@ trackSearch.checkTrack = function(trackName, artistName) {
     return false;
 }
 
-trackSearch.init = function(inputBox, outputBox, limit=20) {
+trackSearch.validateTracks = async function(pattern) {
+    $(pattern).each( function() {
+        var link = $(this).children('a').first();
+        if (link.data('track-title') === undefined) { link.data('track-title',''); }
+        if (link.data('track-artists') === undefined) { link.data('track-artists',''); }
+        if (trackSearch.checkTrack( 
+                decodeURIComponent( link.data('track-title') ), 
+                decodeURIComponent( link.data('track-artists') ) 
+        )) {
+            // Valid choice
+            $(this).addClass('valid').removeClass('invalid').removeClass('validating');
+        } else {
+            // Invalid choice
+            $(this).addClass('invalid').removeClass('valid').removeClass('validating');
+        }
+    } );
+}
+
+trackSearch.init = function(inputBox, outputBox, limit=40) {
     trackSearch.limit = limit;
+    trackSearch.inputBox = inputBox;
+    trackSearch.outputBox = outputBox;
     $(document).ready(function() {
         // Handle typing in search box
-        $(inputBox).on('keyup',function() {
+        $(inputBox).on('keyup',function(event) {
+            // Only deal with actual characters
+            if (((event.which < 40)||(event.which > 90)) && (event.which != 8)) {
+                return;
+            }
             // Don't run loads of simultaneous queries
             var txt=$(this).val();
             if (trackSearch.search_request_running) {
@@ -160,6 +196,7 @@ trackSearch.init = function(inputBox, outputBox, limit=20) {
             } else {
                 if (txt.length > 3) {
                     trackSearch.search_request_running = true;
+                    trackSearch.extraRetrievals = 0;
                     var req = trackSearch.build_search_request(txt);
                     trackSearch.search_request(req.query,req.resultType,req.market,req.limit);
                 }

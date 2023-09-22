@@ -1,7 +1,6 @@
 <?php
 require_once('../autoload.php');
 // Deletes a playlist
-require_once('../autoload.php');
 ob_start();
 
 function safeBool($var, $context) : bool {    

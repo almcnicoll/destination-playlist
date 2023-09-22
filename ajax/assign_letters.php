@@ -1,7 +1,6 @@
 <?php
     require_once('../autoload.php');
     // Assigns letters to participants
-    require_once('../autoload.php');
     ob_start();
 
     $fatal_error = false;

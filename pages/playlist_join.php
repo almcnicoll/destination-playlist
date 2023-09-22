@@ -145,7 +145,9 @@ $srFollow->send($dataPublic);
                     var u = letterData[i].user;
                     user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
                     if (u.id == currentUser) {
-                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"+l.letter.toUpperCase()+"'; letter_id = "+l.id+";\"><span class='bi bi-pencil-square'></span></a>";
+                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
+                                    +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
+                                    +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
                     }
                 }
                 $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
@@ -154,7 +156,11 @@ $srFollow->send($dataPublic);
     }
 
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
-        output = '';
+        var output = '';
+        var isAppend = false;
+        if ('tracks' in data) {
+            isAppend = (data.tracks.offset > 0);
+        }
         if (('tracks' in data) && ('items' in data.tracks)) {
             // Loop through the tracks
             for(var i in data.tracks.items) {
@@ -170,22 +176,14 @@ $srFollow->send($dataPublic);
                         +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
             }
         }
-        $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
-        $('#search-results-container li').each( function() {
-            var link = $(this).children('a').first();
-            if (link.data('track-title') === undefined) { link.data('track-title',''); }
-            if (link.data('track-artists') === undefined) { link.data('track-artists',''); }
-            if (trackSearch.checkTrack( 
-                    decodeURIComponent( link.data('track-title') ), 
-                    decodeURIComponent( link.data('track-artists') ) 
-            )) {
-                // Valid choice
-                $(this).addClass('valid').removeClass('invalid').removeClass('validating');
-            } else {
-                // Invalid choice
-                $(this).addClass('invalid').removeClass('valid').removeClass('validating');
-            }
-        } );
+        // Now determine whether to append or overwrite
+        if (isAppend) {
+            $('#search-results-container').append(output);
+        } else {
+            $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
+        }
+        // Now determine whether they are valid options to select
+        trackSearch.validateTracks('#search-results-container li');
     }
     trackSearch.handleSearchClickCustom = function(clickedElement) {
 
@@ -234,7 +232,15 @@ $srFollow->send($dataPublic);
       <div class="modal-body">
       <div class="row">
         <div class="col-12">
-            <input type="text" placeholder="Type here to search..." id="track-search-box">
+            <div class='input-group'>
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Beginning with<span id='beginning-with-letter' class='text-primary'></span></span>
+                </div>
+                <input type="text" class='form-control' autocomplete="off" placeholder="Type here to search..." id="track-search-box">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
+                </div>
+            </div>
             <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
