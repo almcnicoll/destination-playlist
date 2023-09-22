@@ -52,7 +52,7 @@
 ?>
 
 <div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
-<h2 class="text-center" id="title">Joining playlist <?= $playlist->display_name ?>...</h2>
+<h2 class="text-center" id="title"><span id='titleText'>Joining playlist <?= $playlist->display_name ?>...</span> <a href='#' id='play-button' data-bs-toggle='modal' data-bs-target='#playDevicesModal' onclick="playHandler.getDevices();"><span class='bi bi-play-circle'></span></a></h2></h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
@@ -208,8 +208,8 @@ $srFollow->send($dataPublic);
 <script type="text/javascript">
     $(document).ready(
         function() {
-            var currTitle = $('#title').text();
-            $('#title').text(currTitle.replace(/Joining/,'Joined'));
+            var currTitle = $('#titleText').text();
+            $('#titleText').text(currTitle.replace(/Joining/,'Joined'));
             
             // Modal focus
             document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
