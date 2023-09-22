@@ -185,9 +185,9 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
         // Handle typing in search box
         $(inputBox).on('keyup',function(event) {
             // Only deal with actual characters
-            if (((event.which < 40)||(event.which > 90)) && (event.which != 8)) {
+            /*if (((event.which < 40)||(event.which > 90)) && (event.which != 8)) {
                 return;
-            }
+            }*/
             // Don't run loads of simultaneous queries
             var txt=$(this).val();
             if (trackSearch.search_request_running) {
