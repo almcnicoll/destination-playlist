@@ -6,6 +6,7 @@
         type: resultType,
         market: userMarket,
         limit: resultLimit,
+        offset: resultOffset,
         playlist_id: dp internal playlist id
     */
 
