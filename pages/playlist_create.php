@@ -10,65 +10,63 @@
             // Create playlist on spotify
             $user = $_SESSION['USER'];
             $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
-            $ch = curl_init($endpoint);
-            $options = [
+            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_POST, $endpoint);
+            $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
+            $createOptions = [
                 'name'              => $_REQUEST['display_name'],
                 'public'            => true,
                 'collaborative'     => false,
                 'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),
             ];
-            $url = $endpoint;
-            curl_setopt_array ( $ch, array (
-                CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$_SESSION['USER_ACCESSTOKEN'],'Content-type: application/json'],
-                CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => json_encode($options),
-            ) );
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-            $result = curl_exec($ch);
-            $listresponse = json_decode($result, true);
-            curl_close($ch);
-
-            if (isset($listresponse['error'])) {
-                // Show the error
-                $error_messages[] = $listresponse['error'];
+            $sr->send($createOptions);
+            
+            if ($sr->hasErrors()) {
+                $error_messages[] = $sr->getErrors();
             } else {
-                // Create playlist in db
-                $playlist = new Playlist();
-                $playlist->destination = $_REQUEST['destination'];
-                $playlist->spotify_playlist_id = $listresponse['id'];
-                $playlist->display_name = $_REQUEST['display_name'];
-                $playlist->flags = 0; // And build up from here
-                foreach ($_REQUEST['flags'] as $thisFlag) {
-                    $playlist->flags += ((int)$thisFlag);
-                }
-                $playlist->user_id = $_SESSION['USER_ID'];
-                $playlist->save();
-                
-                // Set playlist image
-                $imageResult = $playlist->setImage();
-                if ($imageResult !== true) {
-                    $error_messages[] = $imageResult;
-                }
+                $result = $sr->result;
+                $listresponse = json_decode($result, true);
 
-                // Populate list of letters
-                $letters = [];
-                if ($playlist->hasFlags(Playlist::FLAGS_INCLUDEDIGITS)) {
-                    $letters = str_split( strtoupper(preg_replace('/[^\w\d]+/i','',$playlist->destination)) , 1);
+                if (isset($listresponse['error'])) {
+                    // Show the error
+                    $error_messages[] = $listresponse['error'];
                 } else {
-                    $letters = str_split( strtoupper(preg_replace('/[^\w]+/i','',$playlist->destination)) , 1);
-                }
+                    // Create playlist in db
+                    $playlist = new Playlist();
+                    $playlist->destination = $_REQUEST['destination'];
+                    $playlist->spotify_playlist_id = $listresponse['id'];
+                    $playlist->display_name = $_REQUEST['display_name'];
+                    $playlist->flags = 0; // And build up from here
+                    foreach ($_REQUEST['flags'] as $thisFlag) {
+                        $playlist->flags += ((int)$thisFlag);
+                    }
+                    $playlist->user_id = $_SESSION['USER_ID'];
+                    $playlist->save();
+                    
+                    // Set playlist image
+                    $imageResult = $playlist->setImage();
+                    if ($imageResult !== true) {
+                        $error_messages[] = $imageResult;
+                    }
 
-                // Create letters in db
-                foreach ($letters as $letter) {
-                    $l = new Letter ();
-                    $l->playlist_id = $playlist->id;
-                    $l->user_id = null; // NOT current user - letter should be unassigned
-                    $l->letter = $letter;
-                    $l->save();
-                }
+                    // Populate list of letters
+                    $letters = [];
+                    if ($playlist->hasFlags(Playlist::FLAGS_INCLUDEDIGITS)) {
+                        $letters = str_split( strtoupper(preg_replace('/[^\w\d]+/i','',$playlist->destination)) , 1);
+                    } else {
+                        $letters = str_split( strtoupper(preg_replace('/[^\w]+/i','',$playlist->destination)) , 1);
+                    }
 
-                header("Location: {$config['root_path']}/playlist/share/{$playlist->id}");
+                    // Create letters in db
+                    foreach ($letters as $letter) {
+                        $l = new Letter ();
+                        $l->playlist_id = $playlist->id;
+                        $l->user_id = null; // NOT current user - letter should be unassigned
+                        $l->letter = $letter;
+                        $l->save();
+                    }
+
+                    header("Location: {$config['root_path']}/playlist/share/{$playlist->id}");
+                }
             }
         }
     }

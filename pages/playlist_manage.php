@@ -16,11 +16,14 @@
     if ($playlist == null) {
         $error_messages[] = "Playlist not found";
         $fatal_error = true;
-    }
-
-    if ($playlist->user_id != $_SESSION['USER_ID']) {
-        $error_messages[] = "You do not own this playlist!";
-        $fatal_error = true;
+    } else {
+        if ($playlist->user_id != $_SESSION['USER_ID']) {
+            $error_messages[] = "You do not own this playlist!";
+            $fatal_error = true;
+        } else {
+            // Ensure that playlist exists on Spotify - sometimes it can be orphaned
+            $playlist->pushToSpotify();
+        }
     }
 
 ?>
