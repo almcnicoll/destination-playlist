@@ -129,9 +129,12 @@ $srFollow->send($dataPublic);
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
 <!-- Include play-devices script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js'></script>
+<!-- Include letter-unassign script (part of letter-assign script) -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
     playHandler.init('#playDevicesContainer');
+    letterAssigner.init(); // No target as we're UN-assigning only
     letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
         $('#tracks-table tbody tr').remove();
         // Manage errors or good data
@@ -153,6 +156,9 @@ $srFollow->send($dataPublic);
                         edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                                     +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
                                     +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
+                        var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Give up this track'><span class='bi bi-x-circle'></span></a>&nbsp;";
+                        user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
+                                        +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
                     }
                 }
                 $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");

@@ -29,11 +29,13 @@
                 $error_messages[] = "Playlist not found";
                 $fatal_error = true;
             } else {
-                if ($playlist->user_id != $_SESSION['USER_ID']) {
+                // We can proceed if (a) the user owns the letter or (b) the user owns the playlist
+                if (($letter->user_id == $_SESSION['USER_ID'])
+                  ||($playlist->user_id == $_SESSION['USER_ID'])) {
+                    $user = $playlist->getOwner();
+                } else {
                     $error_messages[] = "You do not own this playlist!";
                     $fatal_error = true;
-                } else {
-                    $user = $playlist->getOwner();
                 }
             }
         }
@@ -42,6 +44,7 @@
     // Return if fatal
     if ($fatal_error) {
         $output = json_encode(['errors' => $error_messages]);
+        http_response_code(400);
         ob_end_clean();
         die($output);
     }

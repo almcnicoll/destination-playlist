@@ -8,6 +8,7 @@ letterAssigner.updateLettersNow = function() {
     clearTimeout(letterGetter.timer);
     letterGetter.getLetters();
     $("html,html *").css("cursor","auto");
+    $(letterAssigner.target).prop('disabled',false);
 }
 
 letterAssigner.ajaxOptions = {
@@ -19,13 +20,17 @@ letterAssigner.ajaxOptions = {
     complete: letterAssigner.updateLettersNow
 };
 
-letterAssigner.init = function(target) {
+letterAssigner.init = function(target=null) {
+    letterAssigner.target = target;
     $(document).ready(
         function () {
-            $(target).on('click',function() {
-                $("html, html *").css("cursor","wait");
-                $.ajax(letterAssigner.url, letterAssigner.ajaxOptions);
-            });
+            if (letterAssigner.target!=null) {
+                $(letterAssigner.target).on('click',function() {
+                    $(letterAssigner.target).prop('disabled',true);
+                    $("html, html *").css("cursor","wait");
+                    $.ajax(letterAssigner.url, letterAssigner.ajaxOptions);
+                });
+            }
             $('body').on('click','a.unassign-letter',function() {
                 $("html, html *").css("cursor","wait");
                 var letter_id = $(this).data('letter-id');

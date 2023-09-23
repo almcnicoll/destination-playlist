@@ -93,7 +93,7 @@
                 var edit_own = "";
                 if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
                     var u = letterData[i].user;
-                    var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>&nbsp;";
+                    var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
                     user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
                                     +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
                     if (u.id == currentUser) {
@@ -241,7 +241,7 @@ if ($fatal_error) {
 
 <div class="row">
     <div class="col-4">
-        <a href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</a>
+        <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
     </div>
     <div class="col-8"></div>
 </div>
