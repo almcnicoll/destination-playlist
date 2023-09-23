@@ -132,16 +132,15 @@ class SpotifyRequest {
         if ($this->returnTransfer) { curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1); }
 
         // EXECUTE
-        // TODO - remove curl error logging
-        $fh = fopen('curl.err.log','w');
-        curl_setopt($this->ch,CURLOPT_STDERR,$fh);
+        //$fh = fopen('curl.err.log','w');
+        //curl_setopt($this->ch,CURLOPT_STDERR,$fh);
         $this->result = curl_exec($this->ch);
         $this->info = curl_getinfo($this->ch);
         $this->error_message = curl_error($this->ch);
         $this->error_number = curl_errno($this->ch);
         $this->http_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
         curl_close($this->ch);
-        fclose($fh);
+        //fclose($fh);
 
         return $this;
     }
