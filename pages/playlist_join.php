@@ -172,6 +172,9 @@ $srFollow->send($dataPublic);
         if ('tracks' in data) {
             isAppend = (data.tracks.offset > 0);
         }
+        if (!isAppend) {
+            output = "<li class='list-group-item fs-6'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+        }
         if (('tracks' in data) && ('items' in data.tracks)) {
             // Loop through the tracks
             for(var i in data.tracks.items) {
@@ -182,7 +185,7 @@ $srFollow->send($dataPublic);
                     artistNames.push(t.artists[ii].name);
                 }
                 t.artist_string = artistNames.join(' // ');
-                output += "<li class='list-group-item validating'><a href='#' class='search-result' data-track-id='"
+                output += "<li class='list-group-item track validating'><a href='#' class='search-result' data-track-id='"
                         +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
                         +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
             }
@@ -194,7 +197,7 @@ $srFollow->send($dataPublic);
             $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
         }
         // Now determine whether they are valid options to select
-        trackSearch.validateTracks('#search-results-container li');
+        trackSearch.validateTracks('#search-results-container li.track');
     }
     trackSearch.handleSearchClickCustom = function(clickedElement) {
 
