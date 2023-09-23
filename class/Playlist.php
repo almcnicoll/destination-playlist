@@ -89,14 +89,13 @@ class Playlist extends Model {
         return !$sr->hasErrors(); // If there's no errors, it exists - a bit crude because we might have a quota error or something
     }
 
+    // Checks if the playlist exists on Spotify - if not, creates it
     public function pushToSpotify() {
         global $config;
-        // Create playlist on spotify
         $user = $_SESSION['USER'];
-
-        if ($this->existsOnSpotify()) {
+        // We need to re-create if (a) there is no spotify playlist ID saved or (b) Spotify doesn't recognise the id
+        if ((!empty($this->spotify_playlist_id)) && ($this->existsOnSpotify())) {
             $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
-            //die("Endpoint #1: ".$endpoint);
             $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
             $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
             $editData = [
@@ -109,7 +108,6 @@ class Playlist extends Model {
             return $sr->send($editData);
         } else {
             $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
-            //die("Endpoint #2: ".$endpoint);
             $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
             $createdData = [
                 'name'              => $this->display_name,
@@ -117,8 +115,14 @@ class Playlist extends Model {
                 'collaborative'     => false,
                 'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),
             ];
-            
-            return $sr->send($createdData);            
+            $sr->send($createdData);
+            if ($sr->hasErrors()) {
+                return $sr;
+            } else {
+                $result = json_decode($sr->result);
+                $this->spotify_playlist_id = $result->id;
+                return $sr;
+            }
         }
 
         

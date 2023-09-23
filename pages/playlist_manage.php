@@ -16,11 +16,14 @@
     if ($playlist == null) {
         $error_messages[] = "Playlist not found";
         $fatal_error = true;
-    }
-
-    if ($playlist->user_id != $_SESSION['USER_ID']) {
-        $error_messages[] = "You do not own this playlist!";
-        $fatal_error = true;
+    } else {
+        if ($playlist->user_id != $_SESSION['USER_ID']) {
+            $error_messages[] = "You do not own this playlist!";
+            $fatal_error = true;
+        } else {
+            // Ensure that playlist exists on Spotify - sometimes it can be orphaned
+            $playlist->pushToSpotify();
+        }
     }
 
 ?>
@@ -90,8 +93,9 @@
                 var edit_own = "";
                 if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
                     var u = letterData[i].user;
-                    user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>"
-                                    +"<div class='name-display'>"+u.display_name+"</div>";
+                    var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
+                    user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
+                                    +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
                     if (u.id == currentUser) {
                         edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                                     +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
@@ -237,7 +241,7 @@ if ($fatal_error) {
 
 <div class="row">
     <div class="col-4">
-        <a href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</a>
+        <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
     </div>
     <div class="col-8"></div>
 </div>
