@@ -70,7 +70,7 @@ trackSearch.processQueue = function() {
         // Clear queue
         trackSearch.search_request_queue = null;
         // Send queued request
-        trackSearch.search_request(_q,_rT,_m,_l);
+        trackSearch.search_request(_q,_rT,_m,_l,0); // Always offset 0 for queued request
     }
 }
 
@@ -175,6 +175,16 @@ trackSearch.validateTracks = async function(pattern) {
             $(this).addClass('invalid').removeClass('valid').removeClass('validating');
         }
     } );
+    var hiddenCount = $('#search-results-container li.invalid').length;
+    if (hiddenCount==0) {
+        $('#hidden-results-count-container').addClass('visually-hidden');
+        $('#hidden-results-count').text('0');
+        $('#must-begin-with').text($('#beginning-with-letter').text());
+    } else {
+        $('#hidden-results-count-container').removeClass('visually-hidden');
+        $('#hidden-results-count').text(hiddenCount.toString());
+        $('#must-begin-with').text($('#beginning-with-letter').text());
+    }
 }
 
 trackSearch.init = function(inputBox, outputBox, limit=40) {
@@ -198,7 +208,7 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
                     trackSearch.search_request_running = true;
                     trackSearch.extraRetrievals = 0;
                     var req = trackSearch.build_search_request(txt);
-                    trackSearch.search_request(req.query,req.resultType,req.market,req.limit);
+                    trackSearch.search_request(req.query,req.resultType,req.market,req.limit,0);
                 }
             }
         });

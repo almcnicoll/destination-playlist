@@ -80,6 +80,8 @@ table.neat * {
 
 #search-results-container li.validating {
     cursor: no-drop;
+    max-height: 2em;
+    overflow-y: hidden;
 }
 #search-results-container li a.validating {
     color: #666;
@@ -88,6 +90,8 @@ table.neat * {
 
 #search-results-container li.valid {
     cursor: auto;
+    max-height: 2em;
+    overflow-y: hidden;
 }
 #search-results-container li.valid a {
     color: #003399;

@@ -174,6 +174,7 @@ $srFollow->send($dataPublic);
         }
         if (!isAppend) {
             output = "<li class='list-group-item fs-6'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+            output += "<li class='list-group-item fs-6 fst-italic visually-hidden' id='hidden-results-count-container'><span id='hidden-results-count'></span> results hidden because they don't begin with <span id='must-begin-with'></span></li>";
         }
         if (('tracks' in data) && ('items' in data.tracks)) {
             // Loop through the tracks
@@ -192,7 +193,7 @@ $srFollow->send($dataPublic);
         }
         // Now determine whether to append or overwrite
         if (isAppend) {
-            $('#search-results-container').append(output);
+            $('#search-results-container ul').append(output);
         } else {
             $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
         }

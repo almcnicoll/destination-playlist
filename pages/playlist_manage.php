@@ -126,7 +126,8 @@
             isAppend = (data.tracks.offset > 0);
         }
         if (!isAppend) {
-            output = "<li class='list-group-item fs-6 font-italic'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+            output = "<li class='list-group-item pt-0 pb-0'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+            output += "<li class='list-group-item pt-0 pb-0 fst-italic visually-hidden' id='hidden-results-count-container'><small><span id='hidden-results-count'></span> results hidden because they don't begin with<span id='must-begin-with'></span></small></li>";
         }
         if (('tracks' in data) && ('items' in data.tracks)) {
             // Loop through the tracks
@@ -145,7 +146,7 @@
         }
         // Now determine whether to append or overwrite
         if (isAppend) {
-            $('#search-results-container').append(output);
+            $('#search-results-container ul').append(output);
         } else {
             $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
         }
