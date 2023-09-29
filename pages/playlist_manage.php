@@ -168,7 +168,7 @@
     trackSearch.init('#track-search-box','#search-results-container');
     letterGetter.init(500,10000,8000);
     peopleGetter.init(0,10000,8000);
-    letterAssigner.init('#btn-assign-letters');
+    letterAssigner.init('#btn-assign-letters','#btn-reassign-letters');
     
     $(document).ready(
         function() {
@@ -245,7 +245,15 @@ if ($fatal_error) {
 
 <div class="row">
     <div class="col-4">
-        <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
+        <div class='btn-group'>
+            <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
+            <div class='btn-group'>
+                <button type='button' class="btn btn-md btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id='assign-dropdown-label'></button>
+                <ul class='dropdown-menu' aria-labelledby="assign-dropdown-label">
+                    <li><a class='dropdown-item btn btn-md btn-success' href='#' id='btn-reassign-letters'>Reassign letters</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
     <div class="col-8"></div>
 </div>
