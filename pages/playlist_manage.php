@@ -115,7 +115,7 @@
         $('#people-table tbody tr:not(:first)').remove();
         for(var i in data) {
             var u = data[i].user;
-            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
+            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td><td class='kick-user'><a href='#' data-user-id='"+u.id+"'><span class='bi bi-circle-x'></span></a></td></tr>");
         }
     }
 
@@ -218,16 +218,19 @@ if ($fatal_error) {
                 <tr>
                     <th>&nbsp;</th>
                     <th>Name</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td><div class="initial-display"><?= strtoupper(substr($_SESSION['USER']->display_name,0,1)) ?></div></td>
                     <td><?= $_SESSION['USER']->display_name ?></td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td><div class="initial-display">?</div></td>
                     <td class='loading-cell'>Loading...</td>
+                    <td class='loading-cell'>&nbsp;</td>
                 </tr>
             </tbody>
         </table>
