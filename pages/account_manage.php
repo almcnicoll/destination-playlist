@@ -1,3 +1,14 @@
+<script type='text/javascript'>
+    $(document).ready( function() {
+        $('#deleteAccountAreYouSure').on('change', function() {
+            if ($('#deleteAccountAreYouSure').is(':checked')) {
+                $('#deleteAccountButton').removeAttr('disabled');
+            } else {
+                $('#deleteAccountButton').attr('disabled','disabled');
+            }
+        });
+    } );
+</script>
 <?php
 
 $fatal_error = false;
@@ -31,6 +42,7 @@ if ($fatal_error) {
 } else {
     // Handle form submission
     if (isset($_REQUEST['action'])) {
+
         if ($_REQUEST['action'] == 'formsubmitted') {
             if (empty($_REQUEST['displayName'])) {
                 $error_messages[] = "Your name cannot be empty.";
@@ -46,7 +58,33 @@ if ($fatal_error) {
                     $user = User::getById(($_SESSION['USER_ID'])); // Just to be sure that the save DID occur!
                 }
             }
-
+        }
+        
+        if ($_REQUEST['action'] == 'accountdeleted') {
+            if (empty($_REQUEST['deleteAccountAreYouSure'])) {
+                $error_messages[] = "You must confirm deletion.";
+            } else {
+                // Delete letter assignments
+                $letters = Letter::find(['user_id','=',$_SESSION['user_id']]);
+                foreach($letters as $letter) {
+                    $letter->user_id = null;
+                    $letter->save();
+                }
+                // Delete participations
+                $participations = Participation::find(['user_id','=',$_SESSION['user_id']]);
+                foreach($participations as $participation) {
+                    $participation->delete();
+                }
+                // Delete playlists
+                $playlists = Playlist::find(['user_id','=',$_SESSION['user_id']]);
+                foreach($playlists as $playlist) {
+                    $playlist->delete;
+                }
+                // Delete user
+                $user->delete();
+                session_destroy(); // Lose login
+                header('Location: '.$config['root_path'].'/?error_message='.urlencode("Your account has been deleted."));
+            }
         }
     }
 
@@ -88,6 +126,29 @@ if ($fatal_error) {
                     <input type="hidden" name="action" value="formsubmitted">
                     
                     <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- DELETE ACCOUNT -->
+<div class='card'>
+    <div class='card-body'>
+        <h3 class='card-title'>Delete Account</h3>
+        <form method='POST'>
+            <div class="row">
+                <div class="col-12 fs-5 fst-italic">If you want to remove your account, click here.<br />
+                You will lose all your DP playlists, but they will remain on Spotify.</div>
+            </div>  
+            <div class="row">
+                <div class="col-12">
+                    <label for="deleteAccountAreYouSure" class="form-label">Are you sure?</label>
+                    <input class="form-check-input" id="deleteAccountAreYouSure" name="deleteAccountAreYouSure" aria-describedby="deleteAccountAreYouSureHelp" type="checkbox">
+                    <div id="deleteAccountAreYouSureHelp" class="form-text">Tick this box, then click <strong>Delete</strong> below.</div>
+                    
+                    <input type="hidden" name="action" value="accountdeleted">
+                    
+                    <button type="submit" class="btn btn-danger" id='deleteAccountButton' disabled>Delete</button>
                 </div>
             </div>
         </form>
