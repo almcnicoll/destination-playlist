@@ -1,5 +1,10 @@
 <?php
 
+$error_messages = [];
+if (isset($_REQUEST['error_message'])) {
+    $error_messages[] = $_REQUEST['error_message'];
+}
+
 $user = $_SESSION['USER'];
 
 if (isset($_REQUEST['newname'])) {
@@ -13,6 +18,17 @@ echo <<<END_SCRIPTS
 <!-- Include leave-playlist script -->
 <script type='text/javascript' src='{$config['root_path']}/js/leave_handler.js'></script>
 END_SCRIPTS;
+
+// Display error messages
+if (count($error_messages)>0) {
+    foreach($error_messages as $error_message) {
+?>
+<div class="row">
+    <div class="span12 alert alert-danger"><?= $error_message ?></div>
+</div>
+<?php
+    }
+}
 
 if ($user->display_name) {
 ?>
