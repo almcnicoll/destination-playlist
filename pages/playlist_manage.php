@@ -115,7 +115,13 @@
         $('#people-table tbody tr:not(:first)').remove();
         for(var i in data) {
             var u = data[i].user;
-            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td><td class='kick-user'><a href='#' data-user-id='"+u.id+"'><span class='bi bi-circle-x'></span></a></td></tr>");
+            var kicked = data[i].removed;
+            var kickClass = ((kicked)?'unkick-user':'kick-user');
+            var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
+            var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+            var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
+            var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
+            $('#people-table tbody').append("<tr>" + initialCell + nameCell + kickCell + "</tr>");
         }
     }
 

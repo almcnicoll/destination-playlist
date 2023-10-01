@@ -5,6 +5,8 @@ class Participation extends Model {
     public string $playlist_id;
     public int $removed = 0;
 
+    public static $defaultOrderBy = ['removed','user_id'];
+
     static string $tableName = "participations";
     static $fields = ['id','user_id','playlist_id','removed','created','modified'];
 

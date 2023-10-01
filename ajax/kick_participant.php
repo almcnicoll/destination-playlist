@@ -53,8 +53,9 @@
             $error_messages[] = "The user is not part of this playlist.";
             $fatal_error = true;
         } else {
-            // All good - kick them
-            $participant->removed = true;
+            // All good - kick or unkick them
+            $kick = filter_var($_REQUEST['kick'], FILTER_VALIDATE_BOOLEAN);
+            $participant->removed = $kick;
             $participant->save();
         }
     }
@@ -64,7 +65,7 @@
         ob_end_clean();
         die($output);
     } else {
-        $output = json_encode($participants);
+        $output = json_encode(['success' => true]);
         ob_end_clean();
         die($output);
     }

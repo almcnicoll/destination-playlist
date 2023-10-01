@@ -23,9 +23,17 @@ peopleGetter.getParticipants = function() {
     $.ajax(peopleGetter.url, peopleGetter.ajaxOptions);
     peopleGetter.timer = setTimeout('peopleGetter.getParticipants()',peopleGetter.frequency);
 }
+peopleGetter.unkickParticipant = function() {
+    var uid = $(this).data('user-id');
+    $(this).css('cursor','wait');
+    $(this).parent().parent().css('cursor','wait');
+    $.ajax(peopleGetter.kickUrl+uid+"&kick=false", peopleGetter.kickAjaxOptions);
+}
 peopleGetter.kickParticipant = function() {
     var uid = $(this).data('user-id');
-    $.ajax(peopleGetter.kickUrl+uid, peopleGetter.kickAjaxOptions);
+    $(this).css('cursor','wait');
+    $(this).parent().parent().css('cursor','wait');
+    $.ajax(peopleGetter.kickUrl+uid+"&kick=true", peopleGetter.kickAjaxOptions);
 }
 peopleGetter.init = function(initialDelay, frequency, timeout) {
     peopleGetter.initialDelay = initialDelay;
@@ -41,7 +49,9 @@ peopleGetter.init = function(initialDelay, frequency, timeout) {
             }
 
             // Handle kick-user
-            $('#people-table').on('click','a.kick-user a',peopleGetter.kickParticipant);
+            $('#people-table').on('click','td.kick-user a',peopleGetter.kickParticipant);
+            // Handle unkick-user
+            $('#people-table').on('click','td.unkick-user a',peopleGetter.unkickParticipant);
         }
     );
 }
