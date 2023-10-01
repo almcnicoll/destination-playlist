@@ -8,7 +8,7 @@ letterAssigner.updateLettersNow = function() {
     clearTimeout(letterGetter.timer);
     letterGetter.getLetters();
     $("html,html *").css("cursor","auto");
-    $(letterAssigner.target).prop('disabled',false);
+    $(letterAssigner.assignButton).prop('disabled',false);
 }
 
 letterAssigner.ajaxOptions = {
@@ -20,17 +20,30 @@ letterAssigner.ajaxOptions = {
     complete: letterAssigner.updateLettersNow
 };
 
-letterAssigner.init = function(target=null) {
-    letterAssigner.target = target;
+letterAssigner.init = function(assignButton=null,reassignButton=null) {
+    letterAssigner.assignButton = assignButton;
+    letterAssigner.reassignButton = reassignButton;
     $(document).ready(
         function () {
-            if (letterAssigner.target!=null) {
-                $(letterAssigner.target).on('click',function() {
-                    $(letterAssigner.target).prop('disabled',true);
+            // Assign button
+            if (letterAssigner.assignButton!=null) {
+                $(letterAssigner.assignButton).on('click',function() {
+                    $(letterAssigner.assignButton).prop('disabled',true);
+                    $(letterAssigner.reassignButton).prop('disabled',true);
                     $("html, html *").css("cursor","wait");
                     $.ajax(letterAssigner.url, letterAssigner.ajaxOptions);
                 });
             }
+            // Reassign button
+            if (letterAssigner.reassignButton!=null) {
+                $(letterAssigner.reassignButton).on('click',function() {
+                    $(letterAssigner.assignButton).prop('disabled',true);
+                    $(letterAssigner.reassignButton).prop('disabled',true);
+                    $("html, html *").css("cursor","wait");
+                    $.ajax(letterAssigner.url+'&from_scratch=true', letterAssigner.ajaxOptions);
+                });
+            }
+            // Unassign letter icons
             $('body').on('click','a.unassign-letter',function() {
                 $("html, html *").css("cursor","wait");
                 var letter_id = $(this).data('letter-id');

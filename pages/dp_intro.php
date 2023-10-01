@@ -1,5 +1,5 @@
 <?php
-$login_check_soft_fail = true;
+//$login_check_soft_fail = true;
 ?>
 <div class='card text-bg-dark'>
     <div class='card-body bg-primary'>
@@ -26,5 +26,6 @@ $login_check_soft_fail = true;
             <div class="fs-6 step-explain">Which means that everyone discovers new music</div>
             <li>Listen and discover together!</li>
         </ol>
+        <button href="<?= $config['root_path'] ?>" class="btn btn-md btn-success" id='btn-assign-letters'>Let's go! &gt;&gt;</button>
     </div>
 </div>

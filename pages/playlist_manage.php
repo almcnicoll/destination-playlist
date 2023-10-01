@@ -115,7 +115,13 @@
         $('#people-table tbody tr:not(:first)').remove();
         for(var i in data) {
             var u = data[i].user;
-            $('#people-table tbody').append("<tr><td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td><td>"+u.display_name+"</td></tr>");
+            var kicked = data[i].removed;
+            var kickClass = ((kicked)?'unkick-user':'kick-user');
+            var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
+            var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+            var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
+            var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
+            $('#people-table tbody').append("<tr>" + initialCell + nameCell + kickCell + "</tr>");
         }
     }
 
@@ -168,7 +174,7 @@
     trackSearch.init('#track-search-box','#search-results-container');
     letterGetter.init(500,10000,8000);
     peopleGetter.init(0,10000,8000);
-    letterAssigner.init('#btn-assign-letters');
+    letterAssigner.init('#btn-assign-letters','#btn-reassign-letters');
     
     $(document).ready(
         function() {
@@ -218,16 +224,19 @@ if ($fatal_error) {
                 <tr>
                     <th>&nbsp;</th>
                     <th>Name</th>
+                    <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td><div class="initial-display"><?= strtoupper(substr($_SESSION['USER']->display_name,0,1)) ?></div></td>
                     <td><?= $_SESSION['USER']->display_name ?></td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td><div class="initial-display">?</div></td>
                     <td class='loading-cell'>Loading...</td>
+                    <td class='loading-cell'>&nbsp;</td>
                 </tr>
             </tbody>
         </table>
@@ -245,7 +254,15 @@ if ($fatal_error) {
 
 <div class="row">
     <div class="col-4">
-        <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
+        <div class='btn-group'>
+            <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
+            <div class='btn-group'>
+                <button type='button' class="btn btn-md btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id='assign-dropdown-label'></button>
+                <ul class='dropdown-menu' aria-labelledby="assign-dropdown-label">
+                    <li><a class='dropdown-item btn btn-md btn-success' href='#' id='btn-reassign-letters'>Reassign letters</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
     <div class="col-8"></div>
 </div>

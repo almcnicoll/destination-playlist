@@ -80,7 +80,7 @@
     // Make an array of un-overassigned users
     $new_participants = [];
     foreach ($participants as $p) {
-        if($participant_letter_counts[$p->id] <= $target_per_participant) { $new_participants[] = $p; }
+        if($participant_letter_counts[$p->user_id] <= $target_per_participant) { $new_participants[] = $p; }
     }
     // Add a "fake" participation for the owner if appropriate
     if ($participant_letter_counts[$user->id] <= $target_per_participant) {
@@ -100,26 +100,28 @@
     $u = 0;
     $remainder_territory_boundary = $new_target_per_participant * $new_participant_count;
     foreach ($unassigned_letters as $l) {
+        // Make sure we're using a consistent ID - the user's ID
+        if ($new_participants[$u] instanceof Participation) {
+            $use_this_id = $new_participants[$u]->user_id; // Get user_id from participation
+        } else {
+            $use_this_id = $new_participants[$u]->id; // Get id from user - shouldn't happen now though as we're creating "fake" participation for owner
+        }
+        // We're into remainder territory - overassignment is OK
         if ($i>=$remainder_territory_boundary) {
             // Just give it to this user - no checks
         } else {
             // Check that user has capacity - otherwise pick next until capacity found
-            while( $participant_letter_counts[ $new_participants[$u]->user_id ] >= $new_target_per_participant ) {
+            while( $participant_letter_counts[ $use_this_id ] >= $new_target_per_participant ) {
                 $u++; if ($u >= count($new_participants)) { $u = 0; }
             }
         }
         // Assign letter to user and increase their count
-        if ($new_participants[$u] instanceof Participation) {
-            $l->user_id = $new_participants[$u]->user_id; // Get user_id from participation
-        } else {
-            $l->user_id = $new_participants[$u]->id; // Get id from user - shouldn't happen now though as we're creating "fake" participation for owner
-        }
+        $l->user_id = $use_this_id;
         $l->save();
-        $participant_letter_counts[ $new_participants[$u]->id ]++;
+        $participant_letter_counts[ $use_this_id ]++;
         // Increment counter and user
-        $i++;
-        $u++;
-        if ($u >= count($new_participants)) { $u = 0; }
+        $i++; // Counting overall assignments
+        $u++; if ($u >= count($new_participants)) { $u = 0; } // Cycling participants
     }
 
     // Return values
