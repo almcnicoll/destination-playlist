@@ -10,14 +10,14 @@ trackSearch.reArtistSplit = /\s*\/\/\s*/; // Matches two forward-slashes with an
 trackSearch.build_search_request = function(txt) {
     var querystring = '';
     if (trackSearch.allow_title && trackSearch.allow_artist) {
-        querystring = encodeURIComponent(txt);
+        querystring = txt;//encodeURIComponent(txt);
     } else if (trackSearch.allow_title) {
-        querystring = encodeURIComponent("track:"+txt);
+        querystring = "track:"+txt;//encodeURIComponent("track:"+txt);
     } else if (trackSearch.allow_artist) {
-        querystring = encodeURIComponent("artist:"+txt);
+        querystring = "artist:"+txt;//encodeURIComponent("artist:"+txt);
     } else {
         // Not sure what to do here!
-        querystring = encodeURIComponent(txt);
+        querystring = txt;//encodeURIComponent(txt);
     }
     if (!'limit' in trackSearch) { trackSearch.limit = 40; }
     return {
