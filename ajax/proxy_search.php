@@ -48,14 +48,36 @@
         }
     }
 
-    // Make call
-    $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET,"https://api.spotify.com/v1/search");
-
-    $sr->contentType = SpotifyRequest::CONTENT_TYPE_FORM_ENCODED;
-
+    // Load data from query
     $data = $_REQUEST;
 
-    $sr->send($data);
+    // Make call - standard search UNLESS we're passed a spotify share link
+    $reShareLink = "/^\s*https:\/\/open\.spotify\.com\/track\/([^?]+)/i";
+    $matches = [];
+    if (preg_match($reShareLink, $data['q'], $matches) === 1) {
+        // Search by track ID
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET,"https://api.spotify.com/v1/tracks/{$matches[1]}");
+        $sr->contentType = SpotifyRequest::CONTENT_TYPE_FORM_ENCODED;
+        $sr->send($data);
+        // Now put that result inside an items array inside a tracks object, to mimic search results
+        $sr->result = <<<END_JSON
+{
+    "tracks": {
+        "limit": 1,
+        "offset": 0,
+        "items": [
+            {$sr->result}
+        ]
+    }
+}
+END_JSON;
+    } else {
+        // Search by querystring as normal
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET,"https://api.spotify.com/v1/search");
+        $sr->contentType = SpotifyRequest::CONTENT_TYPE_FORM_ENCODED;
+        $sr->send($data);
+    }
+
     
     header("Expires: 0");
     ob_end_clean();

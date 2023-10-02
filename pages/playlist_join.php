@@ -185,8 +185,10 @@ $srFollow->send($dataPublic);
                 for (var ii in t.artists) {
                     artistNames.push(t.artists[ii].name);
                 }
+                var explicit_class = ((t.explicit)?'bi bi-exclamation-diamond warning':'bi bi-file-earmark-music primary');
+                var explicit_title = ((t.explicit)?" title='Explicit lyrics' ":'');
                 t.artist_string = artistNames.join(' // ');
-                output += "<li class='list-group-item track validating'><a href='#' class='search-result' data-track-id='"
+                output += "<li class='list-group-item track validating'><span class='"+explicit_class+"'"+explicit_title+"></span>&nbsp;<a href='#' class='search-result' data-track-id='"
                         +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
                         +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
             }
@@ -246,7 +248,7 @@ $srFollow->send($dataPublic);
       </div>
       <div class="modal-body">
       <div class="row mb-1">
-        <div class='col-12 fs-6 fst-italic'>Pro tip! You can also search <strong>artist:adele</strong> or <strong>track:bohemian</strong>.</div>
+        <div class='col-12 fs-6 fst-italic' id='search-protip'>&nbsp;</div>
       </div>
       <div class="row">
         <div class="col-12">

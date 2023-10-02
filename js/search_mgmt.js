@@ -4,8 +4,18 @@ trackSearch.search_request_queue = null;
 trackSearch.search_request_running = false;
 trackSearch.extraRetrievals = 0;
 
+trackSearch.proTips = new Array();
+trackSearch.proTips.push("Pro tip! You can also search <strong>artist:adele</strong> or <strong>track:bohemian</strong>.");
+trackSearch.proTips.push("Pro tip! You can paste in a Spotify share link if you need a specific track or version.");
+
 trackSearch.reThe = /^the\s+/i; // Matches "the" at the start of a string, case-insensitive
 trackSearch.reArtistSplit = /\s*\/\/\s*/; // Matches two forward-slashes with any leading/trailing whitespace
+//trackSearch.reSpotifyLink = /^\s*https:\/\/open\.spotify\.com\/track\/([^?]+)/i; // Matches a link such as https://open.spotify.com/track/0riUhelZwZWyCPNt6qag6R?si=772e987d87a349f5 // Handled in PHP now
+
+trackSearch.getProTip = function() {
+    var i = Math.floor( Math.random()*trackSearch.proTips.length );
+    return trackSearch.proTips[i];
+}
 
 trackSearch.build_search_request = function(txt) {
     var querystring = '';
@@ -241,5 +251,8 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
                 trackSearch.handleSearchClickCustom(ele); // Runs any custom actions for the page on which we're embedding
             }
         });
+
+        // Populate search pro-tip
+        $('#search-protip').html(trackSearch.getProTip());
     });
 }
