@@ -248,7 +248,7 @@ $srFollow->send($dataPublic);
       </div>
       <div class="modal-body">
       <div class="row mb-1">
-        <div class='col-12 fs-6 fst-italic'>Pro tip! You can also search <strong>artist:adele</strong> or <strong>track:bohemian</strong>.</div>
+        <div class='col-12 fs-6 fst-italic' id='search-protip'>&nbsp;</div>
       </div>
       <div class="row">
         <div class="col-12">
