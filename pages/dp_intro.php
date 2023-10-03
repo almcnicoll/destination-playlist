@@ -1,5 +1,17 @@
 <?php
-//$login_check_soft_fail = true;
+// TODO - find a more universal way of displaying error messages (perhaps using header.php?)
+//  as well as a better way of storing them (session variable? class variable? PageInfo?) 
+if (!isset($error_messages)) { $error_messages = []; }
+if (isset($_REQUEST['error_message'])) { $error_messages[] = $_REQUEST['error_message']; }
+if (count($error_messages)>0) {
+    foreach($error_messages as $error_message) {
+?>
+<div class="row">
+    <div class="span12 alert alert-danger"><?= $error_message ?></div>
+</div>
+<?php
+    }
+}
 ?>
 <div class='card text-bg-dark'>
     <div class='card-body bg-primary'>
