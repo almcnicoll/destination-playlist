@@ -121,6 +121,7 @@ $srFollow->send($dataPublic);
     echo "var playlist_id = {$playlist->id};\n";
     echo "var currentUser = {$_SESSION['USER_ID']};\n";
     echo "playHandler.playlist_id = \"{$playlist->id}\";\n\n";
+    echo "playHandler.spotify_playlist_id = \"{$playlist->spotify_playlist_id}\";\n\n";
     ?>
 </script>
 <!-- Include search script -->

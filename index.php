@@ -55,6 +55,23 @@ ob_start(); // Required, as we're including login-check further down
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php
+    if (strpos(strtolower($_SERVER['SERVER_NAME']), 'localhost') === false):
+    ?>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q5ZQ6ZE62S"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Q5ZQ6ZE62S');
+    </script>
+    <!-- END GOOGLE -->
+    <?php
+    else:
+    echo "<!-- NO ANALYTICS ON LOCALHOST -->\n";
+    endif;
+    ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= (substr($config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Destination Playlist</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">

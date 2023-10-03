@@ -63,7 +63,7 @@ $share_link = $config['root_path'].'/playlist/join/'.$playlist->getShareCode();
         <h3>Share on</h3>
         <div class="row text-center fs-1">
             <div class="col">
-                <a href="whatsapp://send?Join%20my%20destination%20playlist%21%20<?= $share_link ?>" data-action="share/whatsapp/share"  
+                <a href="whatsapp://send?text=Join%20my%20destination%20playlist%21%20<?= $share_link ?>" data-action="share/whatsapp/share"  
         target="_blank" class="">
                     <span class="bi bi-whatsapp" style="color: #25D366;"></span>
                 </a>
