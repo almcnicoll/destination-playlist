@@ -27,6 +27,9 @@ class User extends Model {
 
         $currentUrl = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
 
+        // Check if user is on developer dashboard list - we can lose this if we move to Production Mode
+        $userCheckedOnList = (isset($_SESSION['USER_CHECKEDONLIST']) && ($_SESSION['USER_CHECKEDONLIST'] === true));
+
         if(!(
         isset($_SESSION['USER']) &&
         isset($_SESSION['USER_ID']) &&
@@ -55,6 +58,26 @@ class User extends Model {
                 $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
                 header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl));
                 die();
+            }
+            // Lastly - once per session - make sure the user can access the API - in dev mode, this is only possible if they've been added to the developer dashboard
+            if (!$userCheckedOnList) {
+                $checkUrl = "https://api.spotify.com/v1/me/tracks";
+                $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, $checkUrl);
+                $sr->send();
+                if ($sr->hasErrors()) {
+                    if ($sr->http_code == 403) {
+                        // Not in dev dashboard
+                        $_SESSION['USER_CHECKEDONLIST'] = false;
+                        header('Location: '.$config['root_path'].'/logout.php?'.http_build_query(['error_message'=>"You need to be registered as a trial user before you can access Destination Playlist. Please contact the developer."]));
+                        die();
+                    } else {
+                        // Some other error - ignore, but check again on next page load
+                        $_SESSION['USER_CHECKEDONLIST'] = false;
+                    }
+                } else {
+                    // All good - they're on the dashboard list
+                    $_SESSION['USER_CHECKEDONLIST'] = true;
+                }
             }
             // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object
             $discard = new User(); // Ensure that User class is autoloaded
