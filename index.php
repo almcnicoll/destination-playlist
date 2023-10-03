@@ -39,7 +39,11 @@ $pageinfo = PageInfo::get($stub);
 //die();
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
-    User::loginCheck($pageinfo->redirectOnFail);
+    if (empty($_REQUEST)) {
+        User::loginCheck($pageinfo->redirectOnFail);
+    } else {
+        User::loginCheck($pageinfo->redirectOnFail.'?'.http_build_query($_REQUEST));
+    }
 }
 
 
@@ -77,6 +81,15 @@ if (!@include_once($page)) {
         require_once('inc/login_check.php');
     }
     ob_end_flush();
+}
+
+// Check if we need to authenticate now
+if ($pageinfo->authSetting === PageInfo::AUTH_LATE) {
+    if (empty($_REQUEST)) {
+        User::loginCheck($pageinfo->redirectOnFail);
+    } else {
+        User::loginCheck($pageinfo->redirectOnFail.'?'.http_build_query($_REQUEST));
+    }
 }
 ?>
 </body>
