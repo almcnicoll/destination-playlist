@@ -26,12 +26,15 @@ playHandler.reportDevices = function(data, textStatus, jqXHR) {
     if ('devices' in data) {
         if (data.devices.length == 0) {
             // No devices to play on - say this
-            containerElement.html("<span class='bi bi-emoji-frown'></span>&nbsp;Cannot detect a Spotify-ready device.");
+            containerElement.html("<span class='bi bi-emoji-frown'></span>&nbsp;Cannot detect a Spotify-ready device.<br />"
+                                    +"<a href='https://open.spotify.com/playlist/"+playHandler.spotify_playlist_id+"' target='_blank'>Click here to open Spotify</a>");
         } else if (data.devices.length == 1) {
             // Only one device - announce that we'll play on that
             device = data.devices[0];
             icon = playHandler.getIcon(device);
             containerElement.html("<span class='bi bi-"+icon+"'></span>&nbsp;Playing on <a class='play-on-device' href='#' data-device-id='"+device.id+"'>"+device.name+"</a>.");
+            // And actually play...
+            $('a.play-on-device').trigger('click');
         } else {
             // Populate devices
             var deviceHtmls = new Array();
