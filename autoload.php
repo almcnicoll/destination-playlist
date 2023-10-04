@@ -17,8 +17,22 @@ class Autoloader
                 if (file_exists($file)) {
                     require $file;
                     return true;
+                } else {
+                    // Allow for us calling this two directories down (e.g. in /account/manage)
+                    $file = '../'.$file;
+                    if (file_exists($file)) {
+                        require $file;
+                        return true;
+                    } else {
+                        // Allow for us calling this three directories down (e.g. in /account/request/403)
+                        $file = '../'.$file;
+                        if (file_exists($file)) {
+                            require $file;
+                            return true;
+                        }
+                        return false;
+                    }
                 }
-                return false;
             }
             return false;
         });

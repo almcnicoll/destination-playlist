@@ -43,6 +43,7 @@ class Config {
         self::$__config['pageinfo'] = [];
         self::$__config['pageinfo']['index'] = new PageInfo(PageInfo::AUTH_EARLY, '/dp/intro');
         self::$__config['pageinfo']['dp_intro'] = new PageInfo(PageInfo::AUTH_NEVER, false);
+        self::$__config['pageinfo']['account_request'] = new PageInfo(PageInfo::AUTH_NEVER, false);
 
         self::$__loaded = true; // Don't need to reinitialise
     }

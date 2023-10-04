@@ -83,7 +83,13 @@ ob_start(); // Required, as we're including login-check further down
 
 <?php
 
-require_once('inc/header.php');
+if (!@include_once('inc/header.php')) {
+    if (!@include_once('../inc/header.php')) {
+        if (!@include_once('../../inc/header.php')) {
+            require_once('../../../inc/header.php');
+        }
+    }
+}
 
 if (!@include_once($page)) {
     http_response_code(404);
