@@ -1,22 +1,52 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
 if (isset($_REQUEST['your_name'])) {
-    // Send request and thank them
-    $mailHeaders = 'From: accounts@destinationplaylist.rocks' . "\r\n" .
-                    'Reply-To: accounts@destinationplaylist.rocks' . "\r\n" .
-                    'X-Mailer: PHP/' . phpversion();
-    mail('almcnicoll@gmail.com',
+    if (!isset($config)) { $config = Config::get(); }
+    $mail = new PHPMailer(true);
+    try {
+        //$mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        $mail->isSMTP();
+        $mail->Host = 'destinationplaylist.rocks';
+        $mail->SMTPAuth = true;
+        $mail->Username = $config['MAIL_USERNAME'];
+        $mail->Password = $config['MAIL_PASSWORD'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+        $mail->setFrom('accounts@destinationplaylist.rocks', 'DP Accounts');
+        $mail->addAddress('accounts@destinationplaylist.rocks', 'DP Accounts');
+        $mail->isHTML(true);
+        $mail->Subject = "DP Access Request";
+        $mail->Body = "<p>Access request from Destination Playlist</p><pre>".print_r($_REQUEST,true)."</pre>";
+        $mail->AltBody = "<p>Access request from Destination Playlist:\r\n".print_r($_REQUEST,true);
+        $mail->send();
+        ?>
+        <div class='card'>
+            <div class='card-body border border-4 border-success rounded'>
+                <h3 class='card-title'>Thanks!</h3>
+                <p>Your request has been sent. You'll get an email to <?= $_REQUEST['email'] ?> when your account has been approved.</p>
+            </div>
+        </div>
+        <br />
+        <?php
+    } catch (Exception $e) {
+        ?>
+        <div class='card'>
+            <div class='card-body border border-4 border-danger rounded'>
+                <h3 class='card-title'>Apologies!</h3>
+                <p>Your request could not be sent, for reasons as yet uncertain. Please try again later.</p>
+            </div>
+        </div>
+        <br />
+        <?php
+    }
+    /*mail('almcnicoll@gmail.com',
         "DP Access Request",
         "Output from request form:\r\n\r\n".print_r($_REQUEST,true),
-        $mailHeaders);
-?>
-<div class='card'>
-    <div class='card-body border border-4 border-success rounded'>
-        <h3 class='card-title'>Thanks!</h3>
-        <p>Your request has been sent, and you'll get an email to <?= $_REQUEST['email'] ?> when your account has been approved.</p>
-    </div>
-</div>
-<br />
-<?php
+        $mailHeaders);*/
+  
 } else {
     if (isset($params) && count($params)>0) {
         if ($params[0] == 403) {
@@ -35,19 +65,27 @@ if (isset($_REQUEST['your_name'])) {
         }
     }
 }
+
+$currUser = null; $currName = ''; $currEmail = '';
+if (isset($_SESSION['USER'])) {
+    $currUser = $_SESSION['USER'];
+    $currName = $currUser->display_name;
+    $currEmail = $currUser->email;
+}
 ?>
+
 <div class='card'>
     <div class='card-body'>
         <h3 class='card-title'>Request access</h3>
         <form method='POST'>
             <div class="mb-3">
                 <label for="your_name" class="form-label">What's your name?</label>
-                <input type="text" class="form-control" name="your_name" id="your_name" aria-describedby="your_name-help" required>
+                <input type="text" class="form-control" name="your_name" id="your_name" aria-describedby="your_name-help" required value="<?= $currName ?>">
                 <div class="form-text" id="your_name-help">Hopefully no explanation needed.</div>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">What's your Spotify email address?</label>
-                <input type="email" class="form-control" name="email" id="email" aria-describedby="email-help" required>
+                <input type="email" class="form-control" name="email" id="email" aria-describedby="email-help" required value="<?= $currEmail ?>">
                 <div class="form-text" id="email-help">This has to be the email address you've given Spotify for your account to work properly.</div>
             </div>
             <div class="mb-3">

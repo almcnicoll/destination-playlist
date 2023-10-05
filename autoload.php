@@ -6,7 +6,6 @@ class Autoloader
     {
         global $config;
         spl_autoload_register(function ($class) {
-            //global $config;
             $file = 'class'.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
             if (file_exists($file)) {
                 require $file;
@@ -18,13 +17,13 @@ class Autoloader
                     require $file;
                     return true;
                 } else {
-                    // Allow for us calling this two directories down (e.g. in /account/manage)
+                    // Allow for us calling this two directories down
                     $file = '../'.$file;
                     if (file_exists($file)) {
                         require $file;
                         return true;
                     } else {
-                        // Allow for us calling this three directories down (e.g. in /account/request/403)
+                        // Allow for us calling this three directories down
                         $file = '../'.$file;
                         if (file_exists($file)) {
                             require $file;
