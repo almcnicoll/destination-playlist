@@ -1,14 +1,9 @@
 <?php
 require_once('autoload.php');
-
-/* Do these steps manually, as login-check may be called much later */
-/*
 $discard = new User(); // To force autoloading of User class
 if (session_status() === PHP_SESSION_ACTIVE) {
     if (isset($_SESSION['USER'])) { $_SESSION['USER'] = unserialize(serialize($_SESSION['USER'])); }
 }
-*/
-/* END BLOCK */
 
 if(isset($_GET['params'])) {
     $page_parts = explode('/', $_GET['params']);
@@ -83,7 +78,13 @@ ob_start(); // Required, as we're including login-check further down
 
 <?php
 
-require_once('inc/header.php');
+if (!@include_once('inc/header.php')) {
+    if (!@include_once('../inc/header.php')) {
+        if (!@include_once('../../inc/header.php')) {
+            require_once('../../../inc/header.php');
+        }
+    }
+}
 
 if (!@include_once($page)) {
     http_response_code(404);
