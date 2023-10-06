@@ -222,6 +222,7 @@ if ($fatal_error) {
 <div class="alert alert-warning" role="alert">
   Keep this page open while your guests are adding their tracks!
 </div>
+<nav>
 <ul class="nav nav-tabs" id="nav1" role="tablist">
     <li class="nav-item" role="presentation">
         <a class="nav-link active" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2" aria-current="page" aria-selected="true">Tracks</a>
@@ -230,6 +231,7 @@ if ($fatal_error) {
         <a class="nav-link" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1">People</a>
     </li>
 </ul>
+</nav>
 
 <div class="tab-content" id="nav1-content">
     <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
@@ -267,7 +269,7 @@ if ($fatal_error) {
 </div>
 
 <div class="row">
-    <div class="col-4">
+    <div class="col-12">
         <div class='btn-group'>
             <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
             <div class='btn-group'>
@@ -277,8 +279,8 @@ if ($fatal_error) {
                 </ul>
             </div>
         </div>
+        &nbsp;<span class='bi bi-arrow-left'></span> click here when everyone's joined!
     </div>
-    <div class="col-8"></div>
 </div>
 
 <div class="modal fade" id="trackSearchModal" tabindex="-1">
