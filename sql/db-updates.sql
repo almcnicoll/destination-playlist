@@ -11,3 +11,9 @@ GROUP BY playlist_id
 ) lTwo ON lOne.playlist_id = lTwo.playlist_id
 SET lOne.`rank` = lOne.id-lTwo.minid
 ;
+/* UPDATE */
+/* VERSION 3 */
+ALTER TABLE users
+ADD COLUMN image_url VARCHAR(500) DEFAULT NULL
+AFTER market
+;

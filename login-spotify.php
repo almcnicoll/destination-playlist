@@ -81,6 +81,7 @@ if (isset($_REQUEST['refresh_needed'])) {
     $email = $userresponse['email'];
     $userid = $userresponse['id'];
     $market = $userresponse['country'];
+    $images = $userresponse['images'];
     curl_close($ch);
     //echo "<pre>".print_r($userresponse,true)."</pre>\n";
     
@@ -98,11 +99,19 @@ if (isset($_REQUEST['refresh_needed'])) {
         $user->email = $email;
         $user->display_name = $displayname;
         $user->market = $market;
+        if (!empty($images)) {
+            $user->image_url = $images[0]['url'];
+        }
         $user->save();
     } else {
-        // Refresh market
+        // Refresh market and profile image
         $user = $users[0];
         $user->market = $market;
+        if (empty($images)) {
+            $user->image_url = null;
+        } else {
+            $user->image_url = $images[0]['url'];
+        }
         $user->save();
     }
     $_SESSION['USER_ID'] = $user->id;

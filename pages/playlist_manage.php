@@ -119,7 +119,8 @@
             var kicked = data[i].removed;
             var kickClass = ((kicked)?'unkick-user':'kick-user');
             var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
-            var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+            //var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+            var initialCell = "<td>"+u.thumbnail+"</td>"; // TODO - wrong picture!
             var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
             var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
             $('#people-table tbody').append("<tr>" + initialCell + nameCell + kickCell + "</tr>");
@@ -254,7 +255,7 @@ if ($fatal_error) {
             </thead>
             <tbody>
                 <tr>
-                    <td><div class="initial-display"><?= strtoupper(substr($_SESSION['USER']->display_name,0,1)) ?></div></td>
+                    <td><?= $user->getThumbnail() ?></td>
                     <td><?= $_SESSION['USER']->display_name ?></td>
                     <td>&nbsp;</td>
                 </tr>

@@ -6,9 +6,10 @@ class User extends Model {
     public ?string $email;
     public ?string $display_name;
     public ?string $market;
+    public ?string $image_url;
 
     static string $tableName = "users";
-    static $fields = ['id','authmethod_id','identifier','email','display_name','market','created','modified'];
+    static $fields = ['id','authmethod_id','identifier','email','display_name','market','image_url','created','modified'];
 
     public function setAuthmethod_id($id) {
         $this->authmethod_id = $id;
@@ -16,6 +17,17 @@ class User extends Model {
 
     public function getAuthmethod() : ?AuthMethod {
         return AuthMethod::getById($this->authmethod_id);
+    }
+
+    public function getThumbnail() : string {
+        if (empty($this->image_url)) {
+            // return initial
+            $html = "<div class='initial-display'>".substr($this->display_name,0,1)."</div>";
+        } else {
+            // return pic
+            $html = "<div class='initial-display'><img src='{$this->image_url}' /></div>";
+        }
+        return $html;
     }
 
     public static function loginCheck($redirectOnFail = true) : bool {
