@@ -97,7 +97,7 @@ $share_link = $config['root_path'].'/playlist/join/'.$playlist->getShareCode();
 
 <div class="row mt-4">
     <div class="col-12 text-center">
-        <a class="btn btn-lg btn-success" href="<?= $config['root_path'].'/playlist/manage/'.$playlist->id ?>">Next</a>
+        <a class="btn btn-lg btn-success" href="<?= $config['root_path'].'/playlist/manage/'.$playlist->id ?>#people">Next</a>
         <p class="fs-5 text-body-secondary">Done sharing? Click here to continue.</p>
     </div>
 </div>
