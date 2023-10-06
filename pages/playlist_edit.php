@@ -120,6 +120,7 @@
                     $('#display_name').val('DP: '+$('#destination').val());
                 }
             });
+            $('#destination').focus();
         }
     );
 </script>
