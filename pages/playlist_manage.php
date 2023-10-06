@@ -185,6 +185,17 @@
             document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
                 document.getElementById('track-search-box').focus()
             });
+            // If #people in URL then switch to that tab
+            var urlHash = $(location).attr('hash');
+            if (urlHash == '#people') {
+                //$('#nav1-tab-1').trigger('click');
+                $('#nav1-content-2').removeClass('show active');
+                $('#nav1-content-1').addClass('show active');
+                $('#nav1-tab-2').removeClass('active');
+                $('#nav1-tab-1').addClass('active');
+                $('#nav1-tab-2').attr('aria-selected',"false");
+                $('#nav1-tab-1').attr('aria-selected',"true");
+            }
         }
     );
 </script>
@@ -213,15 +224,24 @@ if ($fatal_error) {
 </div>
 <ul class="nav nav-tabs" id="nav1" role="tablist">
     <li class="nav-item" role="presentation">
-        <a class="nav-link active" aria-current="page" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1" aria-selected="true">People</a>
+        <a class="nav-link active" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2" aria-current="page" aria-selected="true">Tracks</a>
     </li>
     <li class="nav-item" role="presentation">
-        <a class="nav-link" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2">Tracks</a>
+        <a class="nav-link" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1">People</a>
     </li>
 </ul>
 
 <div class="tab-content" id="nav1-content">
-    <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-1" aria-labelledby="nav1-tab-1">
+    <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
+        <table class="table table-light table-striped neat" id="tracks-table">
+            <tbody>
+                <tr>
+                    <td class='loading-cell'>Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" role="tabpanel" id="nav1-content-1" aria-labelledby="nav1-tab-1">
         <table class="table table-light table-striped neat" id="people-table">
             <thead>
                 <tr>
@@ -240,15 +260,6 @@ if ($fatal_error) {
                     <td><div class="initial-display">?</div></td>
                     <td class='loading-cell'>Loading...</td>
                     <td class='loading-cell'>&nbsp;</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="tab-pane fade" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
-        <table class="table table-light table-striped neat" id="tracks-table">
-            <tbody>
-                <tr>
-                    <td class='loading-cell'>Loading...</td>
                 </tr>
             </tbody>
         </table>
