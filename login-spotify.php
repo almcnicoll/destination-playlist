@@ -8,10 +8,13 @@ $discard = new User(); // ensure User class loaded
 if (isset($_REQUEST['refresh_needed'])) {
     // This branch is for refreshing the access token
     $endpoint = "https://accounts.spotify.com/api/token";
-    $options = http_build_query([
+
+    $refreshData = [
         'grant_type'        =>  'refresh_token',
         'refresh_token'     =>  $_SESSION['USER_REFRESHTOKEN'],
-    ]);
+    ];
+
+    $options = http_build_query($refreshData);
     $ch = curl_init($endpoint);
     curl_setopt_array ( $ch, array (
         CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
@@ -22,8 +25,19 @@ if (isset($_REQUEST['refresh_needed'])) {
     curl_setopt($ch, CURLOPT_USERPWD, $config['SPOTIFY_CLIENTID'].':'.$config['SPOTIFY_CLIENTSECRET']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-    $result = curl_exec($ch);
-    $authresponse = json_decode($result, true);
+    $sr = new SpotifyRequest(SpotifyRequest::TYPE_OAUTH_REFRESHTOKEN, SpotifyRequest::ACTION_POST, $endpoint);
+    $sr->send($refreshData);
+
+    //$result = curl_exec($ch);
+    if ($sr->hasErrors()) { // Can't refresh token for some reason
+        //file_put_contents('redirects.log', 'Refresh errors: '.print_r($sr->getErrors(),true)."\n", FILE_APPEND);
+        if (isset($_REQUEST['redirect_url'])) {
+            header("Location: ".$config['root_path'].'/login.php?'.http_build_query(['redirect_url'=>$_REQUEST['redirect_url']]));
+        } else {
+            header("Location: ".$config['root_path'].'/login.php');
+        }        
+    }
+    $authresponse = json_decode($sr->result, true);
     $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
     if (isset($authresponse['refresh_token'])) { $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token']; }
     $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early

@@ -52,11 +52,14 @@ class User extends Model {
         )) {
             // Need to log in
             //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
-            if ($redirectOnFail !== false) {
-                if ($redirectOnFail === true) {
+            if (($redirectOnFail !== false) && ($redirectOnFail !== 0) && ($redirectOnFail !== '0')) {
+                if (($redirectOnFail === true) || ($redirectOnFail === 1) || ($redirectOnFail === '1')) {
                     header("Location: {$config['root_path']}/login.php?redirect_url=".urlencode($currentUrl));
+                    //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/login.php?redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);
                 } else {
                     header("Location: {$config['root_path']}{$redirectOnFail}");
+                    //file_put_contents('redirects.log','Type: '.gettype($redirectOnFail)."\n",FILE_APPEND);
+                    //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}{$redirectOnFail}\n",FILE_APPEND);
                 }
                 die();
             }
@@ -69,6 +72,7 @@ class User extends Model {
                 // Call refresh mechanism
                 $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
                 header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl));
+                //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);
                 die();
             }
             // Lastly - once per session - make sure the user can access the API - in dev mode, this is only possible if they've been added to the developer dashboard
@@ -82,6 +86,7 @@ class User extends Model {
                         $_SESSION['USER_CHECKEDONLIST'] = false;
                         //header('Location: '.$config['root_path'].'/logout.php?'.http_build_query(['error_message'=>"You need to be registered as a trial user before you can access Destination Playlist. Please contact the developer."]));
                         header('Location: '.$config['root_path'].'/account/request/403');
+                        //file_put_contents('redirects.log',__LINE__.' Location: '.$config['root_path'].'/account/request/403'."\n",FILE_APPEND);
                         die();
                     } else {
                         // Some other error - ignore, but check again on next page load

@@ -31,14 +31,16 @@ $pageinfo = PageInfo::get($stub);
 //var_dump($config);
 //var_dump($stub);
 //var_dump($pageinfo);
+$debugInfo = '';
+//$debugInfo .= "Config: ".print_r($config,true)."\n";
+$debugInfo .= "Stub: ".print_r($stub,true)."\n";
+$debugInfo .= "PageInfo: ".print_r($pageinfo,true)."\n";
+//file_put_contents('redirects.log',$debugInfo,FILE_APPEND);
 //die();
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
-    if (empty($_REQUEST)) {
-        User::loginCheck($pageinfo->redirectOnFail);
-    } else {
-        User::loginCheck($pageinfo->redirectOnFail.'?'.http_build_query($_REQUEST));
-    }
+    $pageinfo->processRequestData();
+    User::loginCheck($pageinfo->redirectOnFail);
 }
 
 
@@ -103,11 +105,8 @@ if (!@include_once($page)) {
 
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_LATE) {
-    if (empty($_REQUEST)) {
-        User::loginCheck($pageinfo->redirectOnFail);
-    } else {
-        User::loginCheck($pageinfo->redirectOnFail.'?'.http_build_query($_REQUEST));
-    }
+    $pageinfo->processRequestData();
+    User::loginCheck($pageinfo->redirectOnFail);
 }
 ?>
 </body>
