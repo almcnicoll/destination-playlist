@@ -26,10 +26,6 @@
         $error_messages[] = "Playlist not found";
         $fatal_error = true;
     } else {
-
-        /*var_dump($params,$playlist_id,$auth_suffix,$playlist->getShareCode());
-        die();*/
-
         if (empty($auth_suffix) || ($params[0] != $playlist->getShareCode())) {
             $error_messages[] = "Invalid share link";
             $fatal_error = true;
@@ -38,6 +34,12 @@
         if ($playlist->hasFlags(Playlist::FLAGS_PEOPLELOCKED)) {
             $error_messages[] = "This playlist is locked to new joiners!";
             $fatal_error = true;
+        }
+
+        if ($playlist->user_id == $_SESSION['USER_ID']) {
+            // Can't join a playlist you own
+            header('Location: '.$config['root_path']."/playlist/manage/{$playlist->id}?".http_build_query(['error_message' => "You don't need to join this playlist: you created it!"]));
+            die();
         }
 
         $participation = Participation::findFirst([['playlist_id','=',$playlist->id],['user_id','=',$_SESSION['USER_ID']]]);

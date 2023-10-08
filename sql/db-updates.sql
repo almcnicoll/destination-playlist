@@ -17,3 +17,12 @@ ALTER TABLE users
 ADD COLUMN image_url VARCHAR(500) DEFAULT NULL
 AFTER market
 ;
+/* UPDATE */
+/* VERSION 4 */
+DELETE FROM participations WHERE id IN
+(
+SELECT participations.id
+FROM playlists
+INNER JOIN participations ON participations.playlist_id = playlists.id AND participations.user_id = playlists.user_id
+)
+;
