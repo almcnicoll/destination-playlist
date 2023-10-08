@@ -25,27 +25,30 @@
     if ($playlist == null) {
         $error_messages[] = "Playlist not found";
         $fatal_error = true;
-    }
-
-    /*var_dump($params,$playlist_id,$auth_suffix,$playlist->getShareCode());
-    die();*/
-
-    if (empty($auth_suffix) || ($params[0] != $playlist->getShareCode())) {
-        $error_messages[] = "Invalid share link";
-        $fatal_error = true;
-    }
-
-    if ($playlist->hasFlags(Playlist::FLAGS_PEOPLELOCKED)) {
-        $error_messages[] = "This playlist is locked to new joiners!";
-        $fatal_error = true;
-    }
-
-    $participation = Participation::findFirst([['playlist_id','=',$playlist->id],['user_id','=',$_SESSION['USER_ID']]]);
-    if ($participation != null) {
-        // They're already joined
-        if ($participation->removed == 1) {
-            $error_messages[] = "Sorry, you have been removed from this playlist. Please talk to the playlist owner if you would like to be reinstated.";
+    } else {
+        if (empty($auth_suffix) || ($params[0] != $playlist->getShareCode())) {
+            $error_messages[] = "Invalid share link";
             $fatal_error = true;
+        }
+
+        if ($playlist->hasFlags(Playlist::FLAGS_PEOPLELOCKED)) {
+            $error_messages[] = "This playlist is locked to new joiners!";
+            $fatal_error = true;
+        }
+
+        if ($playlist->user_id == $_SESSION['USER_ID']) {
+            // Can't join a playlist you own
+            header('Location: '.$config['root_path']."/playlist/manage/{$playlist->id}?".http_build_query(['error_message' => "You don't need to join this playlist: you created it!"]));
+            die();
+        }
+
+        $participation = Participation::findFirst([['playlist_id','=',$playlist->id],['user_id','=',$_SESSION['USER_ID']]]);
+        if ($participation != null) {
+            // They're already joined
+            if ($participation->removed == 1) {
+                $error_messages[] = "Sorry, you have been removed from this playlist. Please talk to the playlist owner if you would like to be reinstated.";
+                $fatal_error = true;
+            }
         }
     }
 

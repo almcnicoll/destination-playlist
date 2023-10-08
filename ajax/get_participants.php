@@ -33,6 +33,7 @@
         $participants = Participation::find([['playlist_id','=',$playlist_id],]);
         foreach ($participants as $participant) {
             $participant->user = $participant->getUser();
+            $participant->user->thumbnail = $participant->user->getThumbnail();
         }
     }
 

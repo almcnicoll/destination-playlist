@@ -6,9 +6,10 @@ class User extends Model {
     public ?string $email;
     public ?string $display_name;
     public ?string $market;
+    public ?string $image_url;
 
     static string $tableName = "users";
-    static $fields = ['id','authmethod_id','identifier','email','display_name','market','created','modified'];
+    static $fields = ['id','authmethod_id','identifier','email','display_name','market','image_url','created','modified'];
 
     public function setAuthmethod_id($id) {
         $this->authmethod_id = $id;
@@ -16,6 +17,17 @@ class User extends Model {
 
     public function getAuthmethod() : ?AuthMethod {
         return AuthMethod::getById($this->authmethod_id);
+    }
+
+    public function getThumbnail() : string {
+        if (empty($this->image_url)) {
+            // return initial
+            $html = "<div class='initial-display'>".substr($this->display_name,0,1)."</div>";
+        } else {
+            // return pic
+            $html = "<div class='initial-display'><img src='{$this->image_url}' /></div>";
+        }
+        return $html;
     }
 
     public static function loginCheck($redirectOnFail = true) : bool {
@@ -40,11 +52,14 @@ class User extends Model {
         )) {
             // Need to log in
             //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
-            if ($redirectOnFail !== false) {
-                if ($redirectOnFail === true) {
+            if (($redirectOnFail !== false) && ($redirectOnFail !== 0) && ($redirectOnFail !== '0')) {
+                if (($redirectOnFail === true) || ($redirectOnFail === 1) || ($redirectOnFail === '1')) {
                     header("Location: {$config['root_path']}/login.php?redirect_url=".urlencode($currentUrl));
+                    //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/login.php?redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);
                 } else {
                     header("Location: {$config['root_path']}{$redirectOnFail}");
+                    //file_put_contents('redirects.log','Type: '.gettype($redirectOnFail)."\n",FILE_APPEND);
+                    //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}{$redirectOnFail}\n",FILE_APPEND);
                 }
                 die();
             }
@@ -57,6 +72,7 @@ class User extends Model {
                 // Call refresh mechanism
                 $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
                 header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl));
+                //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);
                 die();
             }
             // Lastly - once per session - make sure the user can access the API - in dev mode, this is only possible if they've been added to the developer dashboard
@@ -70,6 +86,7 @@ class User extends Model {
                         $_SESSION['USER_CHECKEDONLIST'] = false;
                         //header('Location: '.$config['root_path'].'/logout.php?'.http_build_query(['error_message'=>"You need to be registered as a trial user before you can access Destination Playlist. Please contact the developer."]));
                         header('Location: '.$config['root_path'].'/account/request/403');
+                        //file_put_contents('redirects.log',__LINE__.' Location: '.$config['root_path'].'/account/request/403'."\n",FILE_APPEND);
                         die();
                     } else {
                         // Some other error - ignore, but check again on next page load

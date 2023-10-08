@@ -31,6 +31,10 @@ div.initial-display {
     vertical-align: middle;
     font-weight: bold;
 }
+div.initial-display img {
+    max-width: 2em;
+    max-height: 2em;
+}
 
 div.letter-display {
     /*font-family: 'Courier New', Courier, monospace;*/

@@ -102,6 +102,7 @@
                     $('#display_name').val('DP: '+$('#destination').val());
                 }
             });
+            $('#destination').focus();
         }
     );
 </script>
@@ -121,8 +122,8 @@ if (count($error_messages)>0) {
     <form method="POST">
         <div class="mb-3">
             <label for="destination" class="form-label">What's your destination?</label>
-            <input type="text" class="form-control" name="destination" id="destination" placeholder="<?= $destination_placeholder ?>" aria-describedby="destination-help">
-            <div class="form-text" id="destination-help">This is the word or phrase on which the playlist is based.</div>
+            <input type="text" class="form-control" name="destination" id="destination" placeholder="" aria-describedby="destination-help">
+            <div class="form-text" id="destination-help">This is the word or phrase on which the playlist is based - e.g. <?= $destination_placeholder ?>.</div>
         </div>
         <div class="mb-3">
             <label for="display_name" class="form-label">What do you want to call the playlist?</label>

@@ -26,4 +26,25 @@ class PageInfo {
             return new PageInfo();
         }
     }
+
+    public function processRequestData() {
+        $config = Config::get();
+        // Handle any parameters that might affect the redirectOnFail URL
+        // If redirect_url passed in, stash it in the session data
+        if (array_key_exists('redirect_url', $_REQUEST)) {
+            $_SESSION['redirect_url'] = $_REQUEST['redirect_url'];
+            unset($_REQUEST['redirect_url']);
+        }
+        // If error_message passed in, append it to the redirectOnFail property so it gets passed on
+        if (array_key_exists('error_message', $_REQUEST)) {
+            if (($this->redirectOnFail === true) || ($this->redirectOnFail === 1) || ($this->redirectOnFail === '1')) {
+                $this->redirectOnFail = $config['root_path'].'/login.php';
+            }
+            if (strpos($this->redirectOnFail,'?') === false) {
+                $this->redirectOnFail .= ('?'.http_build_query(['error_message' => $_REQUEST['error_message']]));
+            } else {
+                $this->redirectOnFail .= ('&'.http_build_query(['error_message' => $_REQUEST['error_message']]));
+            }
+        }
+    }
 }
