@@ -20,9 +20,11 @@ AFTER market
 /* UPDATE */
 /* VERSION 4 */
 DELETE FROM participations WHERE id IN
+(SELECT id FROM
 (
 SELECT participations.id
 FROM playlists
 INNER JOIN participations ON participations.playlist_id = playlists.id AND participations.user_id = playlists.user_id
+) t1
 )
 ;
