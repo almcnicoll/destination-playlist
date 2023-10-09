@@ -13,6 +13,10 @@ if (isset($_REQUEST['newname'])) {
 }
 
 echo <<<END_SCRIPTS
+<!-- Set variable -->
+<script type='text/javascript'>
+if (typeof(root_path) === 'undefined') { var root_path = "{$config['root_path']}"; }
+</script>
 <!-- Include playlist-delete script -->
 <script src='js/delete_handler.js'></script>
 <!-- Include leave-playlist script -->
