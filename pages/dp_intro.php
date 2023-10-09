@@ -38,6 +38,6 @@ if (count($error_messages)>0) {
             <div class="fs-6 step-explain">Which means that everyone discovers new music</div>
             <li>Listen and discover together!</li>
         </ol>
-        <button href="<?= $config['root_path'] ?>" class="btn btn-md btn-success" id='btn-assign-letters'>Let's go! &gt;&gt;</button>
+        <a href="<?= $config['root_path'] ?>/" class="btn btn-md btn-success" id='btn-assign-letters'>Let's go! &gt;&gt;</a>
     </div>
 </div>

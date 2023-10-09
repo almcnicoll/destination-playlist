@@ -51,6 +51,7 @@ class User extends Model {
         isset($_SESSION['USER_REFRESHNEEDED'])
         )) {
             // Need to log in
+            unset($_SESSION['USER']);
             //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
             if (($redirectOnFail !== false) && ($redirectOnFail !== 0) && ($redirectOnFail !== '0')) {
                 if (($redirectOnFail === true) || ($redirectOnFail === 1) || ($redirectOnFail === '1')) {
