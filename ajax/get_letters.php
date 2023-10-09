@@ -1,28 +1,27 @@
 <?php
-    require_once('../autoload.php');
-    // Returns the current participant list for the playlist
-    $time_start = microtime(true);
-    ob_start();
+require_once('../autoload.php');
+// Returns the current participant list for the playlist
+$time_start = microtime(true);
+ob_start();
 
-    $fatal_error = false;
+$fatal_error = false;
 
-    $error_messages = [];
-    if (isset($_REQUEST['error_message'])) {
-        $error_messages[] = $_REQUEST['error_message'];
-    }
+$error_messages = [];
+if (isset($_REQUEST['error_message'])) {
+    $error_messages[] = $_REQUEST['error_message'];
+}
 
-    if (!isset($_REQUEST['playlist_id'])) {
-        $error_messages[] = "No playlist specified";
-        $fatal_error = true;
-    }
-    $playlist_id = $_REQUEST['playlist_id'];
+if (!isset($_REQUEST['playlist_id'])) {
+    $error_messages[] = "No playlist specified";
+    $fatal_error = true;
+}
+$playlist_id = $_REQUEST['playlist_id'];
 
-    $playlist = Playlist::getById($playlist_id);
-    if ($playlist == null) {
-        $error_messages[] = "Playlist not found";
-        $fatal_error = true;
-    }
-
+$playlist = Playlist::getById($playlist_id);
+if ($playlist == null) {
+    $error_messages[] = "Playlist not found";
+    $fatal_error = true;
+} else {
     // If we're the playlist owner, see if there's any changes to push to Spotify
     if ($playlist->user_id == $_SESSION['USER_ID']) {
         if (empty($_SESSION['last_updates_check'])) { $_SESSION['last_updates_check'] = $playlist->created; }
@@ -90,12 +89,16 @@ END_SQL;
 
     // If we're the playlist owner, we don't need a participation entry
     $found_user = ($playlist->user_id == $_SESSION['USER_ID']);
+    $kicked_user = false;
 
     if (count($error_messages)==0) {
         $participants = Participation::find([['playlist_id','=',$playlist_id],]);
         foreach ($participants as $participant) {
             //$participant->user = $participant->getUser();
-            if ($participant->user_id == $_SESSION['USER_ID']) { $found_user = true; }
+            if ($participant->user_id == $_SESSION['USER_ID']) {
+                $found_user = true;
+                $kicked_user = boolval($participant->removed);
+            }
         }
         // Add in playlist owner too
         $participants[] = $_SESSION['USER'];
@@ -104,39 +107,45 @@ END_SQL;
     if (!$found_user) {
         $error_messages[] = "You have not joined this playlist!";
         $fatal_error = true;
-    }
-
-    $letters = Letter::find([['playlist_id','=',$playlist_id],]);
-
-    if (empty($letters)) {
-        $letters = [];
     } else {
-        foreach ($letters as $letter) {
-            if (!empty($letter->user_id)) {
-                $letter->user = $letter->getUser();
+        if ($kicked_user) {
+            $error_messages[] = "You have been removed from this playlist! Please talk to the playlist owner if you would like to be reinstated.";
+            $fatal_error = true;
+        } else {
+            $letters = Letter::find([['playlist_id','=',$playlist_id],]);
+
+            if (empty($letters)) {
+                $letters = [];
+            } else {
+                foreach ($letters as $letter) {
+                    if (!empty($letter->user_id)) {
+                        $letter->user = $letter->getUser();
+                    }
+                }
             }
         }
     }
+}
 
-    $time_end = microtime(true);
+$time_end = microtime(true);
 
-    if (count($error_messages)>0) {
-        $hash = sha1(serialize($error_messages));
-        $container = [
-            'errors'    => $error_messages,
-            'hash'      => $hash,
-        ];
-        $output = json_encode($container);
-        ob_end_clean();
-        die($output);
-    } else {
-        $hash = sha1(serialize($letters));
-        $container = [
-            'result'    => $letters,
-            'hash'      => $hash,
-        ];
-        $output = json_encode($container);
-        ob_end_clean();
-        //echo "Runtime: ".(($time_end - $time_start) / 1000000)." ms\n\n";
-        die($output);
-    }
+if (count($error_messages)>0) {
+    $hash = sha1(serialize($error_messages));
+    $container = [
+        'errors'    => $error_messages,
+        'hash'      => $hash,
+    ];
+    $output = json_encode($container);
+    ob_end_clean();
+    die($output);
+} else {
+    $hash = sha1(serialize($letters));
+    $container = [
+        'result'    => $letters,
+        'hash'      => $hash,
+    ];
+    $output = json_encode($container);
+    ob_end_clean();
+    //echo "Runtime: ".(($time_end - $time_start) / 1000000)." ms\n\n";
+    die($output);
+}
