@@ -18,6 +18,11 @@ class Playlist extends Model {
     static string $tableName = "playlists";
     static $fields = ['id','user_id','destination','spotify_playlist_id','display_name','flags','created','modified'];
 
+    public static $defaultOrderBy = [
+        ['created','DESC'],
+        ['display_name','ASC'],
+    ];
+
     public function getOwner() : ?User {
         return User::getById($this->user_id);
     }
