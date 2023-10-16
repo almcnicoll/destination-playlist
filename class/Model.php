@@ -2,6 +2,7 @@
 
 class Model {
     static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT','IN'];
+    static $reAscDesc = "/\s+(asc|desc)/i";
 
     public ?int $id = null;
     public ?string $created = null;
@@ -10,15 +11,34 @@ class Model {
     static string $tableName;
     static $fields = ['id','created','modified'];
 
+    // child classes can supply public static $defaultOrderBy as either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
+
     public static function getDefaultOrderBy() : string {
         $calledClass = get_called_class();
         $soughtProperty = 'defaultOrderBy';
         if(property_exists($calledClass,$soughtProperty)) {
             $fields = $calledClass::$$soughtProperty;
             if (is_array($fields)) {
+                // More than one field
                 if (count($fields) == 0) { return ''; }
-                return ' ORDER BY `'.implode('`,`',$fields).'` ';
+                $parsedFields = [];
+                foreach ($fields as $f) {
+                    if (is_array($f)) {
+                        // Sort direction supplied
+                        if ((strtolower($f[1])=='asc')||(strtolower($f[1])=='desc')) {
+                            $parsedFields[] = "`{$f[0]}` {$f[1]}";
+                        } else {
+                            // ... but not correctly
+                            throw new Exception("Field order must be ASC or DESC: '{$f[0]}' supplied.");
+                        }
+                    } else {
+                        // No sort direction
+                        $parsedFields[] = "`{$f}`";
+                    }
+                }
+                return ' ORDER BY '.implode(',',$parsedFields).' ';
             } else {
+                // Only one field (and no sort direction)
                 if (empty($fields)) { return ''; }
                 return "`{$fields}`";
             }
