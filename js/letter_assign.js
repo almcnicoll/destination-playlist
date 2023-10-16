@@ -9,6 +9,14 @@ letterAssigner.updateLettersNow = function() {
     letterGetter.getLetters();
     $("html,html *").css("cursor","auto");
     $(letterAssigner.assignButton).prop('disabled',false);
+    
+    // Switch tab    
+    $('#nav1-content-2').addClass('show active');
+    $('#nav1-content-1').removeClass('show active');
+    $('#nav1-tab-2').addClass('active');
+    $('#nav1-tab-1').removeClass('active');
+    $('#nav1-tab-2').attr('aria-selected',"true");
+    $('#nav1-tab-1').attr('aria-selected',"false");
 }
 
 letterAssigner.ajaxOptions = {
