@@ -13,6 +13,9 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
                 <ul class="navbar-nav ml-auto mb-2 mb-lg-0" text-right pull-right>
                     <li class="nav-item dropdown">
+                      <a class="nav-link" href="<?= $config['root_path'] ?>/dp/faq">FAQ</a>
+                    </li>
+                    <li class="nav-item dropdown">
                         <a class="nav-link" href="<?= $config['root_path'] ?>/login.php" role="button">Login</a>
                     </li>    
                 </ul>
@@ -31,7 +34,10 @@
         <!-- User menu (logged in) -->
         <div class="justify-content-end" id="navbarUserMenu2">
             <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown">
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="<?= $config['root_path'] ?>/dp/faq">FAQ</a>
+              </li>
+              <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class='d-none d-md-inline'><?= $_SESSION['USER']->display_name ?></span>
                     <span class='d-md-none initial-display'><?= substr($_SESSION['USER']->display_name,0,1) ?></span>
