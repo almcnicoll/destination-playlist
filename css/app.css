@@ -57,6 +57,15 @@ td.letter-display {
     text-overflow: ellipsis;
 }
 
+.cell-container {
+    text-overflow: ellipsis;
+    max-width: 340px;
+    padding: 0px;
+    margin: 0px;
+    text-wrap: nowrap;
+    overflow-x: clip;
+}
+
 .loading {
     color: #999;
     font-style: italic;

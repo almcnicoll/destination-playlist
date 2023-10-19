@@ -94,7 +94,7 @@ if (count($my_playlists)==0) {
 ?>
 <h2 class='card-title'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
 
-<table class="table table-striped table-hover" class="playlist-table" id="my-playlists-table">
+<table class="table table-striped table-hover playlist-table" id="my-playlists-table">
     <thead>
         <tr>
             <th>Playlist</th>
@@ -107,8 +107,8 @@ if (count($my_playlists)==0) {
     foreach ($my_playlists as $playlist) {
 ?>
         <tr style='vertical-align: middle;'>
-        <th scope='row'><?=$playlist->display_name?></th>
-        <td><?=$playlist->destination?></td>
+        <th scope='row'><div class='cell-container'><?=$playlist->display_name?></div></th>
+        <td><div class='cell-container'><?=$playlist->destination?></div></td>
         <td>
             <div class='row'>
                 <div class='col-md-6'>
@@ -148,7 +148,7 @@ if (count($joined_playlists)==0) {
     <?php
     } else {
     ?>
-    <table class="table table-striped table-hover" class="playlist-table" id="joined-playlists-table">
+    <table class="table table-striped table-hover playlist-table" id="joined-playlists-table">
         <thead>
             <tr>
                 <th>Playlist</th>
@@ -160,8 +160,8 @@ if (count($joined_playlists)==0) {
     <?php
         foreach ($joined_playlists as $playlist) {
             echo "<tr style='vertical-align: middle;'>\n";
-            echo "<th scope='row'>{$playlist->display_name}</th>\n";
-            echo "<td>{$playlist->destination}</td>\n";
+            echo "<th scope='row'><div class='cell-container'>{$playlist->display_name}</div></th>\n";
+            echo "<td><div class='cell-container'>{$playlist->destination}</div></td>\n";
             echo "<td>";
             echo "<a href='playlist/join/".$playlist->getShareCode()."' title='View playlist' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
             echo "<a href='#' class='btn btn-md btn-danger m-2' title='Leave playlist' id='leavePlaylist' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
