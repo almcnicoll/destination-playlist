@@ -52,6 +52,20 @@ td.letter-display {
     width: 3em;
 }
 
+.playlist-table th, .playlist-table td {
+    max-width: 340px;
+    text-overflow: ellipsis;
+}
+
+.cell-container {
+    text-overflow: ellipsis;
+    max-width: 340px;
+    padding: 0px;
+    margin: 0px;
+    text-wrap: nowrap;
+    overflow-x: clip;
+}
+
 .loading {
     color: #999;
     font-style: italic;
@@ -119,4 +133,22 @@ table.neat * {
 .step-explain {
     font-style: italic;
     color: #666;
+}
+
+
+.accordion-button.collapsed {
+    font-weight: normal;
+    color: var(--bs-light);
+    background-color: var(--bs-secondary);
+}
+.accordion-button:not(.collapsed) {
+    font-weight: bold;
+    color: var(--bs-light);
+    background-color: var(--bs-primary);
+}
+div.accordion-collapse.show {
+    border-color: var(--bs-accordion-active-bg);
+    border-width: 1px;
+    border-style: solid;
+    padding: 1em;
 }
