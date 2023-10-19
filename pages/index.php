@@ -94,7 +94,7 @@ if (count($my_playlists)==0) {
 ?>
 <h2 class='card-title'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
 
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover" class="playlist-table" id="my-playlists-table">
     <thead>
         <tr>
             <th>Playlist</th>
@@ -148,7 +148,7 @@ if (count($joined_playlists)==0) {
     <?php
     } else {
     ?>
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover" class="playlist-table" id="joined-playlists-table">
         <thead>
             <tr>
                 <th>Playlist</th>

@@ -52,6 +52,11 @@ td.letter-display {
     width: 3em;
 }
 
+.playlist-table th, .playlist-table td {
+    max-width: 340px;
+    text-overflow: ellipsis;
+}
+
 .loading {
     color: #999;
     font-style: italic;
