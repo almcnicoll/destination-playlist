@@ -108,6 +108,22 @@ if ($pageinfo->authSetting === PageInfo::AUTH_LATE) {
     $pageinfo->processRequestData();
     User::loginCheck($pageinfo->redirectOnFail);
 }
+
+if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
+?>
+    <!-- KO-FI -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+    kofiWidgetOverlay.draw('al79372', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support me',
+        'floating-chat.donateButton.background-color': '#0dcaf0',
+        'floating-chat.donateButton.text-color': '#fff'
+    });
+    </script>
+    <!-- END KO-FI -->
+<?php
+endif;
 ?>
 </body>
 </html>

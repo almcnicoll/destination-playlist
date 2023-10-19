@@ -177,24 +177,6 @@ if (count($joined_playlists)==0) {
 </div> <!-- CARD-BODY -->
 </div> <!-- CARD -->
 
-<?php
-if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
-?>
-    <!-- KO-FI -->
-    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-    <script>
-    kofiWidgetOverlay.draw('al79372', {
-        'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Support me',
-        'floating-chat.donateButton.background-color': '#0dcaf0',
-        'floating-chat.donateButton.text-color': '#fff'
-    });
-    </script>
-    <!-- END KO-FI -->
-<?php
-endif;
-?>
-
 <div class="modal fade" id="playlistDeleteModal" tabindex="-1">
   <div class="modal-dialog .modal-fullscreen-lg-down">
     <div class="modal-content">
