@@ -26,6 +26,12 @@
         }
     }
 
+    if (isset($_SESSION['PAGE_LOADCOUNTS'][__FILE__])) {
+        $_SESSION['PAGE_LOADCOUNTS'][__FILE__]++;
+    } else {
+        $_SESSION['PAGE_LOADCOUNTS'][__FILE__] = 1;
+    }
+
 ?>
 <!-- Set vars -->
 <script type="text/javascript">
@@ -72,6 +78,8 @@
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/people_refresh.js'></script>
 <!-- Include letter-assign script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
+<!-- Include playlist-lock script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/playlist_lock.js'></script>
 <!-- Include play-devices script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js'></script>
 <!-- Custom callback functions -->
@@ -179,6 +187,7 @@
     letterGetter.init(500,10000,8000);
     peopleGetter.init(0,10000,8000);
     letterAssigner.init('#btn-assign-letters','#btn-reassign-letters');
+    listLocker.init();
     
     $(document).ready(
         function() {
@@ -270,7 +279,7 @@ if ($fatal_error) {
 </div>
 
 <div class="row">
-    <div class="col-12">
+    <div class="col-6">
         <div class='btn-group'>
             <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
             <div class='btn-group'>
@@ -280,7 +289,34 @@ if ($fatal_error) {
                 </ul>
             </div>
         </div>
+<?php
+    if ($_SESSION['PAGE_LOADCOUNTS'][__FILE__] <= 5) {
+?>
         &nbsp;<span class='bi bi-arrow-left'></span> click here when everyone's joined!
+<?php
+    }
+?>
+    </div>
+    <div class="col-6">
+<?php
+    if ($playlist->hasFlags(Playlist::FLAGS_PEOPLELOCKED)) {
+?>
+        <button href="#" class="btn btn-md btn-success" id='btn-unlock-list'><span class='bi bi-unlock'></span></button>
+        <button href="#" class="btn btn-md btn-warning" id='btn-lock-list' style="display:none;"><span class='bi bi-lock'></span></button>
+<?php
+    } else {
+?>
+        <button href="#" class="btn btn-md btn-success" id='btn-unlock-list' style="display:none;"><span class='bi bi-unlock'></span></button>
+        <button href="#" class="btn btn-md btn-warning" id='btn-lock-list'><span class='bi bi-lock'></span></button>
+<?php
+    }
+    
+    if ($_SESSION['PAGE_LOADCOUNTS'][__FILE__] <= 5) {
+?>
+        &nbsp;<span class='bi bi-arrow-left'></span> click here to lock the list to joiners
+<?php
+    }
+?>
     </div>
 </div>
 
