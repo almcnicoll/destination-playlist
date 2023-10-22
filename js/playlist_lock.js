@@ -4,7 +4,8 @@ listLocker.url = root_path+"/ajax/lock_playlist.php?playlist_id="+playlist_id+"&
 
 listLocker.updateButtonNow = function() {
     // Refresh immediately
-    //  TODO
+    $('#btn-lock-list').toggle();
+    $('#btn-unlock-list').toggle();
     $("html, html *").css("cursor","auto");
 }
 
@@ -22,7 +23,7 @@ listLocker.init = function() {
     listLocker.unlockButton = '#btn-unlock-list';
     $(document).ready(
         function () {
-            // Assign button
+            // Lock button
             if (listLocker.lockButton!=null) {
                 $(listLocker.lockButton).on('click',function() {
                     $(listLocker.lockButton).prop('disabled',true);
@@ -30,10 +31,10 @@ listLocker.init = function() {
                     $.ajax(listLocker.url+'lock', listLocker.ajaxOptions);
                 });
             }
-            // Reassign button
-            if (listLocker.r.lockButton!=null) {
-                $(listLocker.r.lockButton).on('click',function() {
-                    $(listLocker.lockButton).prop('disabled',true);
+            // Unlock button
+            if (listLocker.unlockButton!=null) {
+                $(listLocker.unlockButton).on('click',function() {
+                    $(listLocker.unlockButton).prop('disabled',true);
                     $("html, html *").css("cursor","wait");
                     $.ajax(listLocker.url+'unlock', listLocker.ajaxOptions);
                 });
