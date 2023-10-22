@@ -47,6 +47,11 @@ if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
 $page = "pages/{$stub}.php";
 
 ob_start(); // Required, as we're including login-check further down
+
+if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
+    // This keeps track of how many times the user has seen each page that wants to know
+    $_SESSION['PAGE_LOADCOUNTS'] = [];
+}
 ?>
 
 <!DOCTYPE html>

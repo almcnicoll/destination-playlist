@@ -46,6 +46,19 @@ class Playlist extends Model {
         return ($compResult == $flagSum);
     }
 
+    public function setFlag($whichFlag, $flagValue) : void {
+        // Set the specified flag to the specified value
+        if ($flagValue) {
+            // Set the flag to true
+            if ($this->hasFlags($whichFlag)) { return; } // Return if already true
+            $this->flags = (int)$this->flags + (int)$whichFlag;
+        } else {
+            // Set the flag to false
+            if (!$this->hasFlags($whichFlag)) { return; } // Return if already false
+            $this->flags = (int)$this->flags - (int)$whichFlag;
+        }
+    }
+
     public function getShareCode() : string {
         $hash = hash('sha256', (string)$this->id);
         $second_pos = $this->id % 64;
