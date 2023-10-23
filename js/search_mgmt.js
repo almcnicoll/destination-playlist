@@ -9,6 +9,7 @@ trackSearch.proTips.push("Pro tip! You can also search <strong>artist:adele</str
 trackSearch.proTips.push("Pro tip! You can paste in a Spotify share link if you need a specific track or version.");
 
 trackSearch.reThe = /^the\s+/i; // Matches "the" at the start of a string, case-insensitive
+trackSearch.reSpaces = /(?!^)\s+(?=\S)/g; // Matches any number of consecutive white spaces
 trackSearch.reArtistSplit = /\s*\/\/\s*/; // Matches two forward-slashes with any leading/trailing whitespace
 //trackSearch.reSpotifyLink = /^\s*https:\/\/open\.spotify\.com\/track\/([^?]+)/i; // Matches a link such as https://open.spotify.com/track/0riUhelZwZWyCPNt6qag6R?si=772e987d87a349f5 // Handled in PHP now
 
@@ -138,9 +139,10 @@ trackSearch.checkTrack = function(trackName, artistName) {
     if (trackSearch.allow_title) {
         // We can validate on title
         trackName = trackName.toUpperCase(); // Match in uppercase, matching trackSearch.search_letter
-        tracks.push(trackName.replace(trackSearch.reThe,'')); // Always include a "no the" variant
+        // Always add the full track title
+        tracks.push(trackName);
         if (trackSearch.the_agnostic) {
-            tracks.push(trackName);
+            tracks.push(trackName.replace(trackSearch.reThe,'')); // Also include a "no the" variant if appropriate
         }
     }
     // Now check them
@@ -154,9 +156,21 @@ trackSearch.checkTrack = function(trackName, artistName) {
         // Split artist names by separator (//)
         var splitArtists = artistName.toUpperCase().split(this.reArtistSplit); // Match in uppercase, matching trackSearch.search_letter
         for (var i in splitArtists) {
-            artists.push(splitArtists[i].replace(trackSearch.reThe,'')); // Always include a "no the" variant
+            var thisArtist = splitArtists[i].trim();
+            // Always include full artist
+            artists.push(thisArtist);
             if (trackSearch.the_agnostic) {
-                artists.push(splitArtists[i]);
+                // Also include a "no the" variant if appropriate
+                artists.push(thisArtist.replace(trackSearch.reThe,''));
+            }
+            // Now check for [firstname] [surname] pattern
+            if (!thisArtist.match(trackSearch.reThe)) {
+                if ((thisArtist.match(trackSearch.reSpaces) || []).length == 1) {
+                    // If exactly one whitespace divider, and no "the" then assume [firstname] [surname] and add [surname] as entry
+                    //console.log("Parsing: "+thisArtist);
+                    //console.log("Adding: "+thisArtist.split(trackSearch.reSpaces)[1]);
+                    artists.push(thisArtist.split(trackSearch.reSpaces)[1]);
+                }
             }
         }
     }

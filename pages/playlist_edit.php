@@ -69,7 +69,6 @@
 
                 // If letters have changed, we need to make some changes...
                 if ($current_letters_string != $usable_letters_string) {
-                    // TODO - make changes to Letters objects
                     // Populate list of letters
                     $letters = str_split($usable_letters_string);
 
@@ -99,6 +98,10 @@
                                     $new_letter = $current_letters[0]->clone();
                                     $new_letter->rank = $i+$ii;
                                     $new_letter->letter = strtoupper(substr($diff[1],$ii,1));
+                                    $new_letter->cached_artist = '';
+                                    $new_letter->cached_title = '';
+                                    $new_letter->user_id = null;
+                                    $new_letter->spotify_track_id = null;
                                     $new_letter->save();
                                 }
                                 break;
