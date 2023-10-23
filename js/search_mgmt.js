@@ -139,9 +139,10 @@ trackSearch.checkTrack = function(trackName, artistName) {
     if (trackSearch.allow_title) {
         // We can validate on title
         trackName = trackName.toUpperCase(); // Match in uppercase, matching trackSearch.search_letter
-        tracks.push(trackName.replace(trackSearch.reThe,'')); // Always include a "no the" variant
+        // Always add the full track title
+        tracks.push(trackName);
         if (trackSearch.the_agnostic) {
-            tracks.push(trackName);
+            tracks.push(trackName.replace(trackSearch.reThe,'')); // Also include a "no the" variant if appropriate
         }
     }
     // Now check them
