@@ -50,3 +50,10 @@ VALUES
 (3,NOW(),NOW(),"Do I need a Spotify account?","Yes, at the moment you do need a Spotify&reg; account. Even if you aren't the playlist owner, you need to be able to search the Spotify catalogue, which requires you to be logged in. You can can make full use of Destination Playlist with a free Spotify account, which you can create <a href='https://www.spotify.com/signup' target='_blank'>here</a>."),
 (4,NOW(),NOW(),"Does Destination Playlist cost anything?","<p>No, Destination Playlist is free to use. Enjoy it!</p><p>Having said that, it took quite a lot of work to make, and the server costs a bit to maintain too. If you'd like to make a small donation to support the app, you can do so with the 'Support me' link at the bottom of the page.</p>")
 ;
+/* UPDATE */
+/* VERSION 7 */
+UPDATE `faqs` SET `answer`="<p>For families with younger kids, it's great to expose them to a range of music - plus there's only so many times you can listen to <em>Baby Shark</em> or the soundtrack to <em>Frozen</em> - although obviously you'll have to manage the playlist, as Spotify&reg; accounts are for 13s and over. Destination Playlist makes the process of introducing new music a fun one!</p><p>For families with teens, your taste in music probably has quite a small overlap. You might not want to listen to a whole playlist or album of a genre you don't like, but Destination Playlist makes a way to share some of your fave tracks without overload.</p>"
+WHERE rank=2
+;
+UPDATE `faqs` SET `question` = REPLACE(`question`,'Spotify ','Spotify&reg; '),`answer` = REPLACE(`answer`,'Spotify ','Spotify&reg; ')
+;
