@@ -42,14 +42,19 @@ class User extends Model {
         // Check if user is on developer dashboard list - we can lose this if we move to Production Mode
         $userCheckedOnList = (isset($_SESSION['USER_CHECKEDONLIST']) && ($_SESSION['USER_CHECKEDONLIST'] === true));
 
-        if(!(
-        isset($_SESSION['USER']) &&
-        isset($_SESSION['USER_ID']) &&
-        isset($_SESSION['USER_AUTHMETHOD_ID']) &&
-        isset($_SESSION['USER_ACCESSTOKEN']) &&
-        isset($_SESSION['USER_REFRESHTOKEN']) &&
-        isset($_SESSION['USER_REFRESHNEEDED'])
-        )) {
+        // Determine if we have a valid session - need most USER vars and either ACCESS_TOKEN or REFRESH_TOKEN and REFRESHNEEDED
+        $valid_session = true;
+        $valid_session &= isset($_SESSION['USER']);
+        $valid_session &= isset($_SESSION['USER_ID']);
+        $valid_session &= isset($_SESSION['USER_AUTHMETHOD_ID']);
+        $valid_session &= (
+            isset($_SESSION['USER_ACCESSTOKEN'])
+            ||
+            (isset($_SESSION['USER_REFRESHTOKEN']) && isset($_SESSION['USER_REFRESHNEEDED']))
+        );
+
+        if(!$valid_session) {
+            //error_log(__FILE__.':'.__LINE__." At least one session variable not set:\n".print_r($_SESSION,true));
             // Need to log in
             unset($_SESSION['USER']);
             //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
@@ -68,9 +73,11 @@ class User extends Model {
         } else {
             // Check if our token is still valid
             $refresh_needed = (int)($_SESSION['USER_REFRESHNEEDED']);
+            //error_log(__FILE__.':'.__LINE__." refresh_needed = {$refresh_needed} // time() = ".time()." // Refresh if diff is negative: ".($refresh_needed-time()));
             //die("<pre>Comparing {$refresh_needed} to ".time()."</pre>\n");
             if ($refresh_needed < time()) {
                 // Call refresh mechanism
+                //error_log("Trying refresh");
                 $method = AuthMethod::getById((int)$_SESSION['USER_AUTHMETHOD_ID']);
                 header("Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl));
                 //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);

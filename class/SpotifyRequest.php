@@ -28,6 +28,7 @@ class SpotifyRequest {
     public int $error_number = 0;
     public ?int $http_code = null;
     protected $ch = null;
+    public $log_to_file = false;
 
     public function __construct($type, $action, $endpoint) {
         $this->type = $type;
@@ -63,6 +64,13 @@ class SpotifyRequest {
         $this->ch = curl_init($this->endpoint);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($this->ch, CURLOPT_VERBOSE, true);
+
+        // Form-Auth for auth and token-refresh
+        if (($this->type == SpotifyRequest::TYPE_OAUTH_GETTOKEN) || ($this->type == SpotifyRequest::TYPE_OAUTH_REFRESHTOKEN)) {
+            $this->contentType = self::CONTENT_TYPE_FORM_ENCODED;
+            //$this->log_to_file = true;
+            //error_log("Logging cUrl request to file");
+        }
 
         // Set content-type header if appropriate
         if (!empty($this->contentType)) {
@@ -132,15 +140,19 @@ class SpotifyRequest {
         if ($this->returnTransfer) { curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1); }
 
         // EXECUTE
-        //$fh = fopen('curl.err.log','w');
-        //curl_setopt($this->ch,CURLOPT_STDERR,$fh);
+        if ($this->log_to_file) {
+            $fh = fopen('curl.err.log','w');
+            curl_setopt($this->ch,CURLOPT_STDERR,$fh);
+        }
         $this->result = curl_exec($this->ch);
         $this->info = curl_getinfo($this->ch);
         $this->error_message = curl_error($this->ch);
         $this->error_number = curl_errno($this->ch);
         $this->http_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
         curl_close($this->ch);
-        //fclose($fh);
+        if ($this->log_to_file) {
+            fclose($fh);
+        }
 
         return $this;
     }
