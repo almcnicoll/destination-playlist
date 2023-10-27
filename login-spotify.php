@@ -40,7 +40,7 @@ if (isset($_REQUEST['refresh_needed'])) {
     $authresponse = json_decode($sr->result, true);
     if($sr->hasErrors()) {
         // Give up on refresh - try re-auth
-        //error_log("Refresh error: ".$sr->getErrors());
+        LoggedError::log(LoggedError::TYPE_CURL,$sr->error_number,__FILE__,__LINE__,"Refresh error: ".$sr->getErrors());
         $requestVars = $_REQUEST;
         unset($requestVars['refresh_needed']);
         header('Location: '.$_SERVER['REQUEST_URI'].'?'.http_build_query($requestVars));
@@ -48,8 +48,7 @@ if (isset($_REQUEST['refresh_needed'])) {
         die();
     }
     if ($authresponse == null) {
-        error_log(__FILE__.':'.__LINE__." Can't JSON-decode response: ".print_r($sr->result, true));
-        error_log(__FILE__.':'.__LINE__." Data sent: ".print_r($options, true));
+        LoggedError::log(LoggedError::TYPE_CURL,0,__FILE__,__LINE__," Can't JSON-decode response: ".print_r($sr->result, true)."\n"." Data sent: ".print_r($options, true));
     }
     $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
     if (isset($authresponse['refresh_token'])) { $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token']; }
@@ -103,12 +102,16 @@ if (isset($_REQUEST['refresh_needed'])) {
 
     $result = curl_exec($ch);
     $userresponse = json_decode($result, true);
-    if ($userresponse == null) { error_log(print_r($result,true)); }
-    $displayname = $userresponse['display_name'];
-    $email = $userresponse['email'];
-    $userid = $userresponse['id'];
-    $market = $userresponse['country'];
-    $images = $userresponse['images'];
+    if ($userresponse == null) {
+        LoggedError::log(LoggedError::TYPE_CURL,0,__FILE__,__LINE__," User data is not readable JSON: ".print_r($result, true));
+        throw new Exception("Could not retrieve user details from Spotify");
+    } else {
+        $displayname = $userresponse['display_name'];
+        $email = $userresponse['email'];
+        $userid = $userresponse['id'];
+        $market = $userresponse['country'];
+        $images = $userresponse['images'];
+    }
     curl_close($ch);
     //echo "<pre>".print_r($userresponse,true)."</pre>\n";
     
