@@ -3,6 +3,8 @@
 require_once('../autoload.php');
 ob_start();
 
+User::loginCheck(false);
+
 $fatal_error = false;
 
 $error_messages = [];

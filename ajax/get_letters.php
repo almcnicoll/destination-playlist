@@ -4,6 +4,8 @@ require_once('../autoload.php');
 $time_start = microtime(true);
 ob_start();
 
+User::loginCheck(false);
+
 $fatal_error = false;
 
 $error_messages = [];

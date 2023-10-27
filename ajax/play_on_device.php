@@ -2,6 +2,8 @@
     require_once('../autoload.php');
     ob_start();
 
+    User::loginCheck(false);
+
     // Check participation etc.
     $fatal_error = false;
 
