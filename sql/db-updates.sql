@@ -57,3 +57,24 @@ WHERE rank=2
 ;
 UPDATE `faqs` SET `question` = REPLACE(`question`,'Spotify ','Spotify&reg; '),`answer` = REPLACE(`answer`,'Spotify ','Spotify&reg; ')
 ;
+/* UPDATE */
+/* VERSION 8 */
+CREATE TABLE model (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;
+CREATE TABLE errors (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(20) NOT NULL,
+  `number` mediumint DEFAULT NULL,
+  `message` VARCHAR(4000) DEFAULT NULL,
+  `file` varchar(400) DEFAULT NULL,
+  `line` smallint UNSIGNED DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;
