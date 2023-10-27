@@ -11,6 +11,8 @@
 
     // Assigns track to letter
     ob_start();
+
+    User::loginCheck(false);
     
     // Pre-flight checks
     $fatal_error = false;

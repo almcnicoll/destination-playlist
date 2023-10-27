@@ -1,6 +1,9 @@
 <?php
     require_once('../autoload.php');
     ob_start();
+
+    User::loginCheck(false);
+    
     // Expected params
     /*  q: query,
         type: resultType,
