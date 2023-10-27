@@ -89,6 +89,7 @@ class User extends Model {
                 $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, $checkUrl);
                 $sr->send();
                 if ($sr->hasErrors()) {
+                    LoggedError::log(LoggedError::TYPE_CURL,$sr->http_code,__FILE__,__LINE__,$sr->getErrors());
                     if ($sr->http_code == 403) {
                         // Not in dev dashboard
                         $_SESSION['USER_CHECKEDONLIST'] = false;
