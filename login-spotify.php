@@ -14,7 +14,7 @@ if (isset($_REQUEST['refresh_needed'])) {
         'refresh_token'     =>  $_SESSION['USER_REFRESHTOKEN'],
     ];
 
-    $options = http_build_query($refreshData);
+    /*$options = http_build_query($refreshData);
     $ch = curl_init($endpoint);
     curl_setopt_array ( $ch, array (
         CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
@@ -23,10 +23,10 @@ if (isset($_REQUEST['refresh_needed'])) {
     ) );
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, $config['SPOTIFY_CLIENTID'].':'.$config['SPOTIFY_CLIENTSECRET']);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);*/
 
     $sr = new SpotifyRequest(SpotifyRequest::TYPE_OAUTH_REFRESHTOKEN, SpotifyRequest::ACTION_POST, $endpoint);
-    $sr->send($refreshData);
+    $sr->send(http_build_query($refreshData));
 
     //$result = curl_exec($ch);
     if ($sr->hasErrors()) { // Can't refresh token for some reason
@@ -38,12 +38,24 @@ if (isset($_REQUEST['refresh_needed'])) {
         }        
     }
     $authresponse = json_decode($sr->result, true);
+    if($sr->hasErrors()) {
+        // Give up on refresh - try re-auth
+        //error_log("Refresh error: ".$sr->getErrors());
+        $requestVars = $_REQUEST;
+        unset($requestVars['refresh_needed']);
+        header('Location: '.$_SERVER['REQUEST_URI'].'?'.http_build_query($requestVars));
+        //echo 'Redirect to: '.$_SERVER['REQUEST_URI'].'?'.http_build_query($requestVars);
+        die();
+    }
+    if ($authresponse == null) {
+        error_log(__FILE__.':'.__LINE__." Can't JSON-decode response: ".print_r($sr->result, true));
+        error_log(__FILE__.':'.__LINE__." Data sent: ".print_r($options, true));
+    }
     $_SESSION['USER_ACCESSTOKEN'] = $authresponse['access_token'];
     if (isset($authresponse['refresh_token'])) { $_SESSION['USER_REFRESHTOKEN'] = $authresponse['refresh_token']; }
     $_SESSION['USER_REFRESHNEEDED'] = time() + (int)$authresponse['expires_in'] - (5*60); // Set expiry five mins early
     session_write_close();
-    curl_close($ch);
-
+    
     if (isset($_REQUEST['redirect_url'])) {
         header("Location: {$_REQUEST['redirect_url']}");
     } else {

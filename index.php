@@ -12,10 +12,12 @@ if(isset($_GET['params'])) {
 }
 $params = [];
 
-// If no params, treat as index
+// Parse URL into a page with optional params
 if (count($page_parts)==0 || (empty($page_parts[0]))) {
+    // If no params, treat as index
     $stub = 'index';
 } elseif (count($page_parts)==1) {
+    // If only one URL part, treat as /[url-part]/index
     $page_parts[] = 'index';
     $stub = "{$page_parts[0]}_{$page_parts[1]}";
 } elseif (count($page_parts)>=2) {
@@ -28,15 +30,7 @@ if (count($page_parts)==0 || (empty($page_parts[0]))) {
 
 // Get information about the page we're serving
 $pageinfo = PageInfo::get($stub);
-//var_dump($config);
-//var_dump($stub);
-//var_dump($pageinfo);
-$debugInfo = '';
-//$debugInfo .= "Config: ".print_r($config,true)."\n";
-$debugInfo .= "Stub: ".print_r($stub,true)."\n";
-$debugInfo .= "PageInfo: ".print_r($pageinfo,true)."\n";
-//file_put_contents('redirects.log',$debugInfo,FILE_APPEND);
-//die();
+
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
     $pageinfo->processRequestData();
