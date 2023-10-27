@@ -103,6 +103,7 @@ if (isset($_REQUEST['refresh_needed'])) {
 
     $result = curl_exec($ch);
     $userresponse = json_decode($result, true);
+    if ($userresponse == null) { error_log(print_r($result,true)); }
     $displayname = $userresponse['display_name'];
     $email = $userresponse['email'];
     $userid = $userresponse['id'];
