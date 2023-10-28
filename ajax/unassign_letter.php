@@ -3,6 +3,8 @@
     // Assigns letters to participants
     ob_start();
 
+    User::loginCheck(false);
+
     $fatal_error = false;
 
     $error_messages = [];

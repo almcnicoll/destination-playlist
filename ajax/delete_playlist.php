@@ -3,6 +3,8 @@ require_once('../autoload.php');
 // Deletes a playlist
 ob_start();
 
+User::loginCheck(false);
+
 function safeBool($var, $context) : bool {    
     if(is_bool($var)) { return $var; }
 

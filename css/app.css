@@ -59,7 +59,7 @@ td.letter-display {
 
 .cell-container {
     text-overflow: ellipsis;
-    max-width: 340px;
+    max-width: 280px;
     padding: 0px;
     margin: 0px;
     text-wrap: nowrap;

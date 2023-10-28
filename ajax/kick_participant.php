@@ -4,6 +4,8 @@
 
     // Returns the current participant list for the playlist
     ob_start();
+
+    User::loginCheck(false);
     
     $fatal_error = false;
 
