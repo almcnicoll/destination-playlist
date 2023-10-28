@@ -52,6 +52,9 @@ td.letter-display {
     width: 3em;
 }
 
+table.playlist-table {
+    table-layout: fixed;
+}
 .playlist-table th, .playlist-table td {
     max-width: 340px;
     text-overflow: ellipsis;
@@ -62,7 +65,7 @@ td.letter-display {
     max-width: 280px;
     padding: 0px;
     margin: 0px;
-    text-wrap: nowrap;
+    /*text-wrap: nowrap;*/
     overflow-x: clip;
 }
 

@@ -94,7 +94,7 @@ if (count($my_playlists)==0) {
 ?>
 <h2 class='card-title'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
 
-<table class="table table-striped table-hover playlist-table" id="my-playlists-table">
+<table class="table table-sm table-striped table-hover playlist-table" id="my-playlists-table">
     <thead>
         <tr>
             <th>Playlist</th>
@@ -113,7 +113,7 @@ if (count($my_playlists)==0) {
             <div class='row'>
                 <div class='col-md-6'>
                     <a href='playlist/manage/<?=$playlist->id?>' title='View playlist' class='btn btn-md btn-success'><span class='bi bi-eye'></span></a>
-                    <a href='playlist/share/<?=$playlist->id?>' title='Share playlist' class='btn btn-md btn-warning'><span class='bi bi-share'></span></a>
+                    <a href='playlist/share/<?=$playlist->id?>' title='Share playlist' class='btn btn-md btn-primary'><span class='bi bi-share'></span></a>
                 </div>
                 <div class='col-md-6'>
                     <a href='playlist/edit/<?=$playlist->id?>' title='Edit playlist' class='btn btn-md btn-warning'><span class='bi bi-pencil-square' role='edit'></span></a>
@@ -148,7 +148,7 @@ if (count($joined_playlists)==0) {
     <?php
     } else {
     ?>
-    <table class="table table-striped table-hover playlist-table" id="joined-playlists-table">
+    <table class="table table-sm table-striped table-hover playlist-table" id="joined-playlists-table">
         <thead>
             <tr>
                 <th>Playlist</th>
