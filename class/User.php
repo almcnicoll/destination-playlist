@@ -6,7 +6,7 @@ class User extends Model {
     public ?string $email;
     public ?string $display_name;
     public ?string $market;
-    public ?string $image_url;
+    public ?string $image_url = null;
 
     static string $tableName = "users";
     static $fields = ['id','authmethod_id','identifier','email','display_name','market','image_url','created','modified'];
