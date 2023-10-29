@@ -211,6 +211,10 @@ trackSearch.validateTracks = async function(pattern) {
     }
 }
 
+trackSearch.clearLetter = function(letter_id) {
+    // 
+}
+
 trackSearch.init = function(inputBox, outputBox, limit=40) {
     trackSearch.limit = limit;
     trackSearch.inputBox = inputBox;
