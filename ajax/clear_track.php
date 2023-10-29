@@ -1,13 +1,5 @@
 <?php
     require_once('../autoload.php');
-    /*
-     * Note to future me:
-     * At the moment, Spotify doesn't do collaborative playlists very well via API
-     * Collaborative playlists don't allow API calls to alter them unless you're the owner;
-     * The "new" way is to add collaborators, but the API won't let you do that.
-     * So at the moment, the only way we can do this is for non-owners to write to the
-     * database, and have the owner update to Spotify when it next retrieves letters.
-     */
 
     // Assigns track to letter
     ob_start();
@@ -69,9 +61,9 @@
     $old = $letter->clone(true,true,true); // Keep ID, created, modified
 
     // Do the assigning
-    $letter->spotify_track_id = $_REQUEST['spotify_id'];
-    $letter->cached_title = $_REQUEST['cached_title'];
-    $letter->cached_artist = $_REQUEST['cached_artist'];
+    $letter->spotify_track_id = null;
+    $letter->cached_title = '';
+    $letter->cached_artist = '';
     $letter->save();
 
     // If we own the playlist, update it straight away - otherwise leave it for the owner
