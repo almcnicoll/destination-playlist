@@ -19,36 +19,35 @@
     if (!isset($_REQUEST['id'])) {
         $error_messages[] = "No letter specified";
         $fatal_error = true;
-    }
-
-    $letter = Letter::getById($_REQUEST['id']);
-    if ($letter == null) {
-        $error_messages[] = "Letter not found";
-        $fatal_error = true;
-    } else {    
-        $playlist_id = $letter->playlist_id;
-
-        $playlist = Playlist::getById($playlist_id);
-        if ($playlist == null) {
-            $error_messages[] = "Playlist not found";
+    } else {
+        $letter = Letter::getById($_REQUEST['id']);
+        if ($letter == null) {
+            $error_messages[] = "Letter not found";
             $fatal_error = true;
-        }
+        } else {    
+            $playlist_id = $letter->playlist_id;
 
-        if ($letter->user_id != $_SESSION['USER_ID']) {
-            $error_messages[] = "This is not your letter!";
-            $fatal_error = true;
-        } else {
-            // Check if we own playlist, and if not, check that we're a participant
-            if ($playlist->user_id != $letter->user_id) {
-                $participations = Participation::find([['user_id','=',$letter->user_id],['playlist_id','=',$playlist_id]]);
-                if ((count($participations) == 0) || ($participations[0]->removed != 0)) {
-                    $error_messages[] = "You are not part of this playlist!";
-                    $fatal_error = true;
+            $playlist = Playlist::getById($playlist_id);
+            if ($playlist == null) {
+                $error_messages[] = "Playlist not found";
+                $fatal_error = true;
+            }
+
+            if ($letter->user_id != $_SESSION['USER_ID']) {
+                $error_messages[] = "This is not your letter!";
+                $fatal_error = true;
+            } else {
+                // Check if we own playlist, and if not, check that we're a participant
+                if ($playlist->user_id != $letter->user_id) {
+                    $participations = Participation::find([['user_id','=',$letter->user_id],['playlist_id','=',$playlist_id]]);
+                    if ((count($participations) == 0) || ($participations[0]->removed != 0)) {
+                        $error_messages[] = "You are not part of this playlist!";
+                        $fatal_error = true;
+                    }
                 }
             }
         }
     }
-
     // Return if fatal
     if ($fatal_error) {
         $output = json_encode(['errors' => $error_messages]);
