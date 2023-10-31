@@ -78,3 +78,9 @@ CREATE TABLE errors (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ;
+/* UPDATE */
+/* VERSION 9 */
+INSERT INTO `faqs` (`rank`,`created`,`modified`,`question`,`answer`)
+VALUES
+(5,NOW(),NOW(),"How much of my data do you store, and what will you do with it?","<p>The short answer is that we store and use the minimum for the site to operate: your name, email and Spotify&reg; profile picture.</p><p>If there were to be a site security breach which required us to notify users, we would use your email address to do so - the same would be true in the event of a major change to the service which might require your attention. Beyond that, you will not receive emails from us unless you explicitly 'opt in' to do so.</p><p>The full website privacy policy is available <a href='../privacy/policy'>here</a>.</p>")
+;

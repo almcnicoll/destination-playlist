@@ -14,17 +14,6 @@ if (isset($_REQUEST['refresh_needed'])) {
         'refresh_token'     =>  $_SESSION['USER_REFRESHTOKEN'],
     ];
 
-    /*$options = http_build_query($refreshData);
-    $ch = curl_init($endpoint);
-    curl_setopt_array ( $ch, array (
-        CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
-        CURLOPT_POST => 1,
-        CURLOPT_POSTFIELDS => $options, 
-    ) );
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, $config['SPOTIFY_CLIENTID'].':'.$config['SPOTIFY_CLIENTSECRET']);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);*/
-
     $sr = new SpotifyRequest(SpotifyRequest::TYPE_OAUTH_REFRESHTOKEN, SpotifyRequest::ACTION_POST, $endpoint);
     $sr->send(http_build_query($refreshData));
 
@@ -64,7 +53,6 @@ if (isset($_REQUEST['refresh_needed'])) {
 
 } elseif (isset($_REQUEST['code'])) {
     // This branch is callback with auth code
-    //$_SESSION['SPOTIFY_AUTHCODE'] = $_REQUEST['code'];
     
     // Now request token
     $endpoint = "https://accounts.spotify.com/api/token";

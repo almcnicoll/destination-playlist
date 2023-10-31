@@ -127,6 +127,13 @@ trackSearch.ajaxOptions = {
         'Content-type': 'application/json'
     }
 };
+trackSearch.clearAjaxOptions = {
+    async: true,
+    cache: false,
+    complete: trackSearch.handleTrackUpdate,
+    method: 'GET',
+    timeout: 10000
+}
 
 trackSearch.checkTrack = function(trackName, artistName) {
     // Checks if this track is valid, using the relevant options
@@ -211,6 +218,11 @@ trackSearch.validateTracks = async function(pattern) {
     }
 }
 
+trackSearch.clearLetter = function(letter_id) {
+    $("html,html *").css("cursor","wait"); // Wait cursor
+    $.ajax(root_path + '/ajax/clear_track.php?id='+letter_id.toString(), trackSearch.clearAjaxOptions);
+}
+
 trackSearch.init = function(inputBox, outputBox, limit=40) {
     trackSearch.limit = limit;
     trackSearch.inputBox = inputBox;
@@ -265,6 +277,15 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
                 trackSearch.handleSearchClickCustom(ele); // Runs any custom actions for the page on which we're embedding
             }
         });
+
+        $('table').on('click','a.clear-track', function() {
+            var lid = $(this).data('letter-id');
+            if ((lid === undefined) || (lid == '')) {
+                $(this).remove();
+            } else {
+                trackSearch.clearLetter(lid);
+            }
+        })
 
         // Populate search pro-tip
         $('#search-protip').html(trackSearch.getProTip());

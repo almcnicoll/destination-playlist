@@ -106,9 +106,13 @@
                     user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
                                     +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
                     if (u.id == currentUser) {
-                        edit_own = "<a href='#' id='edit-track-"+i+"'  class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
+                        edit_own = "<a href='#' id='edit-track-"+i+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                                     +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
                                     +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
+                        // Allow populated tracks to be cleared
+                        if (l.cached_title!='' && l.cached_artist!='') {
+                            edit_own += "<a href='#' id='clear-track-"+i+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
+                        }
                     }
                 }
                 $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"

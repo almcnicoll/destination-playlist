@@ -1,13 +1,5 @@
 <?php
     require_once('../autoload.php');
-    /*
-     * Note to future me:
-     * At the moment, Spotify doesn't do collaborative playlists very well via API
-     * Collaborative playlists don't allow API calls to alter them unless you're the owner;
-     * The "new" way is to add collaborators, but the API won't let you do that.
-     * So at the moment, the only way we can do this is for non-owners to write to the
-     * database, and have the owner update to Spotify when it next retrieves letters.
-     */
 
     // Assigns track to letter
     ob_start();
@@ -27,36 +19,35 @@
     if (!isset($_REQUEST['id'])) {
         $error_messages[] = "No letter specified";
         $fatal_error = true;
-    }
-
-    $letter = Letter::getById($_REQUEST['id']);
-    if ($letter == null) {
-        $error_messages[] = "Letter not found";
-        $fatal_error = true;
-    } else {    
-        $playlist_id = $letter->playlist_id;
-
-        $playlist = Playlist::getById($playlist_id);
-        if ($playlist == null) {
-            $error_messages[] = "Playlist not found";
+    } else {
+        $letter = Letter::getById($_REQUEST['id']);
+        if ($letter == null) {
+            $error_messages[] = "Letter not found";
             $fatal_error = true;
-        }
+        } else {    
+            $playlist_id = $letter->playlist_id;
 
-        if ($letter->user_id != $_SESSION['USER_ID']) {
-            $error_messages[] = "This is not your letter!";
-            $fatal_error = true;
-        } else {
-            // Check if we own playlist, and if not, check that we're a participant
-            if ($playlist->user_id != $letter->user_id) {
-                $participations = Participation::find([['user_id','=',$letter->user_id],['playlist_id','=',$playlist_id]]);
-                if ((count($participations) == 0) || ($participations[0]->removed != 0)) {
-                    $error_messages[] = "You are not part of this playlist!";
-                    $fatal_error = true;
+            $playlist = Playlist::getById($playlist_id);
+            if ($playlist == null) {
+                $error_messages[] = "Playlist not found";
+                $fatal_error = true;
+            }
+
+            if ($letter->user_id != $_SESSION['USER_ID']) {
+                $error_messages[] = "This is not your letter!";
+                $fatal_error = true;
+            } else {
+                // Check if we own playlist, and if not, check that we're a participant
+                if ($playlist->user_id != $letter->user_id) {
+                    $participations = Participation::find([['user_id','=',$letter->user_id],['playlist_id','=',$playlist_id]]);
+                    if ((count($participations) == 0) || ($participations[0]->removed != 0)) {
+                        $error_messages[] = "You are not part of this playlist!";
+                        $fatal_error = true;
+                    }
                 }
             }
         }
     }
-
     // Return if fatal
     if ($fatal_error) {
         $output = json_encode(['errors' => $error_messages]);
@@ -69,9 +60,9 @@
     $old = $letter->clone(true,true,true); // Keep ID, created, modified
 
     // Do the assigning
-    $letter->spotify_track_id = $_REQUEST['spotify_id'];
-    $letter->cached_title = $_REQUEST['cached_title'];
-    $letter->cached_artist = $_REQUEST['cached_artist'];
+    $letter->spotify_track_id = null;
+    $letter->cached_title = '';
+    $letter->cached_artist = '';
     $letter->save();
 
     // If we own the playlist, update it straight away - otherwise leave it for the owner

@@ -154,6 +154,28 @@ class SpotifyRequest {
             fclose($fh);
         }
 
+        // Log any errors
+        if ($this->hasErrors()) {
+            $message = $this->getErrors();
+            $trace_details = debug_backtrace();
+            if (is_array($trace_details) && (count($trace_details)>1)) {
+                $entry = $trace_details[1];
+                $line = $entry['line'];
+                $file = $entry['file'];
+                if ((!isset($entry['args'])) || (!is_array($entry['args']))) { $entry['args']=[]; }
+                $message .= " // ".$entry['function'].'('.implode(',',$entry['args']).')';
+            } else {
+                $line = __LINE__;
+                $file = __FILE__;
+                $message .= " // no stacktrace";
+            }
+            try {
+                LoggedError::log(LoggedError::TYPE_CURL, $this->error_number, $file, $line, $message);
+            } catch(Exception) {
+                // IGNORE
+            }
+        }
+
         return $this;
     }
 }
