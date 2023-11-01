@@ -28,5 +28,5 @@ leaveHandler.leavePlaylist = function() {
 }
 
 $(document).ready( function() {
-    $('#leavePlaylist').click( leaveHandler.leavePlaylist );
+    $('.leave-playlist').click( leaveHandler.leavePlaylist );
 } );

@@ -164,7 +164,7 @@ if (count($joined_playlists)==0) {
             echo "<td><div class='cell-container'>{$playlist->destination}</div></td>\n";
             echo "<td>";
             echo "<a href='playlist/join/".$playlist->getShareCode()."' title='View playlist' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
-            echo "<a href='#' class='btn btn-md btn-danger m-2' title='Leave playlist' id='leavePlaylist' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
+            echo "<a href='#' class='btn btn-md btn-danger m-2 leave-playlist' title='Leave playlist' id='leave-playlist-{$playlist->id}' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
             echo "</td>\n";
             echo "</tr>\n";
         }
