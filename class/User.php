@@ -11,6 +11,11 @@ class User extends Model {
     static string $tableName = "users";
     static $fields = ['id','authmethod_id','identifier','email','display_name','market','image_url','created','modified'];
 
+    public static $defaultOrderBy = [
+        ['created','DESC'],
+        ['display_name','ASC'],
+    ];
+
     public function setAuthmethod_id($id) {
         $this->authmethod_id = $id;
     }
