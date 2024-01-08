@@ -53,6 +53,17 @@ class Model {
         return $this->modified;
     }
 
+    public static function count() : int {
+        $pdo = db::getPDO();
+        
+        $sql = "SELECT COUNT(*) AS c FROM `".static::$tableName."`"
+                .static::getDefaultOrderBy();
+        $query = $pdo->query($sql);
+
+        $result = $query->fetchColumn();
+        return $result;
+    }
+
     public static function getAll() : array {
         $pdo = db::getPDO();
         
