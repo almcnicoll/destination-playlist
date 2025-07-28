@@ -7,3 +7,4 @@ php_errors.log
 */php_errors.log
 *.local.php
 */*.local.php
+/.VSCodeCounter
