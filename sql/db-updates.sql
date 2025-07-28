@@ -84,3 +84,15 @@ INSERT INTO `faqs` (`rank`,`created`,`modified`,`question`,`answer`)
 VALUES
 (5,NOW(),NOW(),"How much of my data do you store, and what will you do with it?","<p>The short answer is that we store and use the minimum for the site to operate: your name, email and Spotify&reg; profile picture.</p><p>If there were to be a site security breach which required us to notify users, we would use your email address to do so - the same would be true in the event of a major change to the service which might require your attention. Beyond that, you will not receive emails from us unless you explicitly 'opt in' to do so.</p><p>The full website privacy policy is available <a href='../privacy/policy'>here</a>.</p>")
 ;
+/* UPDATE */
+/* VERSION 10 */
+CREATE TABLE `integers` (
+  `number` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`number`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;
+insert  into `integers`(`number`) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21),(22),(23),(24),(25)
+,(26),(27),(28),(29),(30),(31),(32),(33),(34),(35),(36),(37),(38),(39),(40),(41),(42),(43),(44),(45),(46),(47),(48),(49),(50),
+(51),(52),(53),(54),(55),(56),(57),(58),(59),(60),(61),(62),(63),(64),(65),(66),(67),(68),(69),(70),(71),(72),(73),(74),(75),
+(76),(77),(78),(79),(80),(81),(82),(83),(84),(85),(86),(87),(88),(89),(90),(91),(92),(93),(94),(95),(96),(97),(98),(99),(100)
+;

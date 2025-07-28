@@ -54,76 +54,110 @@
     $participants = $playlist->getParticipants();
     $participant_count = count($participants)+1; // Include owner
     $target_per_participant = floor($letters_count / $participant_count);
-    //$target_remainder = $letters_count % $participant_count;
-    $overassignment_count = 0;
-    $participant_letter_counts = [];
-    $overassigned_participants = [];
-    // Loop through all letters, working out which participant they belong to
-    // Count any "overspend" (people with more than their fair share) as we need it for subsequent calcs
-    foreach ($participants as $p) {
-        $participant_letter_counts[$p->user_id] = 0;
-    }
-    $participant_letter_counts[$user->id] = 0; // Owner
 
-    foreach ($letters as $l) {
-        if ($l->user_id !== null) {
-            $participant_letter_counts[$l->user_id]++;
-            if ($participant_letter_counts[$l->user_id] > $target_per_participant) {
-                $overassignment_count++;
-                $overassigned_participants[$l->user_id] = $participant_letter_counts[$l->user_id] - $target_per_participant;
+    $use_old_method = false;
+
+    if ($use_old_method) {
+        //$target_remainder = $letters_count % $participant_count;
+        $overassignment_count = 0;
+        $participant_letter_counts = [];
+        $overassigned_participants = [];
+        // Loop through all letters, working out which participant they belong to
+        // Count any "overspend" (people with more than their fair share) as we need it for subsequent calcs
+        foreach ($participants as $p) {
+            $participant_letter_counts[$p->user_id] = 0;
+        }
+        $participant_letter_counts[$user->id] = 0; // Owner
+
+        foreach ($letters as $l) {
+            if ($l->user_id !== null) {
+                $participant_letter_counts[$l->user_id]++;
+                if ($participant_letter_counts[$l->user_id] > $target_per_participant) {
+                    $overassignment_count++;
+                    $overassigned_participants[$l->user_id] = $participant_letter_counts[$l->user_id] - $target_per_participant;
+                }
             }
         }
-    }
-    // Remove any overassigned users and ALL their tracks from calculations (not just "overspent" ones)
-    $new_letters_count = $unassigned_count - $overassignment_count - (count($overassigned_participants) * $target_per_participant);
-    $new_participant_count = $participant_count - count($overassigned_participants);
-    $new_target_per_participant = floor($new_letters_count / $new_participant_count);
-    $new_target_remainder = $new_letters_count % $new_participant_count;
-    // Make an array of un-overassigned users
-    $new_participants = [];
-    foreach ($participants as $p) {
-        if($participant_letter_counts[$p->user_id] <= $target_per_participant) { $new_participants[] = $p; }
-    }
-    // Add a "fake" participation for the owner if appropriate
-    if ($participant_letter_counts[$user->id] <= $target_per_participant) {
-        $up = new Participation(); // DO NOT CALL save() ON THIS OBJECT!
-        $up->user_id = $user->id;
-        $up->id = 0;
-        $up->playlist_id = $playlist->id;
-        $new_participants[] = $up;
-    }
-    // TODO - what if no users / no tracks at this point? Add tests.
-
-
-    // We now have how many we want to give to each user
-    // So, loop through letters, assigning them to sequential users who aren't overassigned
-    // Only allow overassignment once we're in remainder territory
-    $i=0;
-    $u = 0;
-    $remainder_territory_boundary = $new_target_per_participant * $new_participant_count;
-    foreach ($unassigned_letters as $l) {
-        // Make sure we're using a consistent ID - the user's ID
-        if ($new_participants[$u] instanceof Participation) {
-            $use_this_id = $new_participants[$u]->user_id; // Get user_id from participation
-        } else {
-            $use_this_id = $new_participants[$u]->id; // Get id from user - shouldn't happen now though as we're creating "fake" participation for owner
+        // Remove any overassigned users and ALL their tracks from calculations (not just "overspent" ones)
+        $new_letters_count = $unassigned_count - $overassignment_count - (count($overassigned_participants) * $target_per_participant);
+        $new_participant_count = $participant_count - count($overassigned_participants);
+        $new_target_per_participant = floor($new_letters_count / $new_participant_count);
+        $new_target_remainder = $new_letters_count % $new_participant_count;
+        // Make an array of un-overassigned users
+        $new_participants = [];
+        foreach ($participants as $p) {
+            if($participant_letter_counts[$p->user_id] <= $target_per_participant) { $new_participants[] = $p; }
         }
-        // We're into remainder territory - overassignment is OK
-        if ($i>=$remainder_territory_boundary) {
-            // Just give it to this user - no checks
-        } else {
-            // Check that user has capacity - otherwise pick next until capacity found
-            while( $participant_letter_counts[ $use_this_id ] >= $new_target_per_participant ) {
-                $u++; if ($u >= count($new_participants)) { $u = 0; }
+        // Add a "fake" participation for the owner if appropriate
+        if ($participant_letter_counts[$user->id] <= $target_per_participant) {
+            $up = new Participation(); // DO NOT CALL save() ON THIS OBJECT!
+            $up->user_id = $user->id;
+            $up->id = 0;
+            $up->playlist_id = $playlist->id;
+            $new_participants[] = $up;
+        }
+        // TODO - what if no users / no tracks at this point? Add tests.
+
+
+        // We now have how many we want to give to each user
+        // So, loop through letters, assigning them to sequential users who aren't overassigned
+        // Only allow overassignment once we're in remainder territory
+        $i=0;
+        $u = 0;
+        $remainder_territory_boundary = $new_target_per_participant * $new_participant_count;
+        foreach ($unassigned_letters as $l) {
+            // Make sure we're using a consistent ID - the user's ID
+            if ($new_participants[$u] instanceof Participation) {
+                $use_this_id = $new_participants[$u]->user_id; // Get user_id from participation
+            } else {
+                $use_this_id = $new_participants[$u]->id; // Get id from user - shouldn't happen now though as we're creating "fake" participation for owner
             }
+            // We're into remainder territory - overassignment is OK
+            if ($i>=$remainder_territory_boundary) {
+                // Just give it to this user - no checks
+            } else {
+                // Check that user has capacity - otherwise pick next until capacity found
+                while( $participant_letter_counts[ $use_this_id ] >= $new_target_per_participant ) {
+                    $u++; if ($u >= count($new_participants)) { $u = 0; }
+                }
+            }
+            // Assign letter to user and increase their count
+            $l->user_id = $use_this_id;
+            $l->save();
+            $participant_letter_counts[ $use_this_id ]++;
+            // Increment counter and user
+            $i++; // Counting overall assignments
+            $u++; if ($u >= count($new_participants)) { $u = 0; } // Cycling participants
         }
-        // Assign letter to user and increase their count
-        $l->user_id = $use_this_id;
-        $l->save();
-        $participant_letter_counts[ $use_this_id ]++;
-        // Increment counter and user
-        $i++; // Counting overall assignments
-        $u++; if ($u >= count($new_participants)) { $u = 0; } // Cycling participants
+    } else {
+        // NEW METHOD
+        $pdo = db::getPDO();
+        $sqlAssignmentList = <<<END_SQL
+SELECT `number`, users.id AS user_id
+FROM integers i
+INNER JOIN 
+(
+SELECT u.id, COUNT(l.id) AS letter_count
+FROM users u
+LEFT JOIN participations part ON part.user_id=u.id
+LEFT JOIN playlists p ON part.playlist_id = p.id OR u.id=p.user_id
+LEFT JOIN letters l ON l.user_id=u.id
+WHERE p.id=4 AND (part.removed IS NULL OR part.removed=0)
+GROUP BY u.id
+) users ON users.letter_count<=`number`
+ORDER BY `number`,RAND()
+LIMIT {$unassigned_count}
+;
+END_SQL;
+        $stmt = $pdo->prepare($sqlAssignmentList);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll();
+        foreach ($results as $row) {
+            $letter = array_shift($unassigned_letters);
+            $letter->user_id = $row['user_id'];
+            $letter->save();
+        }
     }
 
     // Return values
