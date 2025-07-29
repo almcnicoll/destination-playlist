@@ -56,7 +56,7 @@
     $target_per_participant = floor($letters_count / $participant_count);
 
     $use_old_method = false;
-	LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, "Executed to this line");
+	//LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, "Executed to this line");
 
     if ($use_old_method) {
         //$target_remainder = $letters_count % $participant_count;
@@ -97,7 +97,7 @@
             $up->playlist_id = $playlist->id;
             $new_participants[] = $up;
         }
-        // TODO - what if no users / no tracks at this point? Add tests.
+        // What if no users / no tracks at this point? Add tests.
 
 
         // We now have how many we want to give to each user
@@ -143,7 +143,7 @@ FROM users u
 LEFT JOIN participations part ON part.user_id=u.id
 LEFT JOIN playlists p ON part.playlist_id = p.id OR u.id=p.user_id
 LEFT JOIN letters l ON l.user_id=u.id
-WHERE p.id=4 AND (part.removed IS NULL OR part.removed=0)
+WHERE p.id={$playlist_id} AND (part.removed IS NULL OR part.removed=0)
 GROUP BY u.id
 ) users ON users.letter_count<=`number`
 ORDER BY `number`,RAND()
@@ -151,12 +151,12 @@ LIMIT {$unassigned_count}
 ;
 END_SQL;
 		
-	    LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Unassigned letters: '.count($unassigned_letters));
+	    //LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Unassigned letters: '.count($unassigned_letters));
         $stmt = $pdo->prepare($sqlAssignmentList);
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $results = $stmt->fetchAll();
-        LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Assignments to make: '.count($results));
+        //LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Assignments to make: '.count($results));
         foreach ($results as $row) {
             $letter = array_shift($unassigned_letters);
             $letter->user_id = $row['user_id'];
