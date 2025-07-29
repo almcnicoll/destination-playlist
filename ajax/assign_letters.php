@@ -140,9 +140,9 @@ INNER JOIN
 (
 SELECT u.id, COUNT(l.id) AS letter_count
 FROM users u
-LEFT JOIN participations part ON part.user_id=u.id
-LEFT JOIN playlists p ON part.playlist_id = p.id OR u.id=p.user_id
-LEFT JOIN letters l ON l.user_id=u.id
+LEFT JOIN participations part ON (part.user_id=u.id AND part.playlist_id={$playlist_id})
+LEFT JOIN playlists p ON part.playlist_id = p.id OR (u.id=p.user_id AND p.id={$playlist_id})
+LEFT JOIN letters l ON (l.user_id=u.id AND l.playlist_id={$playlist_id})
 WHERE p.id={$playlist_id} AND (part.removed IS NULL OR part.removed=0)
 GROUP BY u.id
 ) users ON users.letter_count<=`number`
