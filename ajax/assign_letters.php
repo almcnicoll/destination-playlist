@@ -56,6 +56,7 @@
     $target_per_participant = floor($letters_count / $participant_count);
 
     $use_old_method = false;
+	LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, "Executed to this line");
 
     if ($use_old_method) {
         //$target_remainder = $letters_count % $participant_count;
@@ -149,10 +150,13 @@ ORDER BY `number`,RAND()
 LIMIT {$unassigned_count}
 ;
 END_SQL;
+		
+	    LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Unassigned letters: '.count($unassigned_letters));
         $stmt = $pdo->prepare($sqlAssignmentList);
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $results = $stmt->fetchAll();
+        LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Assignments to make: '.count($results));
         foreach ($results as $row) {
             $letter = array_shift($unassigned_letters);
             $letter->user_id = $row['user_id'];
