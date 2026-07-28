@@ -35,6 +35,13 @@ endif;
         echo "<div class='col-12'><a class='btn btn-lg' href='{$auth_method->handler}'><img src='{$auth_method->image}' height='60' /></a></div>\n";
         echo "</div>\n";
     }
+    if (in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])):
+    ?>
+    <div class='row text-center'>
+        <div class='col-12'><a class='btn btn-lg btn-warning' href='dev-login.php'>DEV: Log in as almcnicoll</a></div>
+    </div>
+    <?php
+    endif;
     ?>
 </body>
 </html>
