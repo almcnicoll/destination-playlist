@@ -169,25 +169,25 @@ class Playlist extends Model {
         // Order by rank (the letters' actual display/spelling order), falling back to id for ties -
         // ordering by id alone put newly-inserted letters at the end instead of their correct position
         $sqlGetTracks = <<<END_SQL
-        SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY `rank`,id SEPARATOR ',spotify:track:')) AS tracks FROM letters
+        SELECT spotify_track_id FROM letters
         WHERE spotify_track_id IS NOT NULL
         AND playlist_id = :playlist_id
-        GROUP BY playlist_id
+        ORDER BY `rank`,id
         ;
 END_SQL;
         $stmtGetTracks = $pdo->prepare($sqlGetTracks);
         $stmtGetTracks->execute(['playlist_id' => $this->id]);
-        $resGetTracks = $stmtGetTracks->fetch(PDO::FETCH_ASSOC);
-        // No rows back means no letters currently have a track assigned - that's a valid "empty playlist" state,
-        // not "nothing to do": push it through so a fully-cleared playlist actually gets cleared on Spotify too
-        $trackList = ($resGetTracks !== false) ? $resGetTracks['tracks'] : '';
+        $trackIds = $stmtGetTracks->fetchAll(PDO::FETCH_COLUMN);
+        // An empty array here is a valid "empty playlist" state, not "nothing to do" - push it
+        // through so a fully-cleared playlist actually gets cleared on Spotify too
+        $trackUris = array_map(fn($id) => 'spotify:track:'.$id, $trackIds);
 
-        $trackData = [
-            'uris' => $trackList,
-        ];
-        $endpoint = "https://api.spotify.com/v1/playlists/".$this->spotify_playlist_id."/items?".http_build_query($trackData);
+        // Sent as a JSON body rather than a query string - Spotify's own docs warn that large uri
+        // lists in the query string can silently exceed URL length limits and get truncated
+        $endpoint = "https://api.spotify.com/v1/playlists/".$this->spotify_playlist_id."/items";
         $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-        $srUpdatePlaylist->send();
+        $srUpdatePlaylist->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
+        $srUpdatePlaylist->send(['uris' => $trackUris]);
         if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
             // All good
         } else {
