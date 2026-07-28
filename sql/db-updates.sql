@@ -108,3 +108,8 @@ SELECT 'spotify', 'login-spotify.php', 'img/logins/spotify.png', '2023-09-16 22:
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `authmethods` WHERE `methodName` = 'spotify')
 ;
+/* UPDATE */
+/* VERSION 13 */
+ALTER TABLE `users` 
+MODIFY COLUMN `image_url` VARCHAR(2000) DEFAULT NULL
+;
