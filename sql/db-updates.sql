@@ -1,6 +1,6 @@
 /* UPDATE */
 /* VERSION 1 */
-ALTER TABLE letters ADD COLUMN rank INT NOT NULL DEFAULT 0 AFTER `spotify_track_id`;
+ALTER TABLE letters ADD COLUMN `rank` INT NOT NULL DEFAULT 0 AFTER `spotify_track_id`;
 /* UPDATE */
 /* VERSION 2 */
 UPDATE letters lOne
@@ -53,7 +53,7 @@ VALUES
 /* UPDATE */
 /* VERSION 7 */
 UPDATE `faqs` SET `answer`="<p>For families with younger kids, it's great to expose them to a range of music - plus there's only so many times you can listen to <em>Baby Shark</em> or the soundtrack to <em>Frozen</em> - although obviously you'll have to manage the playlist, as Spotify&reg; accounts are for 13s and over. Destination Playlist makes the process of introducing new music a fun one!</p><p>For families with teens, your taste in music probably has quite a small overlap. You might not want to listen to a whole playlist or album of a genre you don't like, but Destination Playlist makes a way to share some of your fave tracks without overload.</p>"
-WHERE rank=2
+WHERE `rank`=2
 ;
 UPDATE `faqs` SET `question` = REPLACE(`question`,'Spotify ','Spotify&reg; '),`answer` = REPLACE(`answer`,'Spotify ','Spotify&reg; ')
 ;
