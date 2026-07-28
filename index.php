@@ -28,6 +28,19 @@ if (count($page_parts)==0 || (empty($page_parts[0]))) {
     $stub = "{$page_parts[0]}_{$page_parts[1]}";
 }
 
+$page = "pages/{$stub}.php";
+
+// Unknown/nonexistent page (e.g. a stray asset request like styles.css.map) -
+// bail out before touching auth/session, so it can't poison the login redirect
+if (!file_exists($page)) {
+    http_response_code(404);
+    echo "<h1>You’ve Lost That Lovin’ Feelin’...</h1>\n";
+    echo "<h2>Or, more accurately, you've clicked a wrong link.</h2>\n";
+    echo "<p>Look, it's most likely our fault - sorry. Or you've mistyped something. Who knows?</p>\n";
+    echo "<p class='text-body-secondary'><small>{$page}</small></p>\n";
+    die();
+}
+
 // Get information about the page we're serving
 $pageinfo = PageInfo::get($stub);
 
@@ -36,9 +49,6 @@ if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
     $pageinfo->processRequestData();
     User::loginCheck($pageinfo->redirectOnFail);
 }
-
-
-$page = "pages/{$stub}.php";
 
 ob_start(); // Required, as we're including login-check further down
 
