@@ -101,3 +101,10 @@ insert  into `integers`(`number`) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10
 INSERT INTO `errors` (`type`,`number`,`message`,`file`,`line`,`created`,`modified`)
 VALUES ('sys',0,"Testing Git post-deployment script on remote server",'',0,NOW(),NOW())
 ;
+/* UPDATE */
+/* VERSION 12 */
+INSERT INTO `authmethods` (`methodName`, `handler`, `image`, `created`, `modified`)
+SELECT 'spotify', 'login-spotify.php', 'img/logins/spotify.png', '2023-09-16 22:10:14', '2023-09-16 22:10:14'
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `authmethods` WHERE `methodName` = 'spotify')
+;
