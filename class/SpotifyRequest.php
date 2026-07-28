@@ -149,7 +149,7 @@ class SpotifyRequest {
         $this->error_message = curl_error($this->ch);
         $this->error_number = curl_errno($this->ch);
         $this->http_code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
-        curl_close($this->ch);
+        @curl_close($this->ch);
         if ($this->log_to_file) {
             fclose($fh);
         }

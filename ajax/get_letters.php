@@ -27,6 +27,8 @@ if ($playlist == null) {
     // If we're the playlist owner, see if there's any changes to push to Spotify
     if ($playlist->user_id == $_SESSION['USER_ID']) {
         if (empty($_SESSION['last_updates_check'])) { $_SESSION['last_updates_check'] = $playlist->created; }
+        // Capture "now" before checking, so nothing that changes mid-request gets missed by the next poll
+        $checkStartedAt = (new DateTime())->format('Y-m-d H:i:s');
 
         $sqlCheckIfUpdatesNeeded = <<<END_SQL
         SELECT COUNT(id) AS c
@@ -49,42 +51,66 @@ END_SQL;
         if ($result !== false) {
             // We might have updates to do
             if ($result['c'] > 0) {
-                // Update the playlist
-                $sqlGetTracks = <<<END_SQL
-                SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY id SEPARATOR ',spotify:track:')) AS tracks FROM letters
-                WHERE spotify_track_id IS NOT NULL
-                AND playlist_id = :playlist_id
-                GROUP BY playlist_id
-                ;
-END_SQL;
-                $paramsGetTracks = [
-                    'playlist_id' => $playlist_id,
-                ];
-                $stmtGetTracks = $dbCheckIfUpdatesNeeded->prepare($sqlGetTracks);
-                $stmtGetTracks->execute($paramsGetTracks);
-                $resGetTracks = $stmtGetTracks->fetch(PDO::FETCH_ASSOC);
-                if ($resGetTracks !== false) { 
-                    $trackList = $resGetTracks['tracks'];
-                    $trackData = [
-                        'uris'          => $trackList,
-                    ];
-                    $endpoint = "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/tracks?".http_build_query($trackData);
-                    $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-                    $srUpdatePlaylist->send();
-                    if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
-                        // All good
-                        //error_log("OK:  get_letters CURL returned http code ".$srUpdatePlaylist->http_code);
-                    } else {
-                        //error_log("ERR: get_letters CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
+                // Only one push per playlist at a time - if another request (e.g. a direct
+                // assign/clear) is already pushing, skip this cycle rather than racing it
+                $lockName = 'playlist_push_'.(int)$playlist_id;
+                $stmtGetLock = $dbCheckIfUpdatesNeeded->prepare('SELECT GET_LOCK(:lockname, 0) AS locked');
+                $stmtGetLock->execute(['lockname' => $lockName]);
+                $lockResult = $stmtGetLock->fetch(PDO::FETCH_ASSOC);
+                $lockAcquired = ($lockResult !== false) && ((int)$lockResult['locked'] === 1);
+                $pushSucceeded = false;
 
-                        if ($srUpdatePlaylist->http_code >= 400) {
-                            $error_messages[] = "Request URL: {$endpoint}";
-                            $error_messages[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
+                if ($lockAcquired) {
+                    // Update the playlist
+                    $sqlGetTracks = <<<END_SQL
+                    SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY id SEPARATOR ',spotify:track:')) AS tracks FROM letters
+                    WHERE spotify_track_id IS NOT NULL
+                    AND playlist_id = :playlist_id
+                    GROUP BY playlist_id
+                    ;
+END_SQL;
+                    $paramsGetTracks = [
+                        'playlist_id' => $playlist_id,
+                    ];
+                    $stmtGetTracks = $dbCheckIfUpdatesNeeded->prepare($sqlGetTracks);
+                    $stmtGetTracks->execute($paramsGetTracks);
+                    $resGetTracks = $stmtGetTracks->fetch(PDO::FETCH_ASSOC);
+                    if ($resGetTracks !== false) {
+                        $trackList = $resGetTracks['tracks'];
+                        $trackData = [
+                            'uris'          => $trackList,
+                        ];
+                        $endpoint = "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/items?".http_build_query($trackData);
+                        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+                        $srUpdatePlaylist->send();
+                        if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
+                            // All good
+                            $pushSucceeded = true;
+                            //error_log("OK:  get_letters CURL returned http code ".$srUpdatePlaylist->http_code);
                         } else {
-                            $error_messages[] = $srUpdatePlaylist->error_message;
+                            //error_log("ERR: get_letters CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
+
+                            if ($srUpdatePlaylist->http_code >= 400) {
+                                $error_messages[] = "Request URL: {$endpoint}";
+                                $error_messages[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
+                            } else {
+                                $error_messages[] = $srUpdatePlaylist->error_message;
+                            }
                         }
                     }
+
+                    $stmtReleaseLock = $dbCheckIfUpdatesNeeded->prepare('SELECT RELEASE_LOCK(:lockname)');
+                    $stmtReleaseLock->execute(['lockname' => $lockName]);
                 }
+
+                // Only move the checkpoint forward if we know we're caught up - otherwise
+                // leave it as-is so the next poll retries the same window
+                if ($pushSucceeded) {
+                    $_SESSION['last_updates_check'] = $checkStartedAt;
+                }
+            } else {
+                // Nothing needed pushing, so we're caught up as of now
+                $_SESSION['last_updates_check'] = $checkStartedAt;
             }
         }
     }
