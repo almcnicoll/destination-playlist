@@ -23,6 +23,17 @@
         } else {
             // Ensure that playlist exists on Spotify - sometimes it can be orphaned
             $playlist->pushToSpotify();
+
+            // Force a full track push on page load, to pick up anything that happened while
+            // this page was closed and to give the owner a way to force-refresh a stuck playlist
+            $pushResult = $playlist->pushTracksToSpotify();
+            if (!$pushResult['success']) {
+                foreach ($pushResult['errors'] as $pushError) {
+                    $error_messages[] = $pushError;
+                }
+            } else {
+                $_SESSION['last_updates_check'] = (new DateTime())->format('Y-m-d H:i:s');
+            }
         }
     }
 
