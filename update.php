@@ -146,6 +146,7 @@ if (file_exists('sql/db-updates.sql')) {
             }
             pre_die("Error running SQL for version #{$v}.",
                     "You will need to check that the database is in a valid state.",
+                    "Error message: ".$e->getMessage(),
                     "SQL reads ".ellipsis($sql, 1000));
         }
         $sql = "INSERT INTO dbupdates (`version`,`created`,`modified`) VALUES ({$v},NOW(),NOW());";
