@@ -121,6 +121,29 @@ if (file_exists('sql/db-updates.sql')) {
         try {
         $pdo->exec($sql);
         } catch (Exception $e) {
+            if ($v === 1 && $current_version === 0) {
+                // First migration failed at version 0 - database probably hasn't been initialised yet
+                if ($pdo->inTransaction()) { $pdo->rollBack(); }
+                pre_echo("First migration failed - assuming the database hasn't been initialised.",
+                        "Attempting to run sql/create-tables.sql instead.");
+                if (!file_exists('sql/create-tables.sql')) {
+                    pre_die("Cannot find sql/create-tables.sql to initialise the database.");
+                }
+                $create_sql = file_get_contents('sql/create-tables.sql');
+                try {
+                    $pdo->exec($create_sql);
+                } catch (Exception $e2) {
+                    pre_die("Error running SQL for version #{$v}.",
+                            "Original error was: ".$e->getMessage(),
+                            "SQL reads ".ellipsis($sql, 1000),
+                            "Error initialising database from sql/create-tables.sql.",
+                            "Subsequent error was: ".$e2->getMessage(),
+                            "You will need to check that the database is in a valid state.",
+                            "SQL reads ".ellipsis($create_sql, 1000));
+                }
+                pre_die("Database initialised successfully from sql/create-tables.sql.",
+                        "Please refresh this page to bring the database up to the latest version.");
+            }
             pre_die("Error running SQL for version #{$v}.",
                     "You will need to check that the database is in a valid state.",
                     "SQL reads ".ellipsis($sql, 1000));
