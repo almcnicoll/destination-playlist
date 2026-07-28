@@ -227,7 +227,17 @@ class Model {
         //echo "{$sql}\n";
         //print_r($criteria_values);
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($criteria_values);
+        try {
+            $stmt->execute($criteria_values);
+        } catch (PDOException $e) {
+            $fieldLengths = [];
+            foreach (static::$fields as $i => $field) {
+                $fieldLengths[] = "{$field}=".strlen((string)$criteria_values[$i])."chars";
+            }
+            LoggedError::log(LoggedError::TYPE_PHP, (int)($e->errorInfo[1] ?? 0), __FILE__, __LINE__,
+                "Model->save() failed on table `".static::$tableName."`: ".$e->getMessage()." | field lengths: ".implode(', ', $fieldLengths));
+            throw $e;
+        }
 
         if ($is_insert) {
             $this->id = $pdo->lastInsertId();
