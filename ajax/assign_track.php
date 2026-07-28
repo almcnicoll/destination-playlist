@@ -76,45 +76,13 @@
 
     // If we own the playlist, update it straight away - otherwise leave it for the owner
     if ($playlist->user_id == $_SESSION['USER_ID']) {
-        // Update the playlist
-        $sqlGetTracks = <<<END_SQL
-        SELECT CONCAT('spotify:track:',GROUP_CONCAT(spotify_track_id ORDER BY id SEPARATOR ',spotify:track:')) AS tracks FROM letters
-        WHERE spotify_track_id IS NOT NULL
-        AND playlist_id = :playlist_id
-        GROUP BY playlist_id
-        ;
-END_SQL;
-        $params = [
-            'playlist_id' => $playlist_id,
-        ];
-        $db = db::getPDO();
-        $stmt = $db->prepare($sqlGetTracks);
-        $stmt->execute($params);
-        $resGetTracks = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($resGetTracks !== false) { 
-            $trackList = $resGetTracks['tracks'];
-            $trackData = [
-                'uris'          => $trackList,
-            ];
-            $endpoint = "https://api.spotify.com/v1/playlists/".$playlist->spotify_playlist_id."/tracks?".http_build_query($trackData);
-            $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-            $srUpdatePlaylist->send();
-            if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
-                // All good
-                //error_log("OK:  CURL returned http code ".$srUpdatePlaylist->http_code);
-            } else {
-                //error_log("ERR: CURL returned http code ".$srUpdatePlaylist->http_code." (".$srUpdatePlaylist->result.")");
-
-                if ($srUpdatePlaylist->http_code >= 400) {
-                    $error_messages[] = "Request URL: {$endpoint}";
-                    $error_messages[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
-                } else {
-                    $error_messages[] = $srUpdatePlaylist->error_message;
-                }
-                
-                // Reverse the assigning - SIMPLES
-                $old->save();
+        $pushResult = $playlist->pushTracksToSpotify();
+        if (!$pushResult['success']) {
+            foreach ($pushResult['errors'] as $pushError) {
+                $error_messages[] = $pushError;
             }
+            // Reverse the assigning - SIMPLES
+            $old->save();
         }
     }
 
@@ -131,10 +99,10 @@ END_SQL;
     if (count($info_messages)>0) {
         $output['info'] = $info_messages;
     }
-    // We only perform a SpotifyRequest if we're the owner (see note at start of script)
-    // Hence $srUpdatePlaylist could be null / undefined
-    if (!empty($srUpdatePlaylist)) {
-        http_response_code($srUpdatePlaylist->http_code); // Pass on any errors
+    // We only push to Spotify if we're the owner (see note at start of script)
+    // Hence $pushResult could be unset
+    if (!empty($pushResult) && !empty($pushResult['http_code'])) {
+        http_response_code($pushResult['http_code']); // Pass on any errors
     }
     ob_end_clean();
     die(json_encode($output));

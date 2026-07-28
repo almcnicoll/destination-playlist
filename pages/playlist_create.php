@@ -8,8 +8,7 @@
     if (isset($_REQUEST['action'])) {
         if ($_REQUEST['action'] == 'formsubmitted') {
             // Create playlist on spotify
-            $user = $_SESSION['USER'];
-            $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
+            $endpoint = "https://api.spotify.com/v1/me/playlists";
             $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_POST, $endpoint);
             $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
             $createOptions = [

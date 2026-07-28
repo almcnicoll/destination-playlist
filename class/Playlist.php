@@ -110,7 +110,6 @@ class Playlist extends Model {
     // Checks if the playlist exists on Spotify - if not, creates it
     public function pushToSpotify() {
         global $config;
-        $user = $_SESSION['USER'];
         // We need to re-create if (a) there is no spotify playlist ID saved or (b) Spotify doesn't recognise the id
         if ((!empty($this->spotify_playlist_id)) && ($this->existsOnSpotify())) {
             $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
@@ -122,11 +121,13 @@ class Playlist extends Model {
                 'collaborative'     => false,
                 /*'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),*/ // Don't overwrite
             ];
-            
+
             return $sr->send($editData);
         } else {
-            $endpoint = "https://api.spotify.com/v1/users/{$user->identifier}/playlists";
-            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+            // Playlist creation is POST /me/playlists (POST /users/{id}/playlists was removed by Spotify)
+            $endpoint = "https://api.spotify.com/v1/me/playlists";
+            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_POST, $endpoint);
+            $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
             $createdData = [
                 'name'              => $this->display_name,
                 'public'            => true,
@@ -139,11 +140,70 @@ class Playlist extends Model {
             } else {
                 $result = json_decode($sr->result);
                 $this->spotify_playlist_id = $result->id;
+                $this->save(); // Persist the new id, or every future request will try to re-create it again
                 return $sr;
             }
         }
 
-        
+
+    }
+
+    // Rebuilds the full Spotify track list for this playlist from the DB (in letter rank order) and pushes it.
+    // Returns ['success' => bool, 'errors' => string[], 'http_code' => ?int]. If another request is already
+    // pushing this playlist, this call is a no-op success - that other push will leave Spotify in the right state.
+    public function pushTracksToSpotify() : array {
+        $pdo = db::getPDO();
+
+        $lockName = 'playlist_push_'.(int)$this->id;
+        $stmtGetLock = $pdo->prepare('SELECT GET_LOCK(:lockname, 0) AS locked');
+        $stmtGetLock->execute(['lockname' => $lockName]);
+        $lockResult = $stmtGetLock->fetch(PDO::FETCH_ASSOC);
+        $lockAcquired = ($lockResult !== false) && ((int)$lockResult['locked'] === 1);
+        if (!$lockAcquired) {
+            return ['success' => true, 'errors' => [], 'http_code' => null];
+        }
+
+        $errors = [];
+        $success = true;
+
+        // Order by rank (the letters' actual display/spelling order), falling back to id for ties -
+        // ordering by id alone put newly-inserted letters at the end instead of their correct position
+        $sqlGetTracks = <<<END_SQL
+        SELECT spotify_track_id FROM letters
+        WHERE spotify_track_id IS NOT NULL
+        AND playlist_id = :playlist_id
+        ORDER BY `rank`,id
+        ;
+END_SQL;
+        $stmtGetTracks = $pdo->prepare($sqlGetTracks);
+        $stmtGetTracks->execute(['playlist_id' => $this->id]);
+        $trackIds = $stmtGetTracks->fetchAll(PDO::FETCH_COLUMN);
+        // An empty array here is a valid "empty playlist" state, not "nothing to do" - push it
+        // through so a fully-cleared playlist actually gets cleared on Spotify too
+        $trackUris = array_map(fn($id) => 'spotify:track:'.$id, $trackIds);
+
+        // Sent as a JSON body rather than a query string - Spotify's own docs warn that large uri
+        // lists in the query string can silently exceed URL length limits and get truncated
+        $endpoint = "https://api.spotify.com/v1/playlists/".$this->spotify_playlist_id."/items";
+        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+        $srUpdatePlaylist->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
+        $srUpdatePlaylist->send(['uris' => $trackUris]);
+        if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
+            // All good
+        } else {
+            $success = false;
+            if ($srUpdatePlaylist->http_code >= 400) {
+                $errors[] = "Request URL: {$endpoint}";
+                $errors[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
+            } else {
+                $errors[] = $srUpdatePlaylist->error_message;
+            }
+        }
+
+        $stmtReleaseLock = $pdo->prepare('SELECT RELEASE_LOCK(:lockname)');
+        $stmtReleaseLock->execute(['lockname' => $lockName]);
+
+        return ['success' => $success, 'errors' => $errors, 'http_code' => $srUpdatePlaylist->http_code];
     }
 
     // This function resets the ranks of the letters to start at 1 and increase from there
