@@ -69,7 +69,7 @@ LEFT JOIN playlists p ON part.playlist_id = p.id OR (u.id=p.user_id AND p.id={$p
 LEFT JOIN letters l ON (l.user_id=u.id AND l.playlist_id={$playlist_id})
 WHERE p.id={$playlist_id} AND (part.removed IS NULL OR part.removed=0)
 GROUP BY u.id
-) users ON users.letter_count<=`number`
+) users ON users.letter_count<`number`
 ORDER BY `number`,RAND()
 LIMIT {$unassigned_count}
 ;
