@@ -2,6 +2,8 @@ if (typeof letterAssigner === 'undefined') { letterAssigner = {}; }
 
 letterAssigner.url = root_path+"/ajax/assign_letters.php?playlist_id="+playlist_id;
 letterAssigner.unassignUrl = root_path+"/ajax/unassign_letter.php?letter_id=";
+letterAssigner.assignableUsersUrl = root_path+"/ajax/get_assignable_users.php?playlist_id="+playlist_id;
+letterAssigner.assignToUserUrl = root_path+"/ajax/assign_letter_to_user.php";
 
 // Swaps an element's first icon for a small spinner while its action is in flight, remembering
 // the icon's original class so clearPending can put it back if the action fails
@@ -51,6 +53,60 @@ letterAssigner.ajaxOptions = {
     timeout: 4000
 };
 
+// Populates the "Assign to..." modal with the owner plus any non-kicked participant, for one
+// specific unassigned letter
+letterAssigner.openAssignModal = function(letterId, letterChar) {
+    $('#assignUserModalLetter').text(letterChar);
+    $('#assign-user-list').data('letter-id', letterId);
+    $('#assign-user-list').html("<li class='list-group-item fst-italic'>Loading...</li>");
+    $.ajax(letterAssigner.assignableUsersUrl, {
+        async: true,
+        cache: false,
+        dataType: 'json',
+        method: 'GET',
+        timeout: 8000,
+        success: function(data) {
+            if ('errors' in data) {
+                $('#assign-user-list').html("<li class='list-group-item text-danger'>"+data.errors.join(' ')+"</li>");
+                return;
+            }
+            if (data.users.length === 0) {
+                $('#assign-user-list').html("<li class='list-group-item fst-italic'>No eligible participants.</li>");
+                return;
+            }
+            var html = '';
+            data.users.forEach(function(u) {
+                html += "<li class='list-group-item'><a href='#' class='assign-user-option' data-user-id='"+u.id+"'>"
+                        +"<span class='bi bi-person-fill'></span> "+u.display_name+"</a></li>";
+            });
+            $('#assign-user-list').html(html);
+        },
+        error: function() {
+            $('#assign-user-list').html("<li class='list-group-item text-danger'>Could not load participants. Please try again.</li>");
+        }
+    });
+}
+
+// Assigns one specific letter to one specific user, chosen from the modal above
+letterAssigner.assignLetterToUser = function(letterId, userId, $pendingEl) {
+    letterAssigner.showPending($pendingEl);
+    var url = letterAssigner.assignToUserUrl+'?letter_id='+letterId+'&user_id='+userId;
+    $.ajax(url, $.extend({}, letterAssigner.ajaxOptions, {
+        complete: function(jqXHR, textStatus) {
+            letterAssigner.clearPending($pendingEl);
+            var data = jqXHR.responseJSON;
+            if (textStatus === 'success' && data && data.letter) {
+                $('#assignUserModalCloseX').trigger('click');
+                if ('handleActionResponseCustom' in letterAssigner) {
+                    letterAssigner.handleActionResponseCustom(data); // Patches the row immediately, same as assign/reassign/unassign
+                }
+            } else {
+                alert((data && data.errors) ? data.errors.join(' ') : "Could not assign letter. Please try again.");
+            }
+        }
+    }));
+}
+
 letterAssigner.init = function(assignButton=null,reassignButton=null) {
     letterAssigner.assignButton = assignButton;
     letterAssigner.reassignButton = reassignButton;
@@ -82,6 +138,21 @@ letterAssigner.init = function(assignButton=null,reassignButton=null) {
                 var letter_id = $el.data('letter-id');
                 var unassignUrl = letterAssigner.unassignUrl + letter_id;
                 $.ajax(unassignUrl, $.extend({}, letterAssigner.ajaxOptions, { complete: letterAssigner.handleActionComplete($el) }));
+            })
+            // "Assign" button on an unassigned letter - opens the picker modal (data-bs-toggle
+            // on the button itself handles actually showing it)
+            $('body').on('click','a.assign-to-user',function() {
+                var letterId = $(this).data('letter-id');
+                var letterChar = $(this).data('letter');
+                letterAssigner.openAssignModal(letterId, letterChar);
+            })
+            // Picking a user from that modal's list
+            $('body').on('click','a.assign-user-option',function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('pending')) { return; } // Already saving - ignore repeat clicks
+                var userId = $(this).data('user-id');
+                var letterId = $('#assign-user-list').data('letter-id');
+                letterAssigner.assignLetterToUser(letterId, userId, $(this));
             })
         }
     );

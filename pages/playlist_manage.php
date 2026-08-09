@@ -114,6 +114,9 @@
                     edit_own += "<a href='#' id='clear-track-"+l.id+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
                 }
             }
+        } else {
+            // Unassigned - this page is owner-only, so whoever's viewing it can always assign it directly
+            user_display = "<a href='#' class='btn btn-sm btn-outline-primary assign-to-user' data-bs-toggle='modal' data-bs-target='#assignUserModal' data-letter-id='"+l.id+"' data-letter='"+l.letter.toUpperCase()+"'><span class='bi bi-person-plus'></span> Assign</a>";
         }
         return "<td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"
               +"<td class='edit-track'>"+edit_own+"</td>"
@@ -467,6 +470,24 @@ if ($fatal_error) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="assignUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign letter <span id='assignUserModalLetter' class='text-primary'></span> to...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="assignUserModalCloseX"></button>
+            </div>
+            <div class="modal-body">
+                <ul class='list-group' id='assign-user-list'>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
