@@ -7,7 +7,7 @@
     $user = $_SESSION['USER'];
     
     // Al only
-    if ($user->identifier != 'almcnicoll') {
+    if (!$user->isAdmin()) {
         header("Location: ../");
         die();
     }
@@ -35,6 +35,7 @@ END_HTML;
     }
 ?>
 
+<div class='top-left-menu'><a href="<?= $config['root_path'] ?>/admin/users" class='btn btn-primary btn-md'>Manage Users</a></div>
 
 <h3 class='card-title'>Statistics</h3>
 <table class="table table-sm table-striped table-hover" id="stats-table">

@@ -24,6 +24,11 @@ class User extends Model {
         return AuthMethod::getById($this->authmethod_id);
     }
 
+    // Single hardcoded admin account for now - no roles table yet
+    public function isAdmin() : bool {
+        return $this->identifier === 'almcnicoll';
+    }
+
     public function getThumbnail() : string {
         if (empty($this->image_url)) {
             // return initial

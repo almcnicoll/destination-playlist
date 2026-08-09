@@ -151,6 +151,18 @@ table.neat * {
     display: none;
 }
 
+/* Sortable column headers on the admin Users table - see adminUsers.updateSortIndicators */
+#users-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+#users-table th.sortable.sort-asc::after {
+    content: " \25B2";
+}
+#users-table th.sortable.sort-desc::after {
+    content: " \25BC";
+}
+
 .accordion-button.collapsed {
     font-weight: normal;
     color: var(--bs-light);
