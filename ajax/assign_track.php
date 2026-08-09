@@ -92,6 +92,12 @@
         $output['errors'] = $error_messages;
     } else {
         $output['success'] = true;
+        // Include the saved letter (with its owner populated, same shape as get_letters.php) so the
+        // caller can patch its own row in place instead of doing a full re-fetch of every letter
+        if (!empty($letter->user_id)) {
+            $letter->user = $letter->getUser();
+        }
+        $output['letter'] = $letter;
     }
     if (count($warning_messages)>0) {
         $output['warnings'] = $warning_messages;

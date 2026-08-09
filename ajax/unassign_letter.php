@@ -61,6 +61,9 @@
         $output['errors'] = $error_messages;
     } else {
         $output['success'] = true;
+        // Include the now-unassigned letter (same shape as get_letters.php) so the caller can
+        // patch its row in place instead of doing a full re-fetch of every letter
+        $output['letter'] = $letter;
     }
     if (count($warning_messages)>0) {
         $output['warnings'] = $warning_messages;

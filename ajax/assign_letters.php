@@ -81,10 +81,13 @@ END_SQL;
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $results = $stmt->fetchAll();
     //LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, 'Assignments to make: '.count($results));
+    $updated_letters = [];
     foreach ($results as $row) {
         $letter = array_shift($unassigned_letters);
         $letter->user_id = $row['user_id'];
         $letter->save();
+        $letter->user = $letter->getUser();
+        $updated_letters[] = $letter;
     }
 
     // Return values
@@ -93,6 +96,9 @@ END_SQL;
         $output['errors'] = $error_messages;
     } else {
         $output['success'] = true;
+        // Include just the letters that were actually assigned (same shape as get_letters.php) so
+        // the caller can patch those rows in place instead of a full re-fetch of every letter
+        $output['letters'] = $updated_letters;
     }
     if (count($warning_messages)>0) {
         $output['warnings'] = $warning_messages;

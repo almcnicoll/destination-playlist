@@ -1,22 +1,46 @@
-if (typeof letterAssigner === 'undefined') { letterAssigner = {}; }    
+if (typeof letterAssigner === 'undefined') { letterAssigner = {}; }
 
 letterAssigner.url = root_path+"/ajax/assign_letters.php?playlist_id="+playlist_id;
 letterAssigner.unassignUrl = root_path+"/ajax/unassign_letter.php?letter_id=";
 
-letterAssigner.updateLettersNow = function() {
-    // Refresh immediately
-    clearTimeout(letterGetter.timer);
-    letterGetter.getLetters();
-    $("html,html *").css("cursor","auto");
-    $(letterAssigner.assignButton).prop('disabled',false);
-    
-    // Switch tab    
-    $('#nav1-content-2').addClass('show active');
-    $('#nav1-content-1').removeClass('show active');
-    $('#nav1-tab-2').addClass('active');
-    $('#nav1-tab-1').removeClass('active');
-    $('#nav1-tab-2').attr('aria-selected',"true");
-    $('#nav1-tab-1').attr('aria-selected',"false");
+// Swaps an element's first icon for a small spinner while its action is in flight, remembering
+// the icon's original class so clearPending can put it back if the action fails
+letterAssigner.showPending = function($el) {
+    var $icon = $el.find('span').first();
+    $el.data('pending-icon-class', $icon.attr('class'));
+    $icon.attr('class', 'spinner-border spinner-border-sm');
+    $el.addClass('pending');
+}
+letterAssigner.clearPending = function($el) {
+    var origClass = $el.data('pending-icon-class');
+    if (origClass) { $el.find('span').first().attr('class', origClass); }
+    $el.removeClass('pending');
+}
+
+// Returns a `complete` callback bound to whichever element triggered the request (a single row's
+// icon for unassign; nothing for the whole-playlist assign/reassign buttons)
+letterAssigner.handleActionComplete = function($pendingEl) {
+    return function(jqXHR, textStatus) {
+        $(letterAssigner.assignButton).prop('disabled',false);
+        $(letterAssigner.reassignButton).prop('disabled',false);
+        $("html,html *").css("cursor","auto");
+        if ($pendingEl) { letterAssigner.clearPending($pendingEl); } // About to be patched with real data on success; unchanged on error either way
+
+        var data = jqXHR.responseJSON;
+        if (textStatus === 'success' && data && !data.errors) {
+            if ('handleActionResponseCustom' in letterAssigner) {
+                // Page knows how to patch just the affected row(s) - let it, and skip the blanket refresh below
+                letterAssigner.handleActionResponseCustom(data);
+                return;
+            }
+        } else {
+            alert((data && data.errors) ? data.errors.join("\n") : "Error saving letters. Please try again.");
+        }
+
+        // Fallback for pages that haven't opted into patching (and always on error, so the UI resyncs with the server)
+        clearTimeout(letterGetter.timer);
+        letterGetter.getLetters();
+    };
 }
 
 letterAssigner.ajaxOptions = {
@@ -24,8 +48,7 @@ letterAssigner.ajaxOptions = {
     cache: false,
     dataType: 'json',
     method: 'GET',
-    timeout: 4000,
-    complete: letterAssigner.updateLettersNow
+    timeout: 4000
 };
 
 letterAssigner.init = function(assignButton=null,reassignButton=null) {
@@ -39,7 +62,7 @@ letterAssigner.init = function(assignButton=null,reassignButton=null) {
                     $(letterAssigner.assignButton).prop('disabled',true);
                     $(letterAssigner.reassignButton).prop('disabled',true);
                     $("html, html *").css("cursor","wait");
-                    $.ajax(letterAssigner.url, letterAssigner.ajaxOptions);
+                    $.ajax(letterAssigner.url, $.extend({}, letterAssigner.ajaxOptions, { complete: letterAssigner.handleActionComplete() }));
                 });
             }
             // Reassign button
@@ -48,15 +71,17 @@ letterAssigner.init = function(assignButton=null,reassignButton=null) {
                     $(letterAssigner.assignButton).prop('disabled',true);
                     $(letterAssigner.reassignButton).prop('disabled',true);
                     $("html, html *").css("cursor","wait");
-                    $.ajax(letterAssigner.url+'&from_scratch=true', letterAssigner.ajaxOptions);
+                    $.ajax(letterAssigner.url+'&from_scratch=true', $.extend({}, letterAssigner.ajaxOptions, { complete: letterAssigner.handleActionComplete() }));
                 });
             }
             // Unassign letter icons
             $('body').on('click','a.unassign-letter',function() {
-                $("html, html *").css("cursor","wait");
-                var letter_id = $(this).data('letter-id');
+                if ($(this).hasClass('pending')) { return; } // Already saving - ignore repeat clicks
+                var $el = $(this);
+                letterAssigner.showPending($el); // Spinner on the clicked icon while it saves
+                var letter_id = $el.data('letter-id');
                 var unassignUrl = letterAssigner.unassignUrl + letter_id;
-                $.ajax(unassignUrl, letterAssigner.ajaxOptions);
+                $.ajax(unassignUrl, $.extend({}, letterAssigner.ajaxOptions, { complete: letterAssigner.handleActionComplete($el) }));
             })
         }
     );

@@ -139,6 +139,18 @@ table.neat * {
 }
 
 
+/* Applied to the specific icon/result being saved (search result, clear-track, unassign-letter)
+   while its request is in flight - see showPending/clearPending in search_mgmt.js and letter_assign.js */
+.pending {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* "My letters only" toggle on the tracks table - rows get .mine from letterGetter.patchLetters */
+#tracks-table.my-letters-only tbody tr:not(.mine) {
+    display: none;
+}
+
 .accordion-button.collapsed {
     font-weight: normal;
     color: var(--bs-light);

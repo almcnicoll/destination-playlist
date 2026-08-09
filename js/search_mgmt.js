@@ -85,33 +85,53 @@ trackSearch.processQueue = function() {
     }
 }
 
-trackSearch.handleTrackUpdate = function(jqXHR, textStatus) {
-    // "success", "notmodified", "nocontent", "error", "timeout", "abort", or "parsererror"
-    $("html,html *").css("cursor","auto"); // Reset cursor
+// Swaps an element's first icon for a small spinner while its action is in flight, remembering
+// the icon's original class so clearPending can put it back if the action fails
+trackSearch.showPending = function($el) {
+    var $icon = $el.find('span').first();
+    $el.data('pending-icon-class', $icon.attr('class'));
+    $icon.attr('class', 'spinner-border spinner-border-sm');
+    $el.addClass('pending');
+}
+trackSearch.clearPending = function($el) {
+    var origClass = $el.data('pending-icon-class');
+    if (origClass) { $el.find('span').first().attr('class', origClass); }
+    $el.removeClass('pending');
+}
 
-    switch (textStatus) {
-        case 'success':
-            if ('handleTrackUpdateSuccessCustom' in trackSearch) {
-                trackSearch.handleTrackUpdateSuccessCustom(); // Runs any custom actions for the page on which we're embedding
-            }
-            break;
-        case 'error':
-            if ('handleTrackUpdateErrorCustom' in trackSearch) {
-                trackSearch.handleTrackUpdateErrorCustom(); // Runs any custom actions for the page on which we're embedding
-            } else {
-                alert("Error saving selection. Please try again.");
-            }
-            break;
-        case 'timeout':
-            if ('handleTrackUpdateTimeoutCustom' in trackSearch) {
-                trackSearch.handleTrackUpdateTimeoutCustom(); // Runs any custom actions for the page on which we're embedding
-            } else {
-                alert("The server did not respond in time. Please try again.");
-            }
-            break;
-        default:
-            break;
-    }
+// Returns a `complete` callback bound to the element that triggered the request, so pending
+// state always gets cleared/restored on the right element even if several actions overlap
+trackSearch.handleTrackUpdate = function($pendingEl) {
+    return function(jqXHR, textStatus) {
+        // "success", "notmodified", "nocontent", "error", "timeout", "abort", or "parsererror"
+        switch (textStatus) {
+            case 'success':
+                if ($pendingEl) { $pendingEl.removeClass('pending'); } // Row is about to be patched with real data - just drop the marker
+                if ('handleTrackUpdateSuccessCustom' in trackSearch) {
+                    trackSearch.handleTrackUpdateSuccessCustom(jqXHR.responseJSON); // Runs any custom actions for the page on which we're embedding
+                }
+                break;
+            case 'error':
+                if ($pendingEl) { trackSearch.clearPending($pendingEl); }
+                if ('handleTrackUpdateErrorCustom' in trackSearch) {
+                    trackSearch.handleTrackUpdateErrorCustom(); // Runs any custom actions for the page on which we're embedding
+                } else {
+                    alert("Error saving selection. Please try again.");
+                }
+                break;
+            case 'timeout':
+                if ($pendingEl) { trackSearch.clearPending($pendingEl); }
+                if ('handleTrackUpdateTimeoutCustom' in trackSearch) {
+                    trackSearch.handleTrackUpdateTimeoutCustom(); // Runs any custom actions for the page on which we're embedding
+                } else {
+                    alert("The server did not respond in time. Please try again.");
+                }
+                break;
+            default:
+                if ($pendingEl) { trackSearch.clearPending($pendingEl); }
+                break;
+        }
+    };
 }
 
 trackSearch.ajaxOptions = {
@@ -130,7 +150,7 @@ trackSearch.ajaxOptions = {
 trackSearch.clearAjaxOptions = {
     async: true,
     cache: false,
-    complete: trackSearch.handleTrackUpdate,
+    dataType: 'json', // Needed so jqXHR.responseJSON is populated for handleTrackUpdate to read
     method: 'GET',
     timeout: 10000
 }
@@ -218,9 +238,9 @@ trackSearch.validateTracks = async function(pattern) {
     }
 }
 
-trackSearch.clearLetter = function(letter_id) {
-    $("html,html *").css("cursor","wait"); // Wait cursor
-    $.ajax(root_path + '/ajax/clear_track.php?id='+letter_id.toString(), trackSearch.clearAjaxOptions);
+trackSearch.clearLetter = function(letter_id, $pendingEl) {
+    $.ajax(root_path + '/ajax/clear_track.php?id='+letter_id.toString(),
+        $.extend({}, trackSearch.clearAjaxOptions, { complete: trackSearch.handleTrackUpdate($pendingEl) }));
 }
 
 trackSearch.init = function(inputBox, outputBox, limit=40) {
@@ -251,13 +271,15 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
 
         // Handle clicking on a search result
         $(outputBox).on('click','li.valid a.search-result',function(){
-            $("html,html *").css("cursor","wait"); // Set wait cursor
+            var $li = $(this).closest('li');
+            if ($li.hasClass('pending')) { return; } // Already saving - ignore repeat clicks
 
             var ele = $(this);
+            trackSearch.showPending($li); // Spinner on the chosen result while it saves
 
             // Pass the request to save the track to the playlist
             requestData = new URLSearchParams({
-                'id':               letter_id,                
+                'id':               letter_id,
                 'spotify_id':       ele.data('track-id'),
                 'cached_title':     decodeURIComponent(ele.data('track-title')),
                 'cached_artist':    decodeURIComponent(ele.data('track-artists'))
@@ -265,13 +287,13 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
             var ajaxUpdateOptions = {
                 async: true,
                 cache: false,
-                complete: trackSearch.handleTrackUpdate,
+                complete: trackSearch.handleTrackUpdate($li),
                 dataType: 'json',
                 method: 'GET',
                 timeout: 8000
             };
             $.ajax(root_path+"/ajax/assign_track.php?"+requestData.toString(), ajaxUpdateOptions);
-            
+
 
             if ('handleSearchClickCustom' in trackSearch) {
                 trackSearch.handleSearchClickCustom(ele); // Runs any custom actions for the page on which we're embedding
@@ -279,11 +301,14 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
         });
 
         $('table').on('click','a.clear-track', function() {
+            if ($(this).hasClass('pending')) { return; } // Already saving - ignore repeat clicks
             var lid = $(this).data('letter-id');
             if ((lid === undefined) || (lid == '')) {
                 $(this).remove();
             } else {
-                trackSearch.clearLetter(lid);
+                var $el = $(this);
+                trackSearch.showPending($el); // Spinner on the clicked icon while it saves
+                trackSearch.clearLetter(lid, $el);
             }
         })
 

@@ -97,56 +97,144 @@
 <script type='text/javascript'>
     playHandler.init('#playDevicesContainer');
 
+    letterGetter.buildLetterRowHtml = function(l) {
+        var user_display = "";
+        var edit_own = "";
+        if ((l.user_id != null) && (l.user_id != 'null')) {
+            var u = l.user;
+            var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
+            user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
+                            +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
+            if (u.id == currentUser) {
+                edit_own = "<a href='#' id='edit-track-"+l.id+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
+                            +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
+                            +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
+                // Allow populated tracks to be cleared
+                if (l.cached_title!='' && l.cached_artist!='') {
+                    edit_own += "<a href='#' id='clear-track-"+l.id+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
+                }
+            }
+        }
+        return "<td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"
+              +"<td class='edit-track'>"+edit_own+"</td>"
+              +"<td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td>"
+              +"<td class='initial-display'>"+user_display+"</td>";
+    }
+
+    // Creates/updates one <tr> per letter (keyed by data-letter-id) instead of tearing down the
+    // whole table, so rows that haven't changed never move and scroll position is preserved.
+    // removeStale must only be true when `letters` is the full, authoritative list (a poll) - action
+    // responses only carry the row(s) that changed, so stale-row cleanup would wrongly wipe the rest.
+    letterGetter.patchLetters = function(letters, removeStale) {
+        if (removeStale) {
+            $('#tracks-table tbody tr:not([data-letter-id])').remove(); // Drop the initial "Loading..." placeholder
+        }
+
+        var seenIds = [];
+        letters.forEach(function(l) {
+            seenIds.push(String(l.id));
+            var $row = $('#tracks-table tbody tr[data-letter-id="'+l.id+'"]');
+            if ($row.length === 0) {
+                $row = $("<tr data-letter-id='"+l.id+"'></tr>");
+                $('#tracks-table tbody').append($row);
+            }
+            $row.toggleClass('mine', l.user_id == currentUser); // Drives the "my letters only" filter
+            var newHtml = letterGetter.buildLetterRowHtml(l);
+            // Compare against what we last rendered (not $row.html(), which the browser re-serialises
+            // with normalised quoting and so would never match our freshly-built string)
+            if ($row.data('rendered-html') !== newHtml) {
+                $row.html(newHtml);
+                $row.data('rendered-html', newHtml);
+            }
+        });
+
+        if (removeStale) {
+            // The poll's list is authoritative - anything missing from it no longer exists
+            // (e.g. the destination word was edited on another page while this one stayed open)
+            $('#tracks-table tbody tr[data-letter-id]').each(function() {
+                if (seenIds.indexOf(String($(this).data('letter-id'))) === -1) { $(this).remove(); }
+            });
+            // Re-sync row order to match the server's order (rank) - normally a no-op, since ranks rarely change
+            var currentOrder = $('#tracks-table tbody tr[data-letter-id]').map(function(){ return String($(this).data('letter-id')); }).get();
+            var wantedOrder = letters.map(function(l){ return String(l.id); });
+            if (currentOrder.join(',') !== wantedOrder.join(',')) {
+                letters.forEach(function(l) {
+                    $('#tracks-table tbody').append($('#tracks-table tbody tr[data-letter-id="'+l.id+'"]'));
+                });
+            }
+        }
+    }
+
     letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
-        $('#tracks-table tbody tr').remove();
         // Manage errors or good data
-        if ('errors' in data) {            
+        if ('errors' in data) {
             $('#tracks-table tbody tr').remove();
             for(var i in data.errors) {
                 $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>"+data.errors[i]+"</td></tr>");
             }
         } else {
-            var letterData = data.result;
-            for(var i in letterData) {
-                var l = letterData[i];
-                var user_display = "";
-                var edit_own = "";
-                if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
-                    var u = letterData[i].user;
-                    var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
-                    user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
-                                    +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
-                    if (u.id == currentUser) {
-                        edit_own = "<a href='#' id='edit-track-"+i+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
-                                    +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
-                                    +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
-                        // Allow populated tracks to be cleared
-                        if (l.cached_title!='' && l.cached_artist!='') {
-                            edit_own += "<a href='#' id='clear-track-"+i+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
-                        }
-                    }
-                }
-                $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"
-                                                +"<td class='edit-track'>"+edit_own+"</td>"
-                                                +"<td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td>"
-                                                +"<td class='initial-display'>"
-                                                +user_display+"</td></tr>");
+            letterGetter.patchLetters(data.result, true);
+        }
+    }
+
+    // Called directly from assign/reassign/unassign's own response (see letter_assign.js), so the
+    // change is visible immediately instead of waiting for the next poll to pick it up
+    letterAssigner.handleActionResponseCustom = function(data) {
+        if (data.letter) { letterGetter.patchLetters([data.letter], false); }
+        else if (data.letters) { letterGetter.patchLetters(data.letters, false); }
+    }
+
+    peopleGetter.buildParticipantRowHtml = function(p) {
+        var u = p.user;
+        var kicked = p.removed;
+        var kickClass = ((kicked)?'unkick-user':'kick-user');
+        var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
+        //var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+        var initialCell = "<td>"+u.thumbnail+"</td>"; // TODO - wrong picture!
+        var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
+        var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
+        return initialCell + nameCell + kickCell;
+    }
+
+    // Creates/updates one <tr> per participant (keyed by data-user-id), same approach as
+    // letterGetter.patchLetters - see that function's comment for why removeStale matters
+    peopleGetter.patchParticipantsCustom = function(participants, removeStale) {
+        if (removeStale) {
+            $('#people-table tbody tr:not(.owner-row):not([data-user-id])').remove(); // Drop the initial "Loading..." placeholder
+        }
+
+        var seenIds = [];
+        participants.forEach(function(p) {
+            var uid = String(p.user_id);
+            seenIds.push(uid);
+            var $row = $('#people-table tbody tr[data-user-id="'+uid+'"]');
+            if ($row.length === 0) {
+                $row = $("<tr data-user-id='"+uid+"'></tr>");
+                $('#people-table tbody').append($row);
             }
+            var newHtml = peopleGetter.buildParticipantRowHtml(p);
+            // Compare against what we last rendered, not $row.html() - see letterGetter.patchLetters
+            if ($row.data('rendered-html') !== newHtml) {
+                $row.html(newHtml);
+                $row.data('rendered-html', newHtml);
+            }
+        });
+
+        if (removeStale) {
+            $('#people-table tbody tr[data-user-id]').each(function() {
+                if (seenIds.indexOf(String($(this).data('user-id'))) === -1) { $(this).remove(); }
+            });
         }
     }
 
     peopleGetter.updatePeopleListCustom = function(data, textStatus, jqXHR) {
-        $('#people-table tbody tr:not(:first)').remove();
-        for(var i in data) {
-            var u = data[i].user;
-            var kicked = data[i].removed;
-            var kickClass = ((kicked)?'unkick-user':'kick-user');
-            var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
-            //var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
-            var initialCell = "<td>"+u.thumbnail+"</td>"; // TODO - wrong picture!
-            var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
-            var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
-            $('#people-table tbody').append("<tr>" + initialCell + nameCell + kickCell + "</tr>");
+        if ('errors' in data) {
+            $('#people-table tbody tr:not(.owner-row)').remove();
+            for(var i in data.errors) {
+                $('#people-table tbody').append("<tr><td colspan='3' class='error'>"+data.errors[i]+"</td></tr>");
+            }
+        } else {
+            peopleGetter.patchParticipantsCustom(data.result, true);
         }
     }
 
@@ -190,11 +278,11 @@
     trackSearch.handleSearchClickCustom = function(clickedElement) {
 
     }
-    trackSearch.handleTrackUpdateSuccessCustom = function() {
+    trackSearch.handleTrackUpdateSuccessCustom = function(data) {
         $('#trackSearchModalCloseX').trigger('click');
-        // Refresh immediately
-        clearTimeout(letterGetter.timer);
-        letterGetter.getLetters();
+        if (data && data.letter) {
+            letterGetter.patchLetters([data.letter], false); // Show the saved track immediately, without waiting for the next poll
+        }
     }
 
     // Initialisations
@@ -210,6 +298,12 @@
             document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
                 document.getElementById('track-search-box').focus()
             });
+            // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
+            // as rows get patched in (see the .mine class set in letterGetter.patchLetters)
+            $('#toggle-my-letters').on('change', function() {
+                $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
+            });
+
             // If #people in URL then switch to that tab
             var urlHash = $(location).attr('hash');
             if (urlHash == '#people') {
@@ -260,6 +354,10 @@ if ($fatal_error) {
 
 <div class="tab-content" id="nav1-content">
     <div class="tab-pane fade show active" role="tabpanel" id="nav1-content-2" aria-labelledby="nav1-tab-2">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="toggle-my-letters">
+            <label class="form-check-label" for="toggle-my-letters">Show my letters only</label>
+        </div>
         <table class="table table-light table-striped neat" id="tracks-table">
             <tbody>
                 <tr>
@@ -278,7 +376,7 @@ if ($fatal_error) {
                 </tr>
             </thead>
             <tbody>
-                <tr>
+                <tr class='owner-row'>
                     <td><?= $user->getThumbnail() ?></td>
                     <td><?= $_SESSION['USER']->display_name ?></td>
                     <td>&nbsp;</td>

@@ -48,7 +48,9 @@
         ob_end_clean();
         die($output);
     } else {
-        $output = json_encode($participants);
+        // Same hash+result shape as get_letters.php, so the poller can skip re-rendering when nothing changed
+        $hash = sha1(serialize($participants));
+        $output = json_encode(['result' => $participants, 'hash' => $hash]);
         ob_end_clean();
         die($output);
     }

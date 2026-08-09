@@ -59,6 +59,9 @@
             $kick = filter_var($_REQUEST['kick'], FILTER_VALIDATE_BOOLEAN);
             $participant->removed = $kick;
             $participant->save();
+            // Same shape as get_participants.php's list entries, so the caller can patch this one row
+            $participant->user = $participant->getUser();
+            $participant->user->thumbnail = $participant->user->getThumbnail();
         }
     }
 
@@ -67,7 +70,7 @@
         ob_end_clean();
         die($output);
     } else {
-        $output = json_encode(['success' => true]);
+        $output = json_encode(['success' => true, 'participant' => $participant]);
         ob_end_clean();
         die($output);
     }
