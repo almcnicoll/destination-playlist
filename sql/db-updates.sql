@@ -110,6 +110,13 @@ WHERE NOT EXISTS (SELECT 1 FROM `authmethods` WHERE `methodName` = 'spotify')
 ;
 /* UPDATE */
 /* VERSION 13 */
-ALTER TABLE `users` 
+ALTER TABLE `users`
 MODIFY COLUMN `image_url` VARCHAR(2000) DEFAULT NULL
+;
+/* UPDATE */
+/* VERSION 14 */
+ALTER TABLE `letters`
+ADD COLUMN `swap_offered` TINYINT(1) NOT NULL DEFAULT 0 AFTER `rank`,
+ADD COLUMN `swap_offered_at` DATETIME DEFAULT NULL AFTER `swap_offered`,
+ADD COLUMN `swap_target_id` INT UNSIGNED DEFAULT NULL AFTER `swap_offered_at`
 ;

@@ -135,6 +135,8 @@ $srFollow->send($dataPublic);
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js'></script>
 <!-- Include letter-unassign script (part of letter-assign script) -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
+<!-- Include swap-market script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
     playHandler.init('#playDevicesContainer');
@@ -167,6 +169,7 @@ $srFollow->send($dataPublic);
                         if (l.cached_title!='' && l.cached_artist!='') {
                             edit_own += "<a href='#' id='clear-track-"+i+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
                         }
+                        edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
                     }
                 }
                 $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
@@ -223,7 +226,8 @@ $srFollow->send($dataPublic);
     // Initialisations
     trackSearch.init('#track-search-box','#search-results-container');
     letterGetter.init(500,10000,8000);
-    
+    swapMarket.init();
+
 </script>
 <script type="text/javascript">
     $(document).ready(
@@ -284,6 +288,22 @@ $srFollow->send($dataPublic);
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade" id="swapMarketModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Swap letter <span id='swapMarketModalLetter' class='text-primary'></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="swapMarketModalCloseX"></button>
+            </div>
+            <div class="modal-body" id='swap-market-body'>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="playDevicesModal" tabindex="-1">
