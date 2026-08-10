@@ -46,9 +46,13 @@
 ?>
 <!-- Set vars -->
 <script type="text/javascript">
-    if (typeof trackSearch === 'undefined') { var trackSearch = {}; }
-    if (typeof playHandler === 'undefined') { var playHandler = {}; }
-    <?php
+if (typeof trackSearch === 'undefined') {
+    var trackSearch = {};
+}
+if (typeof playHandler === 'undefined') {
+    var playHandler = {};
+}
+<?php
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
         echo "trackSearch.allow_title=false;\n";
     } else {
@@ -97,240 +101,273 @@
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
-    playHandler.init('#playDevicesContainer');
+playHandler.init('#playDevicesContainer');
 
-    letterGetter.buildLetterRowHtml = function(l) {
-        var user_display = "";
-        var edit_own = "";
-        if ((l.user_id != null) && (l.user_id != 'null')) {
-            var u = l.user;
-            // This page is owner-only, so the owner can always unassign directly - their own letter
-            // or anyone else's. (Everyone else only gets this via "Abandon letter" in the swap modal,
-            // since they can only ever act on their own letter anyway - see js/swap_market.js.)
-            var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
-            user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
-                            +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
-            if (u.id == currentUser) {
-                edit_own = "<a href='#' id='edit-track-"+l.id+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
-                            +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
-                            +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
-                // Allow populated tracks to be cleared
-                if (l.cached_title!='' && l.cached_artist!='') {
-                    edit_own += "<a href='#' id='clear-track-"+l.id+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
-                }
-                edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
-            }
-        } else {
-            // Unassigned - this page is owner-only, so whoever's viewing it can always assign it directly
-            user_display = "<a href='#' class='btn btn-sm btn-outline-primary assign-to-user' data-bs-toggle='modal' data-bs-target='#assignUserModal' data-letter-id='"+l.id+"' data-letter='"+l.letter.toUpperCase()+"'><span class='bi bi-person-plus'></span> Assign</a>";
-        }
-        return "<td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td>"
-              +"<td class='edit-track'>"+edit_own+"</td>"
-              +"<td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td>"
-              +"<td class='initial-display'>"+user_display+"</td>";
-    }
-
-    // Creates/updates one <tr> per letter (keyed by data-letter-id) instead of tearing down the
-    // whole table, so rows that haven't changed never move and scroll position is preserved.
-    // removeStale must only be true when `letters` is the full, authoritative list (a poll) - action
-    // responses only carry the row(s) that changed, so stale-row cleanup would wrongly wipe the rest.
-    letterGetter.patchLetters = function(letters, removeStale) {
-        if (removeStale) {
-            $('#tracks-table tbody tr:not([data-letter-id])').remove(); // Drop the initial "Loading..." placeholder
-        }
-
-        var seenIds = [];
-        letters.forEach(function(l) {
-            seenIds.push(String(l.id));
-            var $row = $('#tracks-table tbody tr[data-letter-id="'+l.id+'"]');
-            if ($row.length === 0) {
-                $row = $("<tr data-letter-id='"+l.id+"'></tr>");
-                $('#tracks-table tbody').append($row);
-            }
-            $row.toggleClass('mine', l.user_id == currentUser); // Drives the "my letters only" filter
-            var newHtml = letterGetter.buildLetterRowHtml(l);
-            // Compare against what we last rendered (not $row.html(), which the browser re-serialises
-            // with normalised quoting and so would never match our freshly-built string)
-            if ($row.data('rendered-html') !== newHtml) {
-                $row.html(newHtml);
-                $row.data('rendered-html', newHtml);
-            }
-        });
-
-        if (removeStale) {
-            // The poll's list is authoritative - anything missing from it no longer exists
-            // (e.g. the destination word was edited on another page while this one stayed open)
-            $('#tracks-table tbody tr[data-letter-id]').each(function() {
-                if (seenIds.indexOf(String($(this).data('letter-id'))) === -1) { $(this).remove(); }
-            });
-            // Re-sync row order to match the server's order (rank) - normally a no-op, since ranks rarely change
-            var currentOrder = $('#tracks-table tbody tr[data-letter-id]').map(function(){ return String($(this).data('letter-id')); }).get();
-            var wantedOrder = letters.map(function(l){ return String(l.id); });
-            if (currentOrder.join(',') !== wantedOrder.join(',')) {
-                letters.forEach(function(l) {
-                    $('#tracks-table tbody').append($('#tracks-table tbody tr[data-letter-id="'+l.id+'"]'));
-                });
+letterGetter.buildLetterRowHtml = function(l) {
+    var user_display = "";
+    var edit_own = "";
+    if ((l.user_id != null) && (l.user_id != 'null')) {
+        var u = l.user;
+        // This page is owner-only, so the owner can always unassign directly - their own letter
+        // or anyone else's. (Everyone else only gets this via "Abandon letter" in the swap modal,
+        // since they can only ever act on their own letter anyway - see js/swap_market.js.)
+        var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='" + l.id +
+            "' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
+        user_display = "<div class='initial-display'>" + unassignLink + u.display_name.substr(0, 1) + "</div>" +
+            "<div class='name-display'>" + unassignLink + u.display_name + "</div>";
+        if (u.id == currentUser) {
+            edit_own = "<a href='#' id='edit-track-" + l.id +
+                "' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '" +
+                l.letter.toUpperCase() + "'; letter_id = " + l.id + "; $('#beginning-with-letter').html('&nbsp;" +
+                l.letter.toUpperCase() + "');\"><span class='bi bi-pencil-square'></span></a>";
+            // Add swap button
+            edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
+            // Allow populated tracks to be cleared
+            if (l.cached_title != '' && l.cached_artist != '') {
+                edit_own += "<a href='#' id='clear-track-" + l.id +
+                    "' class='btn clear-track text-danger' data-letter-id='" + l.id +
+                    "'><span class='bi bi-x-circle'></span></a>";
             }
         }
+    } else {
+        // Unassigned - this page is owner-only, so whoever's viewing it can always assign it directly
+        user_display =
+            "<a href='#' class='btn btn-sm btn-outline-primary assign-to-user' data-bs-toggle='modal' data-bs-target='#assignUserModal' data-letter-id='" +
+            l.id + "' data-letter='" + l.letter.toUpperCase() +
+            "'><span class='bi bi-person-plus'></span> Assign</a>";
+    }
+    return "<td class='letter-display'><div class='letter-display'>" + l.letter.toUpperCase() + "</div></td>" +
+        "<td class='edit-track'>" + edit_own + "</td>" +
+        "<td>" + l.cached_title + "</td><td>" + l.cached_artist + "</td>" +
+        "<td class='initial-display'>" + user_display + "</td>";
+}
+
+// Creates/updates one <tr> per letter (keyed by data-letter-id) instead of tearing down the
+// whole table, so rows that haven't changed never move and scroll position is preserved.
+// removeStale must only be true when `letters` is the full, authoritative list (a poll) - action
+// responses only carry the row(s) that changed, so stale-row cleanup would wrongly wipe the rest.
+letterGetter.patchLetters = function(letters, removeStale) {
+    if (removeStale) {
+        $('#tracks-table tbody tr:not([data-letter-id])').remove(); // Drop the initial "Loading..." placeholder
     }
 
-    letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
-        // Manage errors or good data
-        if ('errors' in data) {
-            $('#tracks-table tbody tr').remove();
-            for(var i in data.errors) {
-                $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>"+data.errors[i]+"</td></tr>");
-            }
-        } else {
-            letterGetter.patchLetters(data.result, true);
+    var seenIds = [];
+    letters.forEach(function(l) {
+        seenIds.push(String(l.id));
+        var $row = $('#tracks-table tbody tr[data-letter-id="' + l.id + '"]');
+        if ($row.length === 0) {
+            $row = $("<tr data-letter-id='" + l.id + "'></tr>");
+            $('#tracks-table tbody').append($row);
         }
-    }
-
-    // Called directly from assign/reassign/unassign's own response (see letter_assign.js), so the
-    // change is visible immediately instead of waiting for the next poll to pick it up
-    letterAssigner.handleActionResponseCustom = function(data) {
-        if (data.letter) { letterGetter.patchLetters([data.letter], false); }
-        else if (data.letters) { letterGetter.patchLetters(data.letters, false); }
-    }
-
-    peopleGetter.buildParticipantRowHtml = function(p) {
-        var u = p.user;
-        var kicked = p.removed;
-        var kickClass = ((kicked)?'unkick-user':'kick-user');
-        var kickIcon = ((kicked)?'bi bi-check2-circle text-success':'bi bi-x-circle text-danger');
-        //var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
-        var initialCell = "<td>"+u.thumbnail+"</td>"; // TODO - wrong picture!
-        var nameCell = "<td>"+((kicked)?'<s>':'')+u.display_name+((kicked)?'</s>':'')+"</td>";
-        var kickCell = "<td class='"+kickClass+"'><a href='#' data-user-id='"+u.id+"' class='"+kickClass+"'><span class='"+kickIcon+"'></span></a></td>";
-        return initialCell + nameCell + kickCell;
-    }
-
-    // Creates/updates one <tr> per participant (keyed by data-user-id), same approach as
-    // letterGetter.patchLetters - see that function's comment for why removeStale matters
-    peopleGetter.patchParticipantsCustom = function(participants, removeStale) {
-        if (removeStale) {
-            $('#people-table tbody tr:not(.owner-row):not([data-user-id])').remove(); // Drop the initial "Loading..." placeholder
+        $row.toggleClass('mine', l.user_id == currentUser); // Drives the "my letters only" filter
+        var newHtml = letterGetter.buildLetterRowHtml(l);
+        // Compare against what we last rendered (not $row.html(), which the browser re-serialises
+        // with normalised quoting and so would never match our freshly-built string)
+        if ($row.data('rendered-html') !== newHtml) {
+            $row.html(newHtml);
+            $row.data('rendered-html', newHtml);
         }
+    });
 
-        var seenIds = [];
-        participants.forEach(function(p) {
-            var uid = String(p.user_id);
-            seenIds.push(uid);
-            var $row = $('#people-table tbody tr[data-user-id="'+uid+'"]');
-            if ($row.length === 0) {
-                $row = $("<tr data-user-id='"+uid+"'></tr>");
-                $('#people-table tbody').append($row);
-            }
-            var newHtml = peopleGetter.buildParticipantRowHtml(p);
-            // Compare against what we last rendered, not $row.html() - see letterGetter.patchLetters
-            if ($row.data('rendered-html') !== newHtml) {
-                $row.html(newHtml);
-                $row.data('rendered-html', newHtml);
+    if (removeStale) {
+        // The poll's list is authoritative - anything missing from it no longer exists
+        // (e.g. the destination word was edited on another page while this one stayed open)
+        $('#tracks-table tbody tr[data-letter-id]').each(function() {
+            if (seenIds.indexOf(String($(this).data('letter-id'))) === -1) {
+                $(this).remove();
             }
         });
-
-        if (removeStale) {
-            $('#people-table tbody tr[data-user-id]').each(function() {
-                if (seenIds.indexOf(String($(this).data('user-id'))) === -1) { $(this).remove(); }
+        // Re-sync row order to match the server's order (rank) - normally a no-op, since ranks rarely change
+        var currentOrder = $('#tracks-table tbody tr[data-letter-id]').map(function() {
+            return String($(this).data('letter-id'));
+        }).get();
+        var wantedOrder = letters.map(function(l) {
+            return String(l.id);
+        });
+        if (currentOrder.join(',') !== wantedOrder.join(',')) {
+            letters.forEach(function(l) {
+                $('#tracks-table tbody').append($('#tracks-table tbody tr[data-letter-id="' + l.id + '"]'));
             });
         }
     }
+}
 
-    peopleGetter.updatePeopleListCustom = function(data, textStatus, jqXHR) {
-        if ('errors' in data) {
-            $('#people-table tbody tr:not(.owner-row)').remove();
-            for(var i in data.errors) {
-                $('#people-table tbody').append("<tr><td colspan='3' class='error'>"+data.errors[i]+"</td></tr>");
+letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
+    // Manage errors or good data
+    if ('errors' in data) {
+        $('#tracks-table tbody tr').remove();
+        for (var i in data.errors) {
+            $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>" + data.errors[i] +
+                "</td></tr>");
+        }
+    } else {
+        letterGetter.patchLetters(data.result, true);
+    }
+}
+
+// Called directly from assign/reassign/unassign's own response (see letter_assign.js), so the
+// change is visible immediately instead of waiting for the next poll to pick it up
+letterAssigner.handleActionResponseCustom = function(data) {
+    if (data.letter) {
+        letterGetter.patchLetters([data.letter], false);
+    } else if (data.letters) {
+        letterGetter.patchLetters(data.letters, false);
+    }
+}
+
+peopleGetter.buildParticipantRowHtml = function(p) {
+    var u = p.user;
+    var kicked = p.removed;
+    var kickClass = ((kicked) ? 'unkick-user' : 'kick-user');
+    var kickIcon = ((kicked) ? 'bi bi-check2-circle text-success' : 'bi bi-x-circle text-danger');
+    //var initialCell = "<td><div class='initial-display'>"+u.display_name.substr(0,1)+"</div></td>";
+    var initialCell = "<td>" + u.thumbnail + "</td>"; // TODO - wrong picture!
+    var nameCell = "<td>" + ((kicked) ? '<s>' : '') + u.display_name + ((kicked) ? '</s>' : '') + "</td>";
+    var kickCell = "<td class='" + kickClass + "'><a href='#' data-user-id='" + u.id + "' class='" + kickClass +
+        "'><span class='" + kickIcon + "'></span></a></td>";
+    return initialCell + nameCell + kickCell;
+}
+
+// Creates/updates one <tr> per participant (keyed by data-user-id), same approach as
+// letterGetter.patchLetters - see that function's comment for why removeStale matters
+peopleGetter.patchParticipantsCustom = function(participants, removeStale) {
+    if (removeStale) {
+        $('#people-table tbody tr:not(.owner-row):not([data-user-id])')
+    .remove(); // Drop the initial "Loading..." placeholder
+    }
+
+    var seenIds = [];
+    participants.forEach(function(p) {
+        var uid = String(p.user_id);
+        seenIds.push(uid);
+        var $row = $('#people-table tbody tr[data-user-id="' + uid + '"]');
+        if ($row.length === 0) {
+            $row = $("<tr data-user-id='" + uid + "'></tr>");
+            $('#people-table tbody').append($row);
+        }
+        var newHtml = peopleGetter.buildParticipantRowHtml(p);
+        // Compare against what we last rendered, not $row.html() - see letterGetter.patchLetters
+        if ($row.data('rendered-html') !== newHtml) {
+            $row.html(newHtml);
+            $row.data('rendered-html', newHtml);
+        }
+    });
+
+    if (removeStale) {
+        $('#people-table tbody tr[data-user-id]').each(function() {
+            if (seenIds.indexOf(String($(this).data('user-id'))) === -1) {
+                $(this).remove();
             }
-        } else {
-            peopleGetter.patchParticipantsCustom(data.result, true);
-        }
+        });
     }
+}
 
-    trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
-        var output = '';
-        var isAppend = false;
-        if ('tracks' in data) {
-            isAppend = (data.tracks.offset > 0);
+peopleGetter.updatePeopleListCustom = function(data, textStatus, jqXHR) {
+    if ('errors' in data) {
+        $('#people-table tbody tr:not(.owner-row)').remove();
+        for (var i in data.errors) {
+            $('#people-table tbody').append("<tr><td colspan='3' class='error'>" + data.errors[i] + "</td></tr>");
         }
-        if (!isAppend) {
-            output = "<li class='list-group-item pt-0 pb-0'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
-            output += "<li class='list-group-item pt-0 pb-0 fst-italic visually-hidden' id='hidden-results-count-container'><small><span id='hidden-results-count'></span> results hidden because they don't begin with<span id='must-begin-with'></span></small></li>";
-        }
-        if (('tracks' in data) && ('items' in data.tracks)) {
-            // Loop through the tracks
-            for(var i in data.tracks.items) {
-                var t = data.tracks.items[i];
-                var t_a = t.artists;
-                var artistNames = new Array();
-                for (var ii in t.artists) {
-                    artistNames.push(t.artists[ii].name);
-                }
-                var explicit_class = ((t.explicit)?'bi bi-exclamation-diamond warning':'bi bi-file-earmark-music primary');
-                var explicit_title = ((t.explicit)?" title='Explicit lyrics' ":'');
-                t.artist_string = artistNames.join(' // ');
-                output += "<li class='list-group-item track validating'><span class='"+explicit_class+"'"+explicit_title+"></span>&nbsp;<a href='#' class='search-result' data-track-id='"
-                        +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
-                        +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
+    } else {
+        peopleGetter.patchParticipantsCustom(data.result, true);
+    }
+}
+
+trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
+    var output = '';
+    var isAppend = false;
+    if ('tracks' in data) {
+        isAppend = (data.tracks.offset > 0);
+    }
+    if (!isAppend) {
+        output = "<li class='list-group-item pt-0 pb-0'>Results from <img src='" + root_path +
+            "/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+        output +=
+            "<li class='list-group-item pt-0 pb-0 fst-italic visually-hidden' id='hidden-results-count-container'><small><span id='hidden-results-count'></span> results hidden because they don't begin with<span id='must-begin-with'></span></small></li>";
+    }
+    if (('tracks' in data) && ('items' in data.tracks)) {
+        // Loop through the tracks
+        for (var i in data.tracks.items) {
+            var t = data.tracks.items[i];
+            var t_a = t.artists;
+            var artistNames = new Array();
+            for (var ii in t.artists) {
+                artistNames.push(t.artists[ii].name);
             }
-        }
-        // Now determine whether to append or overwrite
-        if (isAppend) {
-            $('#search-results-container ul').append(output);
-        } else {
-            $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
-        }
-        // Now determine whether they are valid options to select
-        trackSearch.validateTracks('#search-results-container li.track');
-    }
-    
-    trackSearch.handleSearchClickCustom = function(clickedElement) {
-
-    }
-    trackSearch.handleTrackUpdateSuccessCustom = function(data) {
-        $('#trackSearchModalCloseX').trigger('click');
-        if (data && data.letter) {
-            letterGetter.patchLetters([data.letter], false); // Show the saved track immediately, without waiting for the next poll
+            var explicit_class = ((t.explicit) ? 'bi bi-exclamation-diamond warning' :
+                'bi bi-file-earmark-music primary');
+            var explicit_title = ((t.explicit) ? " title='Explicit lyrics' " : '');
+            t.artist_string = artistNames.join(' // ');
+            output += "<li class='list-group-item track validating'><span class='" + explicit_class + "'" +
+                explicit_title + "></span>&nbsp;<a href='#' class='search-result' data-track-id='" +
+                t.id + "' data-preview-url='" + t.preview_url + "' data-track-title=\"" + encodeURIComponent(t
+                .name) +
+                "\" data-track-artists=\"" + encodeURIComponent(t.artist_string) + "\">" + t.name + " (" + t
+                .artist_string + ")</a></li>";
         }
     }
+    // Now determine whether to append or overwrite
+    if (isAppend) {
+        $('#search-results-container ul').append(output);
+    } else {
+        $('#search-results-container').html("<ul class='list-group'>" + output + "</ul>");
+    }
+    // Now determine whether they are valid options to select
+    trackSearch.validateTracks('#search-results-container li.track');
+}
 
-    // Initialisations
-    trackSearch.init('#track-search-box','#search-results-container');
-    letterGetter.init(500,10000,8000);
-    peopleGetter.init(0,10000,8000);
-    letterAssigner.init('#btn-assign-letters','#btn-reassign-letters');
-    listLocker.init();
-    swapMarket.init();
+trackSearch.handleSearchClickCustom = function(clickedElement) {
 
-    $(document).ready(
-        function() {
-            // Modal focus
-            document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
-                document.getElementById('track-search-box').focus()
-            });
-            // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
-            // as rows get patched in (see the .mine class set in letterGetter.patchLetters)
-            $('#toggle-my-letters').on('change', function() {
-                $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
-            });
+}
+trackSearch.handleTrackUpdateSuccessCustom = function(data) {
+    $('#trackSearchModalCloseX').trigger('click');
+    if (data && data.letter) {
+        letterGetter.patchLetters([data.letter],
+        false); // Show the saved track immediately, without waiting for the next poll
+    }
+}
 
-            // If #people in URL then switch to that tab
-            var urlHash = $(location).attr('hash');
-            if (urlHash == '#people') {
-                //$('#nav1-tab-1').trigger('click');
-                $('#nav1-content-2').removeClass('show active');
-                $('#nav1-content-1').addClass('show active');
-                $('#nav1-tab-2').removeClass('active');
-                $('#nav1-tab-1').addClass('active');
-                $('#nav1-tab-2').attr('aria-selected',"false");
-                $('#nav1-tab-1').attr('aria-selected',"true");
-            }
+// Initialisations
+trackSearch.init('#track-search-box', '#search-results-container');
+letterGetter.init(500, 10000, 8000);
+peopleGetter.init(0, 10000, 8000);
+letterAssigner.init('#btn-assign-letters', '#btn-reassign-letters');
+listLocker.init();
+swapMarket.init();
+
+$(document).ready(
+    function() {
+        // Modal focus
+        document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
+            document.getElementById('track-search-box').focus()
+        });
+        // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
+        // as rows get patched in (see the .mine class set in letterGetter.patchLetters)
+        $('#toggle-my-letters').on('change', function() {
+            $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
+        });
+
+        // If #people in URL then switch to that tab
+        var urlHash = $(location).attr('hash');
+        if (urlHash == '#people') {
+            //$('#nav1-tab-1').trigger('click');
+            $('#nav1-content-2').removeClass('show active');
+            $('#nav1-content-1').addClass('show active');
+            $('#nav1-tab-2').removeClass('active');
+            $('#nav1-tab-1').addClass('active');
+            $('#nav1-tab-2').attr('aria-selected', "false");
+            $('#nav1-tab-1').attr('aria-selected', "true");
         }
-    );
+    }
+);
 </script>
 
-<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
-<h2 class="text-center"><?= $playlist->display_name ?> <a href='#' id='play-button' data-bs-toggle='modal' data-bs-target='#playDevicesModal' onclick="playHandler.getDevices();"><span class='bi bi-play-circle'></span></a></h2>
+<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'>
+        << Back</a>
+</div>
+<h2 class="text-center"><?= $playlist->display_name ?> <a href='#' id='play-button' data-bs-toggle='modal'
+        data-bs-target='#playDevicesModal' onclick="playHandler.getDevices();"><span
+            class='bi bi-play-circle'></span></a></h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
@@ -349,17 +386,19 @@ if ($fatal_error) {
 }
 ?>
 <div class="alert alert-warning" role="alert">
-  Keep this page open while your guests are adding their tracks!
+    Keep this page open while your guests are adding their tracks!
 </div>
 <nav>
-<ul class="nav nav-tabs" id="nav1" role="tablist">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link active" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2" aria-controls="nav-content-2" aria-current="page" aria-selected="true">Tracks</a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1" aria-controls="nav-content-1">People</a>
-    </li>
-</ul>
+    <ul class="nav nav-tabs" id="nav1" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="#nav1-content-2" data-bs-toggle="tab" id="nav1-tab-2"
+                aria-controls="nav-content-2" aria-current="page" aria-selected="true">Tracks</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#nav1-content-1" data-bs-toggle="tab" id="nav1-tab-1"
+                aria-controls="nav-content-1">People</a>
+        </li>
+    </ul>
 </nav>
 
 <div class="tab-content" id="nav1-content">
@@ -392,7 +431,9 @@ if ($fatal_error) {
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td><div class="initial-display">?</div></td>
+                    <td>
+                        <div class="initial-display">?</div>
+                    </td>
                     <td class='loading-cell'>Loading...</td>
                     <td class='loading-cell'>&nbsp;</td>
                 </tr>
@@ -406,38 +447,42 @@ if ($fatal_error) {
         <div class='btn-group'>
             <button href="#" class="btn btn-md btn-success" id='btn-assign-letters'>Assign letters</button>
             <div class='btn-group'>
-                <button type='button' class="btn btn-md btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id='assign-dropdown-label'></button>
+                <button type='button' class="btn btn-md btn-success dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false" id='assign-dropdown-label'></button>
                 <ul class='dropdown-menu' aria-labelledby="assign-dropdown-label">
-                    <li><a class='dropdown-item btn btn-md btn-success' href='#' id='btn-reassign-letters'>Reassign letters</a></li>
+                    <li><a class='dropdown-item btn btn-md btn-success' href='#' id='btn-reassign-letters'>Reassign
+                            letters</a></li>
                 </ul>
             </div>
         </div>
-<?php
+        <?php
     if ($_SESSION['PAGE_LOADCOUNTS'][__FILE__] <= 5) {
 ?>
         &nbsp;<span class='bi bi-arrow-left'></span> click here when everyone's joined!
-<?php
+        <?php
     }
 ?>
     </div>
     <div class="col-6">
-<?php
+        <?php
     if ($playlist->hasFlags(Playlist::FLAGS_PEOPLELOCKED)) {
 ?>
         <button href="#" class="btn btn-md btn-success" id='btn-unlock-list'><span class='bi bi-unlock'></span></button>
-        <button href="#" class="btn btn-md btn-warning" id='btn-lock-list' style="display:none;"><span class='bi bi-lock'></span></button>
-<?php
+        <button href="#" class="btn btn-md btn-warning" id='btn-lock-list' style="display:none;"><span
+                class='bi bi-lock'></span></button>
+        <?php
     } else {
 ?>
-        <button href="#" class="btn btn-md btn-success" id='btn-unlock-list' style="display:none;"><span class='bi bi-unlock'></span></button>
+        <button href="#" class="btn btn-md btn-success" id='btn-unlock-list' style="display:none;"><span
+                class='bi bi-unlock'></span></button>
         <button href="#" class="btn btn-md btn-warning" id='btn-lock-list'><span class='bi bi-lock'></span></button>
-<?php
+        <?php
     }
     
     if ($_SESSION['PAGE_LOADCOUNTS'][__FILE__] <= 5) {
 ?>
         &nbsp;<span class='bi bi-arrow-left'></span> click here to lock the list to joiners
-<?php
+        <?php
     }
 ?>
     </div>
@@ -448,7 +493,8 @@ if ($fatal_error) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Track search</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="trackSearchModalCloseX"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="trackSearchModalCloseX"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-1">
@@ -458,14 +504,19 @@ if ($fatal_error) {
                     <div class="col-12">
                         <div class='input-group'>
                             <div class="input-group-prepend">
-                                <span class="input-group-text">Beginning with<span id='beginning-with-letter' class='text-primary'></span></span>
+                                <span class="input-group-text">Beginning with<span id='beginning-with-letter'
+                                        class='text-primary'></span></span>
                             </div>
-                            <input type="text" class='form-control' autocomplete="off" placeholder="Type here to search..." id="track-search-box">
+                            <input type="text" class='form-control' autocomplete="off"
+                                placeholder="Type here to search..." id="track-search-box">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
+                                <button class="btn btn-outline-warning" type="button"
+                                    onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span
+                                        class='bi bi-x-circle'></span></button>
                             </div>
                             <div class='input-group-append'>
-                                <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
+                                <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner"
+                                    role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
@@ -486,8 +537,10 @@ if ($fatal_error) {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Assign letter <span id='assignUserModalLetter' class='text-primary'></span> to...</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="assignUserModalCloseX"></button>
+                <h5 class="modal-title">Assign letter <span id='assignUserModalLetter' class='text-primary'></span>
+                    to...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="assignUserModalCloseX"></button>
             </div>
             <div class="modal-body">
                 <ul class='list-group' id='assign-user-list'>
@@ -505,7 +558,8 @@ if ($fatal_error) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Swap letter <span id='swapMarketModalLetter' class='text-primary'></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="swapMarketModalCloseX"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="swapMarketModalCloseX"></button>
             </div>
             <div class="modal-body" id='swap-market-body'>
             </div>
@@ -522,7 +576,8 @@ if ($fatal_error) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Play <?= $playlist->display_name ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="playDevicesModalCloseX"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="playDevicesModalCloseX"></button>
             </div>
             <div class="modal-body">
                 <div class="row">

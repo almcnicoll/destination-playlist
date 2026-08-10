@@ -54,8 +54,13 @@
 
 ?>
 
-<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'><< Back</a></div>
-<h2 class="text-center" id="title"><span id='titleText'>Joining playlist <?= $playlist->display_name ?>...</span> <a href='#' id='play-button' data-bs-toggle='modal' data-bs-target='#playDevicesModal' onclick="playHandler.getDevices();"><span class='bi bi-play-circle'></span></a></h2></h2>
+<div class='top-left-menu'><a href="<?= $config['root_path'] ?>" class='btn btn-warning btn-md'>
+        << Back</a>
+</div>
+<h2 class="text-center" id="title"><span id='titleText'>Joining playlist <?= $playlist->display_name ?>...</span> <a
+        href='#' id='play-button' data-bs-toggle='modal' data-bs-target='#playDevicesModal'
+        onclick="playHandler.getDevices();"><span class='bi bi-play-circle'></span></a></h2>
+</h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
@@ -92,9 +97,13 @@ $srFollow->send($dataPublic);
 ?>
 <!-- Set vars -->
 <script type="text/javascript">
-    if (typeof trackSearch === 'undefined') { trackSearch = {}; }
-    if (typeof playHandler === 'undefined') { var playHandler = {}; }
-    <?php
+if (typeof trackSearch === 'undefined') {
+    trackSearch = {};
+}
+if (typeof playHandler === 'undefined') {
+    var playHandler = {};
+}
+<?php
     if(isset($playlist_id) && !$playlist->hasFlags(Playlist::FLAGS_ALLOWTITLE)) {
         echo "trackSearch.allow_title=false;\n";
     } else {
@@ -139,114 +148,129 @@ $srFollow->send($dataPublic);
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
-    playHandler.init('#playDevicesContainer');
-    letterAssigner.init(); // No target as we're UN-assigning only
-    letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
+playHandler.init('#playDevicesContainer');
+letterAssigner.init(); // No target as we're UN-assigning only
+letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
+    $('#tracks-table tbody tr').remove();
+    // Manage errors or good data
+    if ('errors' in data) {
         $('#tracks-table tbody tr').remove();
-        // Manage errors or good data
-        if ('errors' in data) {            
-            $('#tracks-table tbody tr').remove();
-            for(var i in data.errors) {
-                $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>"+data.errors[i]+"</td></tr>");
-            }
-        } else {
-            var letterData = data.result;
-            for(var i in letterData) {
-                var l = letterData[i];
-                var user_display = "";
-                var edit_own = "";
-                if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
-                    var u = letterData[i].user;
-                    user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
-                    if (u.id == currentUser) {
-                        // Giving up my own letter now happens via "Abandon letter" inside the swap
-                        // modal, not a row-level x - see swapMarket.buildSwapButtonHtml below
-                        edit_own = "<a href='#' id='edit-track-"+i+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
-                                    +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
-                                    +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
-                        // Allow populated tracks to be cleared
-                        if (l.cached_title!='' && l.cached_artist!='') {
-                            edit_own += "<a href='#' id='clear-track-"+i+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
-                        }
-                        edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
+        for (var i in data.errors) {
+            $('#tracks-table tbody').append("<tr><td class='error'><div class='error'>" + data.errors[i] +
+                "</td></tr>");
+        }
+    } else {
+        var letterData = data.result;
+        for (var i in letterData) {
+            var l = letterData[i];
+            var user_display = "";
+            var edit_own = "";
+            if ((letterData[i].user_id != null) && (letterData[i].user_id != 'null')) {
+                var u = letterData[i].user;
+                user_display = "<div class='initial-display'>" + u.display_name.substr(0, 1) + "</div>";
+                if (u.id == currentUser) {
+                    // Giving up my own letter now happens via "Abandon letter" inside the swap
+                    // modal, not a row-level x - see swapMarket.buildSwapButtonHtml below
+                    edit_own = "<a href='#' id='edit-track-" + i +
+                        "' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '" +
+                        l.letter.toUpperCase() + "'; letter_id = " + l.id +
+                        "; $('#beginning-with-letter').html('&nbsp;" +
+                        l.letter.toUpperCase() + "');\"><span class='bi bi-pencil-square'></span></a>";
+                    // Add swap button
+                    edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
+                    // Allow populated tracks to be cleared
+                    if (l.cached_title != '' && l.cached_artist != '') {
+                        edit_own += "<a href='#' id='clear-track-" + i +
+                            "' class='btn clear-track text-danger' data-letter-id='" + l.id +
+                            "'><span class='bi bi-x-circle'></span></a>";
                     }
                 }
-                var mineClass = (l.user_id == currentUser) ? " class='mine'" : ""; // Drives the "my letters only" filter
-                $('#tracks-table tbody').append("<tr"+mineClass+"><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
             }
+            var mineClass = (l.user_id == currentUser) ? " class='mine'" :
+            ""; // Drives the "my letters only" filter
+            $('#tracks-table tbody').append("<tr" + mineClass +
+                "><td class='letter-display'><div class='letter-display'>" + l.letter.toUpperCase() +
+                "</div></td><td>" + l.cached_title + "</td><td>" + l.cached_artist +
+                "</td><td class='initial-display'>" + user_display + "</td><td>" + edit_own + "</td></tr>");
         }
     }
+}
 
-    trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
-        var output = '';
-        var isAppend = false;
-        if ('tracks' in data) {
-            isAppend = (data.tracks.offset > 0);
-        }
-        if (!isAppend) {
-            output = "<li class='list-group-item fs-6'>Results from <img src='"+root_path+"/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
-            output += "<li class='list-group-item fs-6 fst-italic visually-hidden' id='hidden-results-count-container'><span id='hidden-results-count'></span> results hidden because they don't begin with <span id='must-begin-with'></span></li>";
-        }
-        if (('tracks' in data) && ('items' in data.tracks)) {
-            // Loop through the tracks
-            for(var i in data.tracks.items) {
-                var t = data.tracks.items[i];
-                var t_a = t.artists;
-                var artistNames = new Array();
-                for (var ii in t.artists) {
-                    artistNames.push(t.artists[ii].name);
-                }
-                var explicit_class = ((t.explicit)?'bi bi-exclamation-diamond warning':'bi bi-file-earmark-music primary');
-                var explicit_title = ((t.explicit)?" title='Explicit lyrics' ":'');
-                t.artist_string = artistNames.join(' // ');
-                output += "<li class='list-group-item track validating'><span class='"+explicit_class+"'"+explicit_title+"></span>&nbsp;<a href='#' class='search-result' data-track-id='"
-                        +t.id+"' data-preview-url='"+t.preview_url+"' data-track-title=\""+encodeURIComponent(t.name)
-                        +"\" data-track-artists=\""+encodeURIComponent(t.artist_string)+"\">"+t.name+" ("+t.artist_string+")</a></li>";
+trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {
+    var output = '';
+    var isAppend = false;
+    if ('tracks' in data) {
+        isAppend = (data.tracks.offset > 0);
+    }
+    if (!isAppend) {
+        output = "<li class='list-group-item fs-6'>Results from <img src='" + root_path +
+            "/img/Spotify_Logo_small_RGB_Black.png' style='height: 1em;'></li>";
+        output +=
+            "<li class='list-group-item fs-6 fst-italic visually-hidden' id='hidden-results-count-container'><span id='hidden-results-count'></span> results hidden because they don't begin with <span id='must-begin-with'></span></li>";
+    }
+    if (('tracks' in data) && ('items' in data.tracks)) {
+        // Loop through the tracks
+        for (var i in data.tracks.items) {
+            var t = data.tracks.items[i];
+            var t_a = t.artists;
+            var artistNames = new Array();
+            for (var ii in t.artists) {
+                artistNames.push(t.artists[ii].name);
             }
+            var explicit_class = ((t.explicit) ? 'bi bi-exclamation-diamond warning' :
+                'bi bi-file-earmark-music primary');
+            var explicit_title = ((t.explicit) ? " title='Explicit lyrics' " : '');
+            t.artist_string = artistNames.join(' // ');
+            output += "<li class='list-group-item track validating'><span class='" + explicit_class + "'" +
+                explicit_title + "></span>&nbsp;<a href='#' class='search-result' data-track-id='" +
+                t.id + "' data-preview-url='" + t.preview_url + "' data-track-title=\"" + encodeURIComponent(t
+                .name) +
+                "\" data-track-artists=\"" + encodeURIComponent(t.artist_string) + "\">" + t.name + " (" + t
+                .artist_string + ")</a></li>";
         }
-        // Now determine whether to append or overwrite
-        if (isAppend) {
-            $('#search-results-container ul').append(output);
-        } else {
-            $('#search-results-container').html("<ul class='list-group'>"+output+"</ul>");
-        }
-        // Now determine whether they are valid options to select
-        trackSearch.validateTracks('#search-results-container li.track');
     }
-    trackSearch.handleSearchClickCustom = function(clickedElement) {
-
+    // Now determine whether to append or overwrite
+    if (isAppend) {
+        $('#search-results-container ul').append(output);
+    } else {
+        $('#search-results-container').html("<ul class='list-group'>" + output + "</ul>");
     }
-    trackSearch.handleTrackUpdateSuccessCustom = function() {
-        $('#trackSearchModalCloseX').trigger('click');
-        // Refresh immediately
-        clearTimeout(letterGetter.timer);
-        letterGetter.getLetters();
-    }
+    // Now determine whether they are valid options to select
+    trackSearch.validateTracks('#search-results-container li.track');
+}
+trackSearch.handleSearchClickCustom = function(clickedElement) {
 
-    // Initialisations
-    trackSearch.init('#track-search-box','#search-results-container');
-    letterGetter.init(500,10000,8000);
-    swapMarket.init();
+}
+trackSearch.handleTrackUpdateSuccessCustom = function() {
+    $('#trackSearchModalCloseX').trigger('click');
+    // Refresh immediately
+    clearTimeout(letterGetter.timer);
+    letterGetter.getLetters();
+}
 
+// Initialisations
+trackSearch.init('#track-search-box', '#search-results-container');
+letterGetter.init(500, 10000, 8000);
+swapMarket.init();
 </script>
 <script type="text/javascript">
-    $(document).ready(
-        function() {
-            var currTitle = $('#titleText').text();
-            $('#titleText').text(currTitle.replace(/Joining/,'Joined'));
+$(document).ready(
+    function() {
+        var currTitle = $('#titleText').text();
+        $('#titleText').text(currTitle.replace(/Joining/, 'Joined'));
 
-            // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
-            // as rows get rebuilt (see the .mine class set in letterGetter.updateLettersCustom)
-            $('#toggle-my-letters').on('change', function() {
-                $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
-            });
+        // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
+        // as rows get rebuilt (see the .mine class set in letterGetter.updateLettersCustom)
+        $('#toggle-my-letters').on('change', function() {
+            $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
+        });
 
-            // Modal focus
-            document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
-                document.getElementById('track-search-box').focus()
-            });
-        }
-    );
+        // Modal focus
+        document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
+            document.getElementById('track-search-box').focus()
+        });
+    }
+);
 </script>
 
 <div class="form-check form-switch">
@@ -262,42 +286,48 @@ $srFollow->send($dataPublic);
 </table>
 
 <div class="modal fade" id="trackSearchModal" tabindex="-1">
-  <div class="modal-dialog .modal-fullscreen-lg-down">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Track search</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="trackSearchModalCloseX"></button>
-      </div>
-      <div class="modal-body">
-      <div class="row mb-1">
-        <div class='col-12 fs-6 fst-italic' id='search-protip'>&nbsp;</div>
-      </div>
-      <div class="row">
-        <div class="col-12">
-            <div class='input-group'>
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Beginning with<span id='beginning-with-letter' class='text-primary'></span></span>
-                </div>
-                <input type="text" class='form-control' autocomplete="off" placeholder="Type here to search..." id="track-search-box">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-warning" type="button" onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span class='bi bi-x-circle'></span></button>
-                </div>
-                            <div class='input-group-append'>
-            <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
+    <div class="modal-dialog .modal-fullscreen-lg-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Track search</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="trackSearchModalCloseX"></button>
             </div>
-        </div>
+            <div class="modal-body">
+                <div class="row mb-1">
+                    <div class='col-12 fs-6 fst-italic' id='search-protip'>&nbsp;</div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class='input-group'>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Beginning with<span id='beginning-with-letter'
+                                        class='text-primary'></span></span>
+                            </div>
+                            <input type="text" class='form-control' autocomplete="off"
+                                placeholder="Type here to search..." id="track-search-box">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-warning" type="button"
+                                    onclick="$('#track-search-box').val(''); $('#track-search-box').focus();"><span
+                                        class='bi bi-x-circle'></span></button>
+                            </div>
+                            <div class='input-group-append'>
+                                <div class="spinner-border spinner-border-sm text-primary hidden" id="search_spinner"
+                                    role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-        <div class="col-12" style="min-height: 10em;" id='search-results-container'>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="col-12" style="min-height: 10em;" id='search-results-container'>
+                    </div>
                 </div>
-      </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade" id="swapMarketModal" tabindex="-1">
@@ -305,7 +335,8 @@ $srFollow->send($dataPublic);
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Swap letter <span id='swapMarketModalLetter' class='text-primary'></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="swapMarketModalCloseX"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="swapMarketModalCloseX"></button>
             </div>
             <div class="modal-body" id='swap-market-body'>
             </div>
@@ -322,7 +353,8 @@ $srFollow->send($dataPublic);
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Play <?= $playlist->display_name ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="playDevicesModalCloseX"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="playDevicesModalCloseX"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
