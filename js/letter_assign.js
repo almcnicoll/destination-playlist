@@ -123,7 +123,8 @@ letterAssigner.init = function(assignButton=null,reassignButton=null) {
             }
             // Reassign button
             if (letterAssigner.reassignButton!=null) {
-                $(letterAssigner.reassignButton).on('click',function() {
+                $(letterAssigner.reassignButton).on('click',function(e) {
+                    e.preventDefault(); // It's a dropdown <a href='#'>, otherwise this scrolls to the top
                     $(letterAssigner.assignButton).prop('disabled',true);
                     $(letterAssigner.reassignButton).prop('disabled',true);
                     $("html, html *").css("cursor","wait");
@@ -131,7 +132,8 @@ letterAssigner.init = function(assignButton=null,reassignButton=null) {
                 });
             }
             // Unassign letter icons
-            $('body').on('click','a.unassign-letter',function() {
+            $('body').on('click','a.unassign-letter',function(e) {
+                e.preventDefault(); // Otherwise the href='#' scrolls the page to the top
                 if ($(this).hasClass('pending')) { return; } // Already saving - ignore repeat clicks
                 var $el = $(this);
                 letterAssigner.showPending($el); // Spinner on the clicked icon while it saves

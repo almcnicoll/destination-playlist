@@ -270,7 +270,8 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
         });
 
         // Handle clicking on a search result
-        $(outputBox).on('click','li.valid a.search-result',function(){
+        $(outputBox).on('click','li.valid a.search-result',function(e){
+            e.preventDefault(); // Otherwise the href='#' scrolls the page to the top
             var $li = $(this).closest('li');
             if ($li.hasClass('pending')) { return; } // Already saving - ignore repeat clicks
 
@@ -300,7 +301,8 @@ trackSearch.init = function(inputBox, outputBox, limit=40) {
             }
         });
 
-        $('table').on('click','a.clear-track', function() {
+        $('table').on('click','a.clear-track', function(e) {
+            e.preventDefault(); // Otherwise the href='#' scrolls the page to the top
             if ($(this).hasClass('pending')) { return; } // Already saving - ignore repeat clicks
             var lid = $(this).data('letter-id');
             if ((lid === undefined) || (lid == '')) {

@@ -70,7 +70,9 @@ playHandler.getDevices = function() {
     $.ajax(playHandler.url, playHandler.ajaxOptions);
 }
 
-playHandler.playOnDevice = function() {
+playHandler.playOnDevice = function(e) {
+    e.preventDefault(); // Otherwise the href='#' scrolls the page to the top (jQuery synthesises
+                         // a real event even for the programmatic .trigger('click') call below)
     var device_id = $(this).data('device-id');
     playHandler.playUrl = root_path+"/ajax/play_on_device.php";
     playHandler.playAjaxOptions = {

@@ -45,14 +45,16 @@ peopleGetter.handleKickResponse = function($row) {
         }
     };
 }
-peopleGetter.unkickParticipant = function() {
+peopleGetter.unkickParticipant = function(e) {
+    e.preventDefault(); // Otherwise the href='#' scrolls the page to the top
     var uid = $(this).data('user-id');
     var $row = $(this).closest('tr');
     $(this).css('cursor','wait');
     $row.css('cursor','wait');
     $.ajax(peopleGetter.kickUrl+uid+"&kick=false", $.extend({}, peopleGetter.kickAjaxOptions, { complete: peopleGetter.handleKickResponse($row) }));
 }
-peopleGetter.kickParticipant = function() {
+peopleGetter.kickParticipant = function(e) {
+    e.preventDefault(); // Otherwise the href='#' scrolls the page to the top
     var uid = $(this).data('user-id');
     var $row = $(this).closest('tr');
     $(this).css('cursor','wait');
