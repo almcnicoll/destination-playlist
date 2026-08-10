@@ -51,8 +51,13 @@
         die($output);
     }
 
-    // Do the unassigning
+    // Do the unassigning - also take it off the swap market, since an unassigned letter has no
+    // owner left to complete a trade on (this is what the "Abandon letter" button in the swap
+    // modal relies on: it's just this same endpoint, called on the letter currently up for swap)
     $letter->user_id = null;
+    $letter->swap_offered = 0;
+    $letter->swap_offered_at = null;
+    $letter->swap_target_id = null;
     $letter->save();
 
     // Return values

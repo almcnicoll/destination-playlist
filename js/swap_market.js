@@ -6,6 +6,9 @@ swapMarket.proposeUrl = root_path+"/ajax/propose_swap.php";
 swapMarket.cancelUrl = root_path+"/ajax/cancel_swap_proposal.php";
 swapMarket.respondUrl = root_path+"/ajax/respond_swap_proposal.php";
 swapMarket.withdrawUrl = root_path+"/ajax/withdraw_swap_offer.php?playlist_id="+playlist_id;
+// Abandoning is just a plain unassign (same endpoint the old row-level x used) - see the comment
+// in ajax/unassign_letter.php for why that's also what takes it off the swap market
+swapMarket.abandonUrl = root_path+"/ajax/unassign_letter.php?letter_id=";
 
 swapMarket.pollTimer = null;
 swapMarket.actionInFlight = false; // Guards propose/cancel/respond against double-clicks
@@ -33,6 +36,7 @@ swapMarket.reflectLetters = function(letters) {
 
 swapMarket.startOffer = function(letterId, letterChar) {
     swapMarket.hadOffer = false;
+    $('#swapMarketModal').data('letter-id', letterId); // Remembered for the "Abandon letter" button
     $('#swapMarketModalLetter').text(letterChar);
     $('#swap-market-body').html("<p class='fst-italic'>Putting your letter up for swap...</p>");
     $.ajax(swapMarket.offerUrl+'?letter_id='+letterId, {
@@ -122,6 +126,32 @@ swapMarket.withdraw = function() {
     $.ajax(swapMarket.withdrawUrl, { async: true, cache: false, dataType: 'json', method: 'GET', timeout: 8000 });
 }
 
+// Gives up the letter currently open in the modal entirely - not just taking it off the swap
+// market (that's withdraw, above), but unassigning it so it's free for anyone to claim
+swapMarket.abandonLetter = function() {
+    if (swapMarket.actionInFlight) { return; }
+    var letterId = $('#swapMarketModal').data('letter-id');
+    if (!letterId) { return; }
+    swapMarket.actionInFlight = true;
+    swapMarket.stopPolling(); // We're about to leave the modal either way; no point polling mid-request
+    $.ajax(swapMarket.abandonUrl+letterId, {
+        async: true, cache: false, dataType: 'json', method: 'GET', timeout: 8000,
+        complete: function(jqXHR, textStatus) {
+            swapMarket.actionInFlight = false;
+            var data = jqXHR.responseJSON;
+            if (textStatus === 'success' && data && data.letter) {
+                swapMarket.reflectLetters([data.letter]);
+                $('#swapMarketModalCloseX').trigger('click'); // Nothing left to do here - the letter isn't ours any more
+            } else {
+                alert((data && data.errors) ? data.errors.join(' ') : "Could not abandon that letter. Please try again.");
+                // We're still offering it (the abandon never went through) - resume as before
+                swapMarket.pollNow();
+                swapMarket.pollTimer = setInterval(swapMarket.pollNow, 1000);
+            }
+        }
+    });
+}
+
 swapMarket.init = function() {
     $(document).ready(function() {
         // Opening the "offer for swap" button
@@ -185,6 +215,12 @@ swapMarket.init = function() {
                     swapMarket.pollNow();
                 }
             });
+        });
+
+        // "Abandon letter" - gives up the letter entirely, not just taking it off the market
+        $('body').on('click', '#swap-abandon-letter', function(e) {
+            e.preventDefault();
+            swapMarket.abandonLetter();
         });
 
         // Closing the modal - X, Cancel, backdrop click, or Escape all fire this one event - takes

@@ -159,12 +159,11 @@ $srFollow->send($dataPublic);
                     var u = letterData[i].user;
                     user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>";
                     if (u.id == currentUser) {
+                        // Giving up my own letter now happens via "Abandon letter" inside the swap
+                        // modal, not a row-level x - see swapMarket.buildSwapButtonHtml below
                         edit_own = "<a href='#' id='edit-track-"+i+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                                     +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
                                     +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
-                        var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Give up this track'><span class='bi bi-x-circle'></span></a>&nbsp;";
-                        user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
-                                        +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
                         // Allow populated tracks to be cleared
                         if (l.cached_title!='' && l.cached_artist!='') {
                             edit_own += "<a href='#' id='clear-track-"+i+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
@@ -300,6 +299,7 @@ $srFollow->send($dataPublic);
             <div class="modal-body" id='swap-market-body'>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="swap-abandon-letter">Abandon letter</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>

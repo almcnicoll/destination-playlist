@@ -104,10 +104,11 @@
         var edit_own = "";
         if ((l.user_id != null) && (l.user_id != 'null')) {
             var u = l.user;
-            var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
-            user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
-                            +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
             if (u.id == currentUser) {
+                // My own letter - giving it up now happens via "Abandon letter" inside the swap modal,
+                // not a row-level x, so it lives alongside the other things you can do with your own letter
+                user_display = "<div class='initial-display'>"+u.display_name.substr(0,1)+"</div>"
+                                +"<div class='name-display'>"+u.display_name+"</div>";
                 edit_own = "<a href='#' id='edit-track-"+l.id+"' class='btn' data-bs-toggle='modal' data-bs-target='#trackSearchModal' onclick=\"trackSearch.search_letter = '"
                             +l.letter.toUpperCase()+"'; letter_id = "+l.id+"; $('#beginning-with-letter').html('&nbsp;"
                             +l.letter.toUpperCase()+"');\"><span class='bi bi-pencil-square'></span></a>";
@@ -116,6 +117,11 @@
                     edit_own += "<a href='#' id='clear-track-"+l.id+"' class='btn clear-track text-danger' data-letter-id='"+l.id+"'><span class='bi bi-x-circle'></span></a>";
                 }
                 edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
+            } else {
+                // Someone else's letter - this page is owner-only, so the owner can still free it up directly
+                var unassignLink = "<a href='#' class='unassign-letter text-danger' data-letter-id='"+l.id+"' title='Unassign from user'><span class='bi bi-x-circle'></span></a>&nbsp;";
+                user_display = "<div class='initial-display'>"+unassignLink+u.display_name.substr(0,1)+"</div>"
+                                +"<div class='name-display'>"+unassignLink+u.display_name+"</div>";
             }
         } else {
             // Unassigned - this page is owner-only, so whoever's viewing it can always assign it directly
@@ -507,6 +513,7 @@ if ($fatal_error) {
             <div class="modal-body" id='swap-market-body'>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="swap-abandon-letter">Abandon letter</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
