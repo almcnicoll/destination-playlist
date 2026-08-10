@@ -171,7 +171,8 @@ $srFollow->send($dataPublic);
                         edit_own += swapMarket.buildSwapButtonHtml(l.id, l.letter.toUpperCase());
                     }
                 }
-                $('#tracks-table tbody').append("<tr><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
+                var mineClass = (l.user_id == currentUser) ? " class='mine'" : ""; // Drives the "my letters only" filter
+                $('#tracks-table tbody').append("<tr"+mineClass+"><td class='letter-display'><div class='letter-display'>"+l.letter.toUpperCase()+"</div></td><td>"+l.cached_title+"</td><td>"+l.cached_artist+"</td><td class='initial-display'>"+user_display+"</td><td>"+edit_own+"</td></tr>");
             }
         }
     }
@@ -233,7 +234,13 @@ $srFollow->send($dataPublic);
         function() {
             var currTitle = $('#titleText').text();
             $('#titleText').text(currTitle.replace(/Joining/,'Joined'));
-            
+
+            // "My letters only" toggle - pure CSS filter, so it applies instantly and stays correct
+            // as rows get rebuilt (see the .mine class set in letterGetter.updateLettersCustom)
+            $('#toggle-my-letters').on('change', function() {
+                $('#tracks-table').toggleClass('my-letters-only', $(this).is(':checked'));
+            });
+
             // Modal focus
             document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
                 document.getElementById('track-search-box').focus()
@@ -242,6 +249,10 @@ $srFollow->send($dataPublic);
     );
 </script>
 
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="toggle-my-letters">
+    <label class="form-check-label" for="toggle-my-letters">Show my letters only</label>
+</div>
 <table class="table table-light table-striped neat" id="tracks-table">
     <tbody>
         <tr>
