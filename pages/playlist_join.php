@@ -188,10 +188,12 @@ letterGetter.updateLettersCustom = function(data, textStatus, jqXHR) {
             }
             var mineClass = (l.user_id == currentUser) ? " class='mine'" :
             ""; // Drives the "my letters only" filter
+            // Same column order as playlist_manage.php - edit_own (pencil/swap/clear) sits right next
+            // to the letter, not off at the far end where it's unclear which row it belongs to
             $('#tracks-table tbody').append("<tr" + mineClass +
                 "><td class='letter-display'><div class='letter-display'>" + l.letter.toUpperCase() +
-                "</div></td><td>" + l.cached_title + "</td><td>" + l.cached_artist +
-                "</td><td class='initial-display'>" + user_display + "</td><td>" + edit_own + "</td></tr>");
+                "</div></td><td class='edit-track'>" + edit_own + "</td><td>" + l.cached_title + "</td><td>" +
+                l.cached_artist + "</td><td class='initial-display'>" + user_display + "</td></tr>");
         }
     }
 }
