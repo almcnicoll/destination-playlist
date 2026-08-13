@@ -48,12 +48,26 @@
                     <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/admin/users">Manage Users</a></li>
                     <?php endif; ?>
                     <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/account/manage">My account</a></li>
+                    <li><a class="dropdown-item" href="#" id="replay-tour-link">Replay tour</a></li>
                     <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/logout.php">Logout</a></li>
                 </ul>
                 </li>    
             </ul>
         </div>
     </div>
+    <script type="text/javascript">
+    // Delegated to document (not the link itself) so this works regardless of whether this
+    // script runs before or after the rest of the page has parsed - see js/swap_market.js for
+    // the same pattern elsewhere in the app.
+    $(document).on('click', '#replay-tour-link', function(e) {
+        e.preventDefault();
+        if ((typeof tourGuide !== 'undefined') && (typeof tourApplicable !== 'undefined')) {
+            tourGuide.replay(tourApplicable);
+        } else {
+            alert("There's no guided tour on this page.");
+        }
+    });
+    </script>
 <?php
     }
 ?>

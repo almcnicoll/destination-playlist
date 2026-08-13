@@ -120,3 +120,16 @@ ADD COLUMN `swap_offered` TINYINT(1) NOT NULL DEFAULT 0 AFTER `rank`,
 ADD COLUMN `swap_offered_at` DATETIME DEFAULT NULL AFTER `swap_offered`,
 ADD COLUMN `swap_target_id` INT UNSIGNED DEFAULT NULL AFTER `swap_offered_at`
 ;
+/* UPDATE */
+/* VERSION 15 */
+CREATE TABLE `tour_seen_steps` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `step_key` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `IX_USER_STEP` (`user_id`,`step_key`),
+  CONSTRAINT `FK_tour_seen_steps_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;

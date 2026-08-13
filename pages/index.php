@@ -76,11 +76,24 @@ foreach ($my_participations as $part) {
 $criteriaJoined = [['id','IN',array_keys($joined_playlist_ids)],];
 $joined_playlists = Playlist::find($criteriaJoined);
 
+// Guided tour - the per-button steps only apply once we actually own a playlist to point them at;
+// the section-heading steps apply either way, since both headings render regardless of count.
+$tourApplicable = ['my-playlists-section'];
+if (count($my_playlists) > 0) {
+    $tourApplicable = array_merge($tourApplicable, ['pick-tracks','edit-playlist','share-playlist','delete-playlist']);
+}
+$tourApplicable[] = 'joined-playlists-section';
+echo "<script type='text/javascript' src='{$config['root_path']}/js/tour_guide.js'></script>\n";
+echo "<script type='text/javascript'>\n";
+echo "var tourApplicable = ".json_encode($tourApplicable).";\n";
+echo "var tourSeen = ".json_encode(TourStep::getSeenKeys((int)$_SESSION['USER_ID'])).";\n";
+echo "</script>\n";
+
 if (count($my_playlists)==0) {
     // No playlists of our own
 ?>
 
-<h2 class='card-title'>Your Playlists</h2>
+<h2 class='card-title' id='my-playlists-heading'>Your Playlists</h2>
 <div class="row">
     <div class="col-12">
         <h3>You don't have any playlists. How sad!</h3>
@@ -92,7 +105,7 @@ if (count($my_playlists)==0) {
 } else {
     // At least one playlist of our own
 ?>
-<h2 class='card-title'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
+<h2 class='card-title' id='my-playlists-heading'>Your Playlists <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/playlist/create">+ New</a></h2>
 
 <table class="table table-sm table-striped table-hover playlist-table" id="my-playlists-table">
     <thead>
@@ -104,20 +117,23 @@ if (count($my_playlists)==0) {
     </thead>
     <tbody>
 <?php
+    $myPlaylistRow = 0;
     foreach ($my_playlists as $playlist) {
+        $myPlaylistRow++;
+        $extraRowClass = ($myPlaylistRow > 10) ? ' d-none playlist-extra-row' : '';
 ?>
-        <tr style='vertical-align: middle;'>
+        <tr style='vertical-align: middle;' class='<?=$extraRowClass?>'>
         <th scope='row'><div class='cell-container'><?=$playlist->display_name?></div></th>
         <td><div class='cell-container'><?=$playlist->destination?></div></td>
         <td>
             <div class='row'>
                 <div class='col-md-6'>
-                    <a href='playlist/manage/<?=$playlist->id?>' title='View playlist' class='btn btn-md btn-success'><span class='bi bi-eye'></span></a>
-                    <a href='playlist/share/<?=$playlist->id?>' title='Share playlist' class='btn btn-md btn-primary'><span class='bi bi-share'></span></a>
+                    <a href='playlist/manage/<?=$playlist->id?>' title='Pick tracks' class='btn btn-md btn-success pick-tracks-btn'><span class='bi bi-music-note-beamed'></span></a>
+                    <a href='playlist/share/<?=$playlist->id?>' title='Share playlist' class='btn btn-md btn-primary share-playlist-btn'><span class='bi bi-share'></span></a>
                 </div>
                 <div class='col-md-6'>
-                    <a href='playlist/edit/<?=$playlist->id?>' title='Edit playlist' class='btn btn-md btn-warning'><span class='bi bi-pencil-square' role='edit'></span></a>
-                    <a href='#' class='btn btn-md btn-danger' title='Delete playlist' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = <?=$playlist->id?>;'><span class='bi bi-trash3'></span></a>
+                    <a href='playlist/edit/<?=$playlist->id?>' title='Edit playlist' class='btn btn-md btn-warning edit-playlist-btn'><span class='bi bi-pencil-square' role='edit'></span></a>
+                    <a href='#' class='btn btn-md btn-danger delete-playlist-btn' title='Delete playlist' data-bs-toggle='modal' data-bs-target='#playlistDeleteModal' role='delete' onclick='deleteHandler.idToDelete = <?=$playlist->id?>;'><span class='bi bi-trash3'></span></a>
                 </div>
             </div>
         </td>
@@ -128,6 +144,15 @@ if (count($my_playlists)==0) {
     </tbody>
 </table>
 <?php
+if (count($my_playlists) > 10) {
+?>
+<div class='text-center mt-2'>
+    <button type='button' class='btn btn-outline-light btn-sm show-more-playlists-btn' data-table='my-playlists-table'>Show more</button>
+</div>
+<?php
+}
+?>
+<?php
 }
 ?>
 </div> <!-- CARD-BODY -->
@@ -135,7 +160,7 @@ if (count($my_playlists)==0) {
 <br /><hr /><br />
 <div class='card text-bg-dark'>
 <div class='card-body'>
-<h2 class='card-title'>Joined Playlists</h2>
+<h2 class='card-title' id='joined-playlists-heading'>Joined Playlists</h2>
 <?php
 if (count($joined_playlists)==0) {
     ?>
@@ -158,12 +183,15 @@ if (count($joined_playlists)==0) {
         </thead>
         <tbody>
     <?php
+        $joinedPlaylistRow = 0;
         foreach ($joined_playlists as $playlist) {
-            echo "<tr style='vertical-align: middle;'>\n";
+            $joinedPlaylistRow++;
+            $extraRowClass = ($joinedPlaylistRow > 10) ? ' d-none playlist-extra-row' : '';
+            echo "<tr style='vertical-align: middle;' class='{$extraRowClass}'>\n";
             echo "<th scope='row'><div class='cell-container'>{$playlist->display_name}</div></th>\n";
             echo "<td><div class='cell-container'>{$playlist->destination}</div></td>\n";
             echo "<td>";
-            echo "<a href='playlist/join/".$playlist->getShareCode()."' title='View playlist' class='btn btn-md btn-success m-2'><span class='bi bi-eye'></span></a>";
+            echo "<a href='playlist/join/".$playlist->getShareCode()."' title='Pick tracks' class='btn btn-md btn-success m-2 pick-tracks-btn'><span class='bi bi-music-note-beamed'></span></a>";
             echo "<a href='#' class='btn btn-md btn-danger m-2 leave-playlist' title='Leave playlist' id='leave-playlist-{$playlist->id}' onclick='leaveHandler.idToLeave= {$playlist->id};'><span class='bi bi-node-minus'></span></a>";
             echo "</td>\n";
             echo "</tr>\n";
@@ -172,10 +200,39 @@ if (count($joined_playlists)==0) {
         </tbody>
     </table>
     <?php
+    if (count($joined_playlists) > 10) {
+    ?>
+    <div class='text-center mt-2'>
+        <button type='button' class='btn btn-outline-light btn-sm show-more-playlists-btn' data-table='joined-playlists-table'>Show more</button>
+    </div>
+    <?php
+    }
+    ?>
+    <?php
     }
 ?>
 </div> <!-- CARD-BODY -->
 </div> <!-- CARD -->
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // "Show more" - all rows beyond the first 10 per table are already rendered, just hidden
+    // (see the playlist-extra-row/d-none rows above), so this only ever reveals, never fetches.
+    $(document).on('click', '.show-more-playlists-btn', function() {
+        var $btn = $(this);
+        var tableId = $btn.data('table');
+        var $hiddenRows = $('#' + tableId + ' tbody tr.playlist-extra-row.d-none');
+        $hiddenRows.slice(0, 10).removeClass('d-none');
+        if ($('#' + tableId + ' tbody tr.playlist-extra-row.d-none').length === 0) {
+            $btn.remove();
+        }
+    });
+
+    // Guided tour - run after the page's own DOM (tables, buttons) has been parsed, since
+    // driver.js needs the target elements to exist for the first step it highlights.
+    tourGuide.init(tourApplicable, tourSeen);
+});
+</script>
 
 <div class="modal fade" id="playlistDeleteModal" tabindex="-1">
   <div class="modal-dialog .modal-fullscreen-lg-down">

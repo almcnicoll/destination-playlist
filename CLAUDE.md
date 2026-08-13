@@ -94,6 +94,13 @@ staleness check, etc.) — this is normal and expected in this codebase, not a s
 - Debug/error output goes through `pre_echo()` (info, keeps going) and `pre_die()` (fatal, always ends the
   script) — both wrap output in styled `<pre>` blocks. Keep using these rather than plain `echo`/`die` for
   consistency in this file.
+- New tables created in a migration consistently follow one shape (see `faqs`, `errors`, `model` at
+  versions 5/8 in `sql/db-updates.sql`): `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `created`/`modified` DATETIME DEFAULT NULL, `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci`. Follow this for any new table.
+- Raw `INSERT`s written directly in a migration (as opposed to going through a model's `save()`) must set
+  `created`/`modified` explicitly (typically `NOW()`) — migrations bypass `Model.php`'s auto-stamping
+  entirely, since that only happens inside `save()`.
 
 ## Frontend conventions
 

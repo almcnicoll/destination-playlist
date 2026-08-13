@@ -134,6 +134,8 @@ if (typeof playHandler === 'undefined') {
     echo "var currentUser = {$_SESSION['USER_ID']};\n";
     echo "playHandler.playlist_id = \"{$playlist->id}\";\n\n";
     echo "playHandler.spotify_playlist_id = \"{$playlist->spotify_playlist_id}\";\n\n";
+    echo "var tourApplicable = ".json_encode(['play-devices','my-letters-toggle','track-search','swap-letter']).";\n";
+    echo "var tourSeen = ".json_encode(TourStep::getSeenKeys((int)$_SESSION['USER_ID'])).";\n";
     ?>
 </script>
 <!-- Include search script -->
@@ -146,6 +148,8 @@ if (typeof playHandler === 'undefined') {
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
 <!-- Include swap-market script -->
 <script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js'></script>
+<!-- Include guided-tour script -->
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/tour_guide.js'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
 playHandler.init('#playDevicesContainer');
@@ -271,6 +275,10 @@ $(document).ready(
         document.getElementById('trackSearchModal').addEventListener('shown.bs.modal', () => {
             document.getElementById('track-search-box').focus()
         });
+
+        // Guided tour - run after the page's own DOM (buttons, toggle, etc.) has been parsed,
+        // since driver.js needs the target elements to exist for the first step it highlights.
+        tourGuide.init(tourApplicable, tourSeen);
     }
 );
 </script>
