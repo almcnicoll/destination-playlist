@@ -170,6 +170,13 @@ building a playlist together. Notable patterns worth reusing if extending it fur
   a successful push, so a failed push retries the same window next poll).
   `pushTracksToSpotify()` also takes a MySQL `GET_LOCK` so overlapping pushes (e.g. an action's own push
   racing a poll's push) no-op instead of double-submitting.
+- **Spotify's playlist-items endpoints cap at 100 uris per request** (both replace/`PUT` and add/`POST`) —
+  `pushTracksToSpotify()` sends the full rebuilt tracklist in `array_chunk($trackUris, 100)` batches: the
+  first chunk as a `PUT` (full replace), any remaining chunks as `POST`s appended in order. Confirmed
+  2026-08-13: a 136-track playlist 400'd ("too many tracks requested") when this was a single unchunked
+  `PUT`, since `playlist_manage.php` forces a full push on every page load. If a batch mid-way fails, the
+  whole push reports failure and the checkpoint doesn't advance — safe to just retry, since the next attempt
+  starts over with a full-replace `PUT` rather than double-appending.
 - **`letters.user_id` has no foreign key** (see `sql/create-tables.sql`) — deleting a user does _not_
   cascade-null letters they hold in other people's playlists; that has to be done manually (see
   `ajax/admin_delete_user.php` and the self-delete flow in `pages/account_manage.php`). Playlists a user
@@ -225,4 +232,5 @@ loop without re-deriving why it currently works.
 - Named placeholders can't repeat within one query (see "Database connection" above) — a real, already-hit
   footgun, not a theoretical one.
 - `letters.user_id` has no FK — see "The playlist-manage page" above.
+- Spotify playlist-items requests must stay ≤100 uris each — see "The playlist-manage page" above.
 - The `assign_letters.php` join needs strict `<`, not `<=` — see "Letter assignment algorithm" above.
