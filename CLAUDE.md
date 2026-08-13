@@ -88,7 +88,7 @@ staleness check, etc.) — this is normal and expected in this codebase, not a s
 - Each migration runs in its own transaction; on failure the whole update run stops via `pre_die()`.
 - **Special case**: if version 1 fails while the DB is at version 0, `update.php` assumes the DB was never
   initialized and falls back to running `sql/create-tables.sql` directly, then tells the user to refresh to
-  continue the normal migration chain. If create-tables.sql *also* fails, both the original v1 error and the
+  continue the normal migration chain. If create-tables.sql _also_ fails, both the original v1 error and the
   create-tables error are shown together (don't lose the original error — it's often the real diagnostic
   signal).
 - Debug/error output goes through `pre_echo()` (info, keeps going) and `pre_die()` (fatal, always ends the
@@ -97,7 +97,7 @@ staleness check, etc.) — this is normal and expected in this codebase, not a s
 - New tables created in a migration consistently follow one shape (see `faqs`, `errors`, `model` at
   versions 5/8 in `sql/db-updates.sql`): `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `created`/`modified` DATETIME DEFAULT NULL, `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci`. Follow this for any new table.
+COLLATE=utf8mb4_unicode_ci`. Follow this for any new table.
 - Raw `INSERT`s written directly in a migration (as opposed to going through a model's `save()`) must set
   `created`/`modified` explicitly (typically `NOW()`) — migrations bypass `Model.php`'s auto-stamping
   entirely, since that only happens inside `save()`.
@@ -126,7 +126,7 @@ an admin's session) — keep escaping there, and consider it before copying that
 elsewhere.
 
 **Cache-busting**: there's no build step to fingerprint assets, so every local `<script src='.../js/*.js'>`
-tag *and* `css/app.css`'s `<link>` tag are manually suffixed with a bare query string —
+tag _and_ `css/app.css`'s `<link>` tag are manually suffixed with a bare query string —
 `.../js/foo.js?<?= $config['asset_version'] ?>` — where `asset_version` lives in `class/Config.php`, in the
 "non-local, non-secret config" block near the top of `Config::init()`.
 **Whenever you edit any file under `js/`, or `css/app.css`, bump `asset_version`.** A plain increment
@@ -137,7 +137,7 @@ can hold onto a cached script or stylesheet well past what a normal (even a forc
 exactly what caused the `#toggle-my-letters` "my letters only" checkbox to look broken on mobile at one
 point: the JS was toggling the `.my-letters-only` class correctly, but a phone with an `app.css` cached from
 before that CSS rule existed would show no visible effect at all — not a JS bug, not a caching-can't-explain-it
-dead end, just an untouched stylesheet URL that had never had a reason to change before. If you add a *new*
+dead end, just an untouched stylesheet URL that had never had a reason to change before. If you add a _new_
 `js/*.js` file and wire it into a page, give its `<script>` tag the same
 `?<?= $config['asset_version'] ?>` suffix as all the others.
 
@@ -165,15 +165,15 @@ building a playlist together. Notable patterns worth reusing if extending it fur
   cursor, since those are the odd operations that legitimately affect the entire view.
 - **Owner-only Spotify push**: collaborative playlists can't be written to via the Spotify API by
   non-owners (see the comment at the top of `assign_track.php`), so only the playlist owner's browser ever
-  actually calls `Playlist::pushTracksToSpotify()`. Non-owner changes get pushed the next time the *owner's*
+  actually calls `Playlist::pushTracksToSpotify()`. Non-owner changes get pushed the next time the _owner's_
   client polls `get_letters.php`, gated by a `$_SESSION['last_updates_check']` checkpoint (only advances on
   a successful push, so a failed push retries the same window next poll).
   `pushTracksToSpotify()` also takes a MySQL `GET_LOCK` so overlapping pushes (e.g. an action's own push
   racing a poll's push) no-op instead of double-submitting.
-- **`letters.user_id` has no foreign key** (see `sql/create-tables.sql`) — deleting a user does *not*
+- **`letters.user_id` has no foreign key** (see `sql/create-tables.sql`) — deleting a user does _not_
   cascade-null letters they hold in other people's playlists; that has to be done manually (see
   `ajax/admin_delete_user.php` and the self-delete flow in `pages/account_manage.php`). Playlists a user
-  owns, and that user's own `participations` rows, *do* cascade via real FKs.
+  owns, and that user's own `participations` rows, _do_ cascade via real FKs.
 
 ## Letter assignment algorithm (`ajax/assign_letters.php`)
 
@@ -193,7 +193,7 @@ loop without re-deriving why it currently works.
   `inc/config.local.php`'s `root_path`).
 - Git remotes: `origin` (GitHub, `almcnicoll/destination-playlist` — this is the one that works and should
   be pushed to) and `deploy` (`destinationplaylist.rocks` Plesk git). As of 2026-08-09, `deploy` returns a
-  plain 404 *from the destination-playlist app's own router*, not from a git server — the Plesk git
+  plain 404 _from the destination-playlist app's own router_, not from a git server — the Plesk git
   deployment endpoint at that URL isn't reachable/configured as the remote expects. Don't assume `deploy`
   works; flag it rather than silently pushing there.
 - This shell environment has no cached GitHub credentials by default — `git push origin main` may hang
@@ -211,8 +211,10 @@ loop without re-deriving why it currently works.
   component presenting a certificate that doesn't cleanly match this hostname via SNI, not anything wrong
   with the webhook. Falling back to `curl -sk` for just this request is fine here (diagnose first if the
   failure looks like anything other than `SEC_E_WRONG_PRINCIPAL`, rather than reaching for `-k` by default).
-  If the file isn't there, just skip this step — don't create one, and
-  don't treat its absence as an error. This webhook is the thing that actually works for deployment; the
+  If the file isn't there and we're in interactive mode then prompt the user to supply the URL and save it to
+  the correct file. If the file isn't there and we're in auto/unattended mode, just skip this step — don't create one, and
+  don't treat its absence as an error - but do invite the user to create the file with the webhook URL in any
+  end-of-workload summary. This webhook is the thing that actually works for deployment; the
   `deploy` remote is still broken as of the note above, so don't fall back to pushing there instead.
 
 ## Gotchas
