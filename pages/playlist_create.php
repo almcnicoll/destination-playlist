@@ -45,6 +45,10 @@
                     // to a playlist just by creating it via the API, so follow it explicitly
                     $playlist->followOnSpotify();
 
+                    // Spotify's create endpoint doesn't reliably honour `public` in the request body -
+                    // set it explicitly with a follow-up call
+                    $playlist->updateDetailsOnSpotify();
+
                     // Set playlist image
                     $imageResult = $playlist->setImage();
                     if ($imageResult !== true) {

@@ -125,6 +125,17 @@ Nearly all user-controlled strings get interpolated straight into HTML client-si
 an admin's session) — keep escaping there, and consider it before copying that file's row-building pattern
 elsewhere.
 
+**Cache-busting**: there's no build step to fingerprint assets, so every local
+`<script src='.../js/*.js'>` tag is manually suffixed with a bare query string —
+`.../js/foo.js?<?= $config['js_version'] ?>` — where `js_version` lives in `class/Config.php`, in the
+"non-local, non-secret config" block near the top of `Config::init()`.
+**Whenever you edit any file under `js/`, bump `js_version`.** A plain increment (`'1'` → `'2'`) is enough;
+what matters is that the value changes so the URL changes. Skipping this is easy to miss and hard to
+diagnose from the server side, since the server always serves the current file correctly — it's purely the
+requesting browser's cache that goes stale, and mobile browsers in particular can hold onto a cached script
+well past what a normal (even a forced) refresh clears. If you add a *new* `js/*.js` file and wire it into a
+page, give its `<script>` tag the same `?<?= $config['js_version'] ?>` suffix as all the others.
+
 ## The playlist-manage page (`pages/playlist_manage.php`)
 
 The largest/most complex page — a live collaborative view that multiple people can have open at once while

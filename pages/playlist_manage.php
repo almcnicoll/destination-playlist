@@ -88,21 +88,21 @@ if (typeof playHandler === 'undefined') {
     ?>
 </script>
 <!-- Include search script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js?<?= $config['js_version'] ?>'></script>
 <!-- Include letter-refresh script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js?<?= $config['js_version'] ?>'></script>
 <!-- Include people-refresh script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/people_refresh.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/people_refresh.js?<?= $config['js_version'] ?>'></script>
 <!-- Include letter-assign script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js?<?= $config['js_version'] ?>'></script>
 <!-- Include playlist-lock script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/playlist_lock.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/playlist_lock.js?<?= $config['js_version'] ?>'></script>
 <!-- Include play-devices script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js?<?= $config['js_version'] ?>'></script>
 <!-- Include swap-market script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js?<?= $config['js_version'] ?>'></script>
 <!-- Include guided-tour script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/tour_guide.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/tour_guide.js?<?= $config['js_version'] ?>'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
 playHandler.init('#playDevicesContainer');

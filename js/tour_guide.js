@@ -184,6 +184,20 @@ tourGuide.buildSteps = function(keys) {
         var step = {
             popover: { title: def.popover.title, description: def.popover.description },
             onHighlightStarted: function() {
+                // driver.js@1.3.1 can fail to remove driver-active-element from the *previous*
+                // step's target when the new target needs scrolling into view, leaving two
+                // elements "active" at once with the highlight effectively still stuck on the
+                // stale one - confirmed by hand on the my-letters-toggle step, which sits well
+                // below play-button on the page. Defensively make sure only this step's real
+                // target carries the class, and that it's actually been scrolled into view,
+                // regardless of whether driver.js's own attempt succeeded.
+                if (def.element) {
+                    var targetEl = document.querySelector(def.element);
+                    document.querySelectorAll('.driver-active-element').forEach(function(el) {
+                        if (el !== targetEl) { el.classList.remove('driver-active-element'); }
+                    });
+                    if (targetEl) { targetEl.scrollIntoView({ block: 'center' }); }
+                }
                 if (def.onHighlightStarted) { def.onHighlightStarted(); }
             },
             onHighlighted: function() {

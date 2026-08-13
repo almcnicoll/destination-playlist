@@ -117,22 +117,27 @@ class Playlist extends Model {
         return !$sr->hasErrors(); // If there's no errors, it exists - a bit crude because we might have a quota error or something
     }
 
+    // Pushes name/public/collaborative settings to an already-existing Spotify playlist
+    public function updateDetailsOnSpotify() : SpotifyRequest {
+        $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+        $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
+        $editData = [
+            'name'              => $this->display_name,
+            'public'            => true,
+            'collaborative'     => false,
+            /*'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),*/ // Don't overwrite
+        ];
+
+        return $sr->send($editData);
+    }
+
     // Checks if the playlist exists on Spotify - if not, creates it
     public function pushToSpotify() {
         global $config;
         // We need to re-create if (a) there is no spotify playlist ID saved or (b) Spotify doesn't recognise the id
         if ((!empty($this->spotify_playlist_id)) && ($this->existsOnSpotify())) {
-            $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/";
-            $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-            $sr->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
-            $editData = [
-                'name'              => $this->display_name,
-                'public'            => true,
-                'collaborative'     => false,
-                /*'description'       => "Created by Destination Playlist: ".date('jS M Y, H:i'),*/ // Don't overwrite
-            ];
-
-            return $sr->send($editData);
+            return $this->updateDetailsOnSpotify();
         } else {
             // Playlist creation is POST /me/playlists (POST /users/{id}/playlists was removed by Spotify)
             $endpoint = "https://api.spotify.com/v1/me/playlists";
@@ -152,6 +157,9 @@ class Playlist extends Model {
                 $this->spotify_playlist_id = $result->id;
                 $this->save(); // Persist the new id, or every future request will try to re-create it again
                 $this->followOnSpotify();
+                // Spotify's create endpoint doesn't reliably honour `public` in the request body -
+                // set it explicitly with a follow-up call, same as the edit path above
+                $this->updateDetailsOnSpotify();
                 return $sr;
             }
         }

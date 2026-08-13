@@ -62,7 +62,7 @@
     echo "var root_path = \"{$config['root_path']}\";\n\n";
     ?>
 </script>
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js?<?= $config['js_version'] ?>'></script>
 <script type='text/javascript'>
     // TODO - move this to search_mgmt.js - need to work out how to get PHP inserts into it
     trackSearch.updateSearchBoxCustom = function(data, textStatus, jqXHR) {

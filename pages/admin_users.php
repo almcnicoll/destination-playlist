@@ -18,7 +18,7 @@
     var root_path = "<?= $config['root_path'] ?>";
     var currentUserId = <?= $_SESSION['USER_ID'] ?>;
 </script>
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/admin_users.js'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/admin_users.js?<?= $config['js_version'] ?>'></script>
 <script type='text/javascript'>
     adminUsers.init();
 </script>

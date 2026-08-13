@@ -36,6 +36,13 @@ class Config {
         // Add any non-local, non-secret config here in the form:
         // self::$__config['variable_key'] = 'variable value';
 
+        // Cache-busting suffix appended (as a bare query string, e.g. '...js/foo.js?3') to every
+        // local <script src='.../js/*.js'> tag. There's no build step here to fingerprint assets
+        // automatically, so this has to be bumped by hand any time a js/*.js file changes - see
+        // CLAUDE.md's "Frontend conventions" section. Mobile browsers in particular can hang onto a
+        // cached script well past a normal refresh, so this is the only reliable way to force one.
+        self::$__config['js_version'] = '2';
+
         // When to perform user authentication on the specified pages
         //  values are PAGEAUTH_NONE (don't authenticate), PAGEAUTH_LATE (authenticate after content rendered) or PAGE_AUTH_EARLY (authenticate first thing)
         //  the default is 'early' and any unrecognised values will be handled as 'early'
