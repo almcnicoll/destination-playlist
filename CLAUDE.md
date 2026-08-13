@@ -202,9 +202,16 @@ loop without re-deriving why it currently works.
 - **Production deploys via a webhook, not the `deploy` remote above.** After a successful push to
   `origin main` specifically (not other branches, not other remotes), check whether `inc/deploy-webhook.txt`
   exists. It's gitignored and not part of a fresh checkout — it holds a Plesk Git webhook URL, which is
-  effectively a bearer credential, so it's never committed. If present, `GET` the URL it contains (e.g.
-  `curl -s "$(cat inc/deploy-webhook.txt)"`) right after the push succeeds, to tell Plesk to pull and deploy
-  the latest `main` to production. If the file isn't there, just skip this step — don't create one, and
+  effectively a bearer credential, so it's never committed. If present, `POST` (not GET — GET returns a
+  plain 404 from Plesk's own webhook handler, `sw-cp-server`; POST returns `204 No Content`, confirmed by
+  hand on 2026-08-13) to the URL it contains right after the push succeeds, to tell Plesk to pull and deploy
+  the latest `main` to production: `curl -s -X POST "$(cat inc/deploy-webhook.txt)"`. On Windows, curl's
+  Schannel TLS backend may fail this specific host with `SEC_E_WRONG_PRINCIPAL` even though the server and
+  URL are entirely legitimate (confirmed by hand — `-k` gets a normal `204`) — this looks like Plesk's panel
+  component presenting a certificate that doesn't cleanly match this hostname via SNI, not anything wrong
+  with the webhook. Falling back to `curl -sk` for just this request is fine here (diagnose first if the
+  failure looks like anything other than `SEC_E_WRONG_PRINCIPAL`, rather than reaching for `-k` by default).
+  If the file isn't there, just skip this step — don't create one, and
   don't treat its absence as an error. This webhook is the thing that actually works for deployment; the
   `deploy` remote is still broken as of the note above, so don't fall back to pushing there instead.
 
