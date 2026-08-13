@@ -204,25 +204,44 @@ END_SQL;
         // Sent as a JSON body rather than a query string - Spotify's own docs warn that large uri
         // lists in the query string can silently exceed URL length limits and get truncated
         $endpoint = "https://api.spotify.com/v1/playlists/".$this->spotify_playlist_id."/items";
-        $srUpdatePlaylist = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
-        $srUpdatePlaylist->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
-        $srUpdatePlaylist->send(['uris' => $trackUris]);
-        if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
-            // All good
-        } else {
-            $success = false;
-            if ($srUpdatePlaylist->http_code >= 400) {
-                $errors[] = "Request URL: {$endpoint}";
-                $errors[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
+
+        // Spotify hard-caps both "replace items" (PUT) and "add items" (POST) at 100 uris per
+        // request - longer playlists 400 ("too many tracks requested") if sent in one go. Push the
+        // first 100 as a PUT (replaces the whole playlist), then append the rest as POSTs in
+        // 100-uri batches, in order, so the end result matches what a single call would have done.
+        $chunks = array_chunk($trackUris, 100);
+        if (empty($chunks)) { $chunks = [[]]; } // Still need one PUT to clear an emptied playlist
+
+        $lastHttpCode = null;
+        foreach ($chunks as $index => $chunkUris) {
+            $srUpdatePlaylist = new SpotifyRequest(
+                SpotifyRequest::TYPE_API_CALL,
+                ($index === 0) ? SpotifyRequest::ACTION_PUT : SpotifyRequest::ACTION_POST,
+                $endpoint
+            );
+            $srUpdatePlaylist->contentType = SpotifyRequest::CONTENT_TYPE_JSON;
+            $srUpdatePlaylist->send(['uris' => $chunkUris]);
+            $lastHttpCode = $srUpdatePlaylist->http_code;
+            if (($srUpdatePlaylist->result !== false) && ($srUpdatePlaylist->error_number==0) && ($srUpdatePlaylist->http_code < 400)) {
+                // All good, move on to the next batch
             } else {
-                $errors[] = $srUpdatePlaylist->error_message;
+                $success = false;
+                if ($srUpdatePlaylist->http_code >= 400) {
+                    $errors[] = "Request URL: {$endpoint}";
+                    $errors[] = "Request returned ".$srUpdatePlaylist->http_code.': '.$srUpdatePlaylist->result;
+                } else {
+                    $errors[] = $srUpdatePlaylist->error_message;
+                }
+                // Stop here - the checkpoint won't advance, so the next push retries the whole
+                // rebuild from scratch (the initial PUT is a full replace, so this is idempotent)
+                break;
             }
         }
 
         $stmtReleaseLock = $pdo->prepare('SELECT RELEASE_LOCK(:lockname)');
         $stmtReleaseLock->execute(['lockname' => $lockName]);
 
-        return ['success' => $success, 'errors' => $errors, 'http_code' => $srUpdatePlaylist->http_code];
+        return ['success' => $success, 'errors' => $errors, 'http_code' => $lastHttpCode];
     }
 
     // This function resets the ranks of the letters to start at 1 and increase from there
