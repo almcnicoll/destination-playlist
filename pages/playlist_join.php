@@ -139,17 +139,17 @@ if (typeof playHandler === 'undefined') {
     ?>
 </script>
 <!-- Include search script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/search_mgmt.js?<?= $config['asset_version'] ?>'></script>
 <!-- Include letter-refresh script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_refresh.js?<?= $config['asset_version'] ?>'></script>
 <!-- Include play-devices script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/play_handler.js?<?= $config['asset_version'] ?>'></script>
 <!-- Include letter-unassign script (part of letter-assign script) -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/letter_assign.js?<?= $config['asset_version'] ?>'></script>
 <!-- Include swap-market script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/swap_market.js?<?= $config['asset_version'] ?>'></script>
 <!-- Include guided-tour script -->
-<script type='text/javascript' src='<?= $config['root_path'] ?>/js/tour_guide.js?<?= $config['js_version'] ?>'></script>
+<script type='text/javascript' src='<?= $config['root_path'] ?>/js/tour_guide.js?<?= $config['asset_version'] ?>'></script>
 <!-- Custom callback functions -->
 <script type='text/javascript'>
 playHandler.init('#playDevicesContainer');

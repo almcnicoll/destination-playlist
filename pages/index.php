@@ -18,9 +18,9 @@ echo <<<END_SCRIPTS
 if (typeof(root_path) === 'undefined') { var root_path = "{$config['root_path']}"; }
 </script>
 <!-- Include playlist-delete script -->
-<script src='js/delete_handler.js?{$config['js_version']}'></script>
+<script src='js/delete_handler.js?{$config['asset_version']}'></script>
 <!-- Include leave-playlist script -->
-<script type='text/javascript' src='{$config['root_path']}/js/leave_handler.js?{$config['js_version']}'></script>
+<script type='text/javascript' src='{$config['root_path']}/js/leave_handler.js?{$config['asset_version']}'></script>
 END_SCRIPTS;
 
 // Display error messages
@@ -83,7 +83,7 @@ if (count($my_playlists) > 0) {
     $tourApplicable = array_merge($tourApplicable, ['pick-tracks','edit-playlist','share-playlist','delete-playlist']);
 }
 $tourApplicable[] = 'joined-playlists-section';
-echo "<script type='text/javascript' src='{$config['root_path']}/js/tour_guide.js?{$config['js_version']}'></script>\n";
+echo "<script type='text/javascript' src='{$config['root_path']}/js/tour_guide.js?{$config['asset_version']}'></script>\n";
 echo "<script type='text/javascript'>\n";
 echo "var tourApplicable = ".json_encode($tourApplicable).";\n";
 echo "var tourSeen = ".json_encode(TourStep::getSeenKeys((int)$_SESSION['USER_ID'])).";\n";

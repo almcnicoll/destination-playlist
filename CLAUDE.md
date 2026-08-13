@@ -125,16 +125,21 @@ Nearly all user-controlled strings get interpolated straight into HTML client-si
 an admin's session) — keep escaping there, and consider it before copying that file's row-building pattern
 elsewhere.
 
-**Cache-busting**: there's no build step to fingerprint assets, so every local
-`<script src='.../js/*.js'>` tag is manually suffixed with a bare query string —
-`.../js/foo.js?<?= $config['js_version'] ?>` — where `js_version` lives in `class/Config.php`, in the
+**Cache-busting**: there's no build step to fingerprint assets, so every local `<script src='.../js/*.js'>`
+tag *and* `css/app.css`'s `<link>` tag are manually suffixed with a bare query string —
+`.../js/foo.js?<?= $config['asset_version'] ?>` — where `asset_version` lives in `class/Config.php`, in the
 "non-local, non-secret config" block near the top of `Config::init()`.
-**Whenever you edit any file under `js/`, bump `js_version`.** A plain increment (`'1'` → `'2'`) is enough;
-what matters is that the value changes so the URL changes. Skipping this is easy to miss and hard to
-diagnose from the server side, since the server always serves the current file correctly — it's purely the
-requesting browser's cache that goes stale, and mobile browsers in particular can hold onto a cached script
-well past what a normal (even a forced) refresh clears. If you add a *new* `js/*.js` file and wire it into a
-page, give its `<script>` tag the same `?<?= $config['js_version'] ?>` suffix as all the others.
+**Whenever you edit any file under `js/`, or `css/app.css`, bump `asset_version`.** A plain increment
+(`'1'` → `'2'`) is enough; what matters is that the value changes so the URL changes. Skipping this is easy
+to miss and hard to diagnose from the server side, since the server always serves the current file
+correctly — it's purely the requesting browser's cache that goes stale, and mobile browsers in particular
+can hold onto a cached script or stylesheet well past what a normal (even a forced) refresh clears. This is
+exactly what caused the `#toggle-my-letters` "my letters only" checkbox to look broken on mobile at one
+point: the JS was toggling the `.my-letters-only` class correctly, but a phone with an `app.css` cached from
+before that CSS rule existed would show no visible effect at all — not a JS bug, not a caching-can't-explain-it
+dead end, just an untouched stylesheet URL that had never had a reason to change before. If you add a *new*
+`js/*.js` file and wire it into a page, give its `<script>` tag the same
+`?<?= $config['asset_version'] ?>` suffix as all the others.
 
 ## The playlist-manage page (`pages/playlist_manage.php`)
 
