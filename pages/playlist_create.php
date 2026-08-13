@@ -40,7 +40,11 @@
                     }
                     $playlist->user_id = $_SESSION['USER_ID'];
                     $playlist->save();
-                    
+
+                    // Some account types (e.g. Family-plan child accounts) don't get auto-subscribed
+                    // to a playlist just by creating it via the API, so follow it explicitly
+                    $playlist->followOnSpotify();
+
                     // Set playlist image
                     $imageResult = $playlist->setImage();
                     if ($imageResult !== true) {

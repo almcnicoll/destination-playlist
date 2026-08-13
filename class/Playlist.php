@@ -98,6 +98,16 @@ class Playlist extends Model {
         }
     }
 
+    // Explicitly follows the playlist as the current session's user. Spotify normally auto-follows a
+    // playlist for whoever creates it via the API, but some account types (e.g. Family-plan child
+    // accounts) don't get that automatic library add, so the owner-creation paths call this explicitly
+    // too - mirroring what playlist_join.php already does for participants.
+    public function followOnSpotify() : SpotifyRequest {
+        $endpoint = "https://api.spotify.com/v1/playlists/{$this->spotify_playlist_id}/followers";
+        $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_PUT, $endpoint);
+        return $sr->send();
+    }
+
     public function existsOnSpotify() : bool {
         global $config;
         if (empty($this->spotify_playlist_id)) { return false; } // No id therefore can't exist
@@ -141,6 +151,7 @@ class Playlist extends Model {
                 $result = json_decode($sr->result);
                 $this->spotify_playlist_id = $result->id;
                 $this->save(); // Persist the new id, or every future request will try to re-create it again
+                $this->followOnSpotify();
                 return $sr;
             }
         }
