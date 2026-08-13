@@ -1,5 +1,6 @@
 inc/secret.php
 inc/config.local.php
+inc/deploy-webhook.txt
 */*.log
 tests.php
 *.log

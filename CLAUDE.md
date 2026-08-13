@@ -199,6 +199,14 @@ loop without re-deriving why it currently works.
 - This shell environment has no cached GitHub credentials by default — `git push origin main` may hang
   waiting on a credential prompt (use `GIT_TERMINAL_PROMPT=0` with a short timeout to fail fast instead of
   hanging, and ask the user to push if it fails).
+- **Production deploys via a webhook, not the `deploy` remote above.** After a successful push to
+  `origin main` specifically (not other branches, not other remotes), check whether `inc/deploy-webhook.txt`
+  exists. It's gitignored and not part of a fresh checkout — it holds a Plesk Git webhook URL, which is
+  effectively a bearer credential, so it's never committed. If present, `GET` the URL it contains (e.g.
+  `curl -s "$(cat inc/deploy-webhook.txt)"`) right after the push succeeds, to tell Plesk to pull and deploy
+  the latest `main` to production. If the file isn't there, just skip this step — don't create one, and
+  don't treat its absence as an error. This webhook is the thing that actually works for deployment; the
+  `deploy` remote is still broken as of the note above, so don't fall back to pushing there instead.
 
 ## Gotchas
 
