@@ -117,8 +117,7 @@ tourGuide.registry = {
 tourGuide.markSeenUrl = root_path + "/ajax/mark_tour_step.php";
 
 // Tracks every step this user has seen, cumulatively across pages/tours in this session -
-// seeded from the server in init(), and topped up client-side as steps are highlighted, so
-// allStepsSeen() below is accurate without needing a round trip after every step.
+// seeded from the server in init(), and topped up client-side as steps are highlighted.
 tourGuide.seenSet = tourGuide.seenSet || new Set();
 
 tourGuide.markSeen = function(stepKey) {
@@ -131,11 +130,16 @@ tourGuide.markSeen = function(stepKey) {
     });
 };
 
-// True once every concept in the whole app (not just this page) has been seen - not just the
-// ones offered on the current page.
-tourGuide.allStepsSeen = function() {
-    return Object.keys(tourGuide.registry).every(function(key) {
-        return tourGuide.seenSet.has(key);
+// Closing a tour via its X means "stop showing me these automatically", not "I've seen this
+// one step" - so every step, app-wide, gets marked seen in one request (see
+// TourStep::markAllSeen), not just the ones this particular tour happened to include. One
+// request rather than one per step also means a page-reload right after closing can't race and
+// abort only some of them, which is what caused steps to keep reappearing after a refresh.
+tourGuide.markAllSeen = function() {
+    Object.keys(tourGuide.registry).forEach(function(key) { tourGuide.seenSet.add(key); });
+    $.ajax(tourGuide.markSeenUrl, {
+        async: true, cache: false, dataType: 'json', method: 'POST', timeout: 8000,
+        data: { all: 1 }
     });
 };
 
@@ -151,12 +155,12 @@ tourGuide.ensureReplayModal = function() {
         +   "<div class='modal-dialog'>"
         +     "<div class='modal-content'>"
         +       "<div class='modal-header'>"
-        +         "<h5 class='modal-title'>You've completed the tour!</h5>"
+        +         "<h5 class='modal-title'>Guided tour turned off</h5>"
         +         "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>"
         +       "</div>"
         +       "<div class='modal-body'>"
-        +         "<p>You've now seen every part of Destination Playlist's guided tour.</p>"
-        +         "<p class='mb-0'>You can replay any of it at any time from your account menu &rarr; <strong>Replay tour</strong>.</p>"
+        +         "<p>You won't see these tour tips pop up automatically any more.</p>"
+        +         "<p class='mb-0'>You can bring them back any time from your account menu &rarr; <strong>Replay tour</strong>.</p>"
         +       "</div>"
         +       "<div class='modal-footer'>"
         +         "<button type='button' class='btn btn-md btn-success' data-bs-dismiss='modal'>Got it</button>"
@@ -204,16 +208,18 @@ tourGuide.run = function(keys) {
         steps: tourGuide.buildSteps(keys),
         // Providing our own onCloseClick replaces driver.js's default entirely (which is just
         // "destroy") - Escape and backdrop-click both call destroy directly without going through
-        // this hook, so this only fires for an actual click on the popover's X.
+        // this hook, so this only fires for an actual click on the popover's X. That click means
+        // "turn the tour off", so it marks everything seen (not just this tour's steps) before
+        // destroying, rather than leaving the rest to reappear on the next page/reload.
         onCloseClick: function() {
             closedViaCross = true;
+            tourGuide.markAllSeen();
             driverObj.destroy();
         },
         // Fires however the tour ends (X, Escape, backdrop click, or finishing normally via
-        // "Done") - only surface the replay hint for the specific combination asked for: closed
-        // via the X, at the point where there's nothing left in the whole app still unseen.
+        // "Done") - only show the "how to turn it back on" hint for the X-close case.
         onDestroyed: function() {
-            if (closedViaCross && tourGuide.allStepsSeen()) {
+            if (closedViaCross) {
                 tourGuide.showReplayModal();
             }
         }
@@ -232,8 +238,15 @@ tourGuide.init = function(applicableKeys, seenKeys) {
     tourGuide.run(unseen);
 };
 
-// Ignores seen-state entirely for which steps to show - wired to the "Replay tour" link in
-// inc/header.php. Still updates seenSet/allStepsSeen bookkeeping as steps are (re)shown.
+// Wired to the "Replay tour" link in inc/header.php. This is a genuine global reset, not just
+// "show this page's steps regardless of seen-state" - otherwise every *other* page would still
+// think everything had already been seen (from the last X-dismissal) and show nothing on its
+// own next visit, which defeats the point of restarting the tour.
 tourGuide.replay = function(applicableKeys) {
+    tourGuide.seenSet = new Set();
+    $.ajax(tourGuide.markSeenUrl, {
+        async: true, cache: false, dataType: 'json', method: 'POST', timeout: 8000,
+        data: { reset: 1 }
+    });
     tourGuide.run(applicableKeys || tourGuide.applicableKeys || []);
 };
